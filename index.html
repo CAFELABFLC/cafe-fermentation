@@ -486,6 +486,343 @@ body.view-only .edit-only { display: none !important; }
   .d-main .row .seg { margin-left: 0; }
   .chart { height: 220px; }
 }
+/* Learn layer: the fermentation exhibit. Sized in em from one base size, so it scales with the screen:
+   about 26px at 1920×1080 (the 4K hallway screen at 200% scaling, and the kiosk), about 18px at 1280×720. */
+.seg.layer button { min-width: 0; }
+.learn {
+  position: fixed; inset: 0; z-index: 15; background: var(--bg); color: var(--fg);
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  font-size: clamp(17px, calc(.95vw + .55vh), 30px); line-height: 1.4;
+  user-select: none; -webkit-user-select: none;
+}
+.learn h2, .learn h3, .learn p { margin: 0; }
+.l-top {
+  display: flex; align-items: center; gap: .5em .8em; flex-wrap: wrap;
+  padding: .45em clamp(16px, 1.5vw, 28px); background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.l-top .logo { height: 2.3em; }
+.l-name { min-width: 0; margin-right: auto; }
+.l-name h1 { margin: 0; font: 700 1.35em/1 var(--font-display); }
+.l-name p { margin: .15em 0 0; color: var(--muted); font-size: .7em; }
+.l-badges { display: flex; gap: .3em; align-items: center; }
+.l-badges .bd { width: 1.75em; height: 1.75em; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--line); color: var(--line); }
+.l-badges .bd.on { border: 0; background: var(--amber); color: var(--panel); }
+.l-badges .bd .ico { width: 1em; height: 1em; }
+.l-badges .cnt { font: 600 .8em/1 var(--font-body); color: var(--muted); margin-left: .3em; white-space: nowrap; }
+.learn .seg.layer button, .learn .l-top .l-btn { min-height: 2.2em; font-size: .8em; padding: 0 .9em; }
+.l-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: .9em clamp(16px, 1.5vw, 28px) 1.2em; display: grid; min-height: 0; }
+.l-view { display: grid; gap: .8em; align-content: start; min-width: 0; }
+.l-view.center { align-content: center; }
+.l-btn {
+  min-height: 2.5em; padding: 0 1em; border-radius: .55em; border: 1px solid var(--line); background: var(--panel);
+  font: 600 1em/1.1 var(--font-body); color: var(--fg); display: inline-flex; align-items: center; justify-content: center; gap: .45em; text-align: center;
+}
+.l-btn:active { transform: scale(.97); }
+.l-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.l-btn.big { font-size: 1.15em; min-height: 2.7em; padding: 0 1.3em; }
+.l-btn[disabled] { opacity: .45; }
+.l-btn .ico { width: 1.1em; height: 1.1em; }
+.ico { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; flex: none; }
+.ico .fill { fill: currentColor; stroke: none; }
+.l-h { font: 700 1.9em/1.05 var(--font-display); text-wrap: balance; }
+.l-lead { font-size: 1.05em; color: var(--muted); max-width: 60ch; }
+.l-card { background: var(--panel); border: 1px solid var(--line); border-radius: .7em; padding: .8em 1em; min-width: 0; }
+.l-card h3 { font: 600 .68em/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .35em; }
+.l-note { font-size: .7em; color: var(--muted); }
+.l-tabs { display: flex; gap: .4em; flex-wrap: wrap; }
+.l-tab { min-height: 2.2em; padding: 0 1em; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font: 600 .9em/1 var(--font-body); color: var(--muted); }
+.l-tab[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+
+/* Start screen, shown when idle */
+.l-attract { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 1.5em; align-items: center; }
+.la-text { display: grid; gap: .7em; align-content: center; }
+.la-kicker { font: 600 .8em/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.la-text h2 { font: 700 3.3em/.98 var(--font-display); text-wrap: balance; }
+.la-sub { font-size: 1.15em; color: var(--muted); max-width: 34ch; }
+.la-btns { display: flex; gap: .6em; flex-wrap: wrap; margin-top: .3em; }
+.la-spot { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1em .8em; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: .7em; padding: .6em .9em; margin-top: .4em; }
+.la-spot .live { grid-row: span 2; font: 700 .65em/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ok); display: flex; align-items: center; gap: .4em; }
+.la-spot .live::before { content: ""; width: .7em; height: .7em; border-radius: 50%; background: var(--ok); animation: l-pulse 1.6s ease-in-out infinite; }
+.la-spot b { font: 600 1.05em/1.2 var(--font-display); }
+.la-spot span { color: var(--muted); font-size: .85em; }
+.la-tip { font-size: .95em; border-left: .25em solid var(--amber); padding: .2em 0 .2em .8em; max-width: 46ch; min-height: 3em; }
+.la-tip b { color: var(--amber); }
+.la-art { display: grid; place-items: center; min-height: 0; }
+.la-art svg { width: 100%; max-height: 72vh; }
+.la-course { font-size: .8em; color: var(--muted); }
+.la-course b { color: var(--fg); }
+
+/* Shared animations */
+@keyframes l-pulse { 50% { opacity: .3; } }
+@keyframes l-rise { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: .9; } 100% { transform: translate(var(--dx, 0px), var(--rise, -260px)); opacity: 0; } }
+@keyframes l-drift { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(var(--dx, 12px), var(--dy, -10px)) rotate(var(--rot, 12deg)); } }
+@keyframes l-bud { 0%, 15% { transform: scale(.15); } 70%, 100% { transform: scale(1); } }
+@keyframes l-split { 0%, 30% { transform: translateX(0); } 80%, 100% { transform: translateX(var(--sx, 10px)); } }
+@keyframes l-grow { from { stroke-dashoffset: var(--len, 300); } to { stroke-dashoffset: 0; } }
+@keyframes l-flow { 0% { transform: translate(var(--fx, -160px), var(--fy, 0px)) scale(1); opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { transform: translate(0, 0) scale(.3); opacity: 0; } }
+@keyframes l-pop { 0% { transform: translate(-50%, 30px) scale(.8); opacity: 0; } 12%, 85% { transform: translate(-50%, 0) scale(1); opacity: 1; } 100% { transform: translate(-50%, -20px); opacity: 0; } }
+@keyframes l-shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+@keyframes l-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes l-fall { from { transform: translateY(-10vh) rotate(0deg); } to { transform: translateY(110vh) rotate(720deg); } }
+.anim-rise { animation: l-rise var(--d, 4s) linear infinite; animation-delay: var(--t, 0s); transform-box: fill-box; }
+.anim-drift { animation: l-drift var(--d, 7s) ease-in-out infinite; animation-delay: var(--t, 0s); transform-box: fill-box; transform-origin: center; }
+.anim-bud { animation: l-bud 3.2s ease-out infinite alternate; transform-box: fill-box; transform-origin: 0% 50%; }
+.anim-split { animation: l-split 3s ease-in-out infinite alternate; transform-box: fill-box; }
+.anim-grow { stroke-dasharray: var(--len, 300); animation: l-grow var(--d, 3s) ease-out infinite alternate; animation-delay: var(--t, 0s); }
+.anim-flow { animation: l-flow var(--d, 3s) ease-in infinite; animation-delay: var(--t, 0s); transform-box: fill-box; }
+.l-view.anim { animation: l-in .35s ease-out; }
+
+/* Tour */
+.l-tour { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 1.5em; align-items: center; }
+.lt-vis { background: var(--panel); border: 1px solid var(--line); border-radius: 1em; padding: 1em; display: grid; place-items: center; min-height: 64vh; }
+.lt-vis svg { width: 100%; max-height: 60vh; }
+.lt-text { display: grid; gap: .7em; align-content: center; }
+.lt-step { font: 600 .75em/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.lt-text h2 { font: 700 2.5em/1 var(--font-display); text-wrap: balance; }
+.lt-text p { font-size: 1.1em; max-width: 38ch; }
+.lt-eq { font: 600 1.15em/1.3 var(--font-display); background: var(--panel-2); border-radius: .5em; padding: .45em .8em; justify-self: start; }
+.lt-eq small { display: block; font: 500 .65em/1.3 var(--font-body); color: var(--muted); }
+.lt-nav { display: flex; gap: .6em; align-items: center; flex-wrap: wrap; margin-top: .5em; }
+.lt-dots { display: flex; gap: .4em; margin-right: auto; }
+.lt-dots i { width: .7em; height: .7em; border-radius: 50%; background: var(--line); }
+.lt-dots i.on { background: var(--accent); width: 1.8em; border-radius: .35em; }
+.lt-live { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .5em; width: 100%; }
+.lt-live div { background: var(--panel-2); border-radius: .5em; padding: .5em .6em; display: grid; gap: .1em; }
+.lt-live b { font: 700 .95em/1.1 var(--font-display); }
+.lt-live span { font-size: .72em; color: var(--muted); }
+.lt-live em { font: 600 1.3em/1 var(--font-display); font-style: normal; color: var(--ph); font-variant-numeric: tabular-nums; }
+
+/* Explore hub */
+.l-hub { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7em; }
+.l-tile {
+  position: relative; text-align: left; display: grid; grid-template-rows: auto auto 1fr; gap: .3em; min-height: 8.5em;
+  padding: .9em 1em; border-radius: .8em; border: 1px solid var(--line); background: var(--panel); color: var(--fg);
+  box-shadow: inset 0 .3em 0 var(--c, var(--accent));
+}
+.l-tile:active { transform: scale(.98); }
+.l-tile .ico { width: 2.2em; height: 2.2em; color: var(--c, var(--accent)); }
+.l-tile b { font: 700 1.3em/1.1 var(--font-display); }
+.l-tile span { color: var(--muted); font-size: .85em; }
+.l-tile .tag-live { position: absolute; top: .9em; right: .9em; font: 700 .6em/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ok); display: flex; gap: .4em; align-items: center; }
+.l-tile .tag-live::before { content: ""; width: .8em; height: .8em; border-radius: 50%; background: var(--ok); animation: l-pulse 1.6s infinite; }
+.l-tile .got { position: absolute; top: .8em; right: .8em; width: 1.6em; height: 1.6em; border-radius: 50%; background: var(--amber); color: var(--panel); display: grid; place-items: center; }
+.l-tile .got .ico { width: 1em; height: 1em; color: var(--panel); }
+.l-hubhead { display: flex; align-items: end; gap: 1em; flex-wrap: wrap; }
+.l-hubhead .l-lead { margin-right: auto; }
+.l-promo { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .3em 1em; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: .8em; padding: .8em 1em; }
+.l-promo .ico { width: 2.4em; height: 2.4em; color: var(--accent); grid-row: span 2; }
+.l-promo b { font: 700 1.2em/1.1 var(--font-display); }
+.l-promo span { color: var(--muted); font-size: .85em; }
+.l-promo .qr { grid-row: span 2; width: 5em; height: 5em; background: #fff; border-radius: .3em; padding: .2em; }
+.l-promo .qr svg { width: 100%; height: 100%; display: block; }
+.l-badgelist { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .5em; }
+.l-badgelist div { display: grid; justify-items: center; text-align: center; gap: .2em; font-size: .72em; color: var(--muted); }
+.l-badgelist .bd { width: 2.6em; height: 2.6em; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--line); color: var(--line); }
+.l-badgelist .bd .ico { width: 1.4em; height: 1.4em; }
+.l-badgelist .on .bd { border: 0; background: var(--amber); color: var(--panel); }
+.l-badgelist .on b { color: var(--fg); }
+
+/* Inside our tanks */
+.l-tanks { display: grid; grid-template-columns: minmax(9em, .3fr) minmax(0, 1fr); gap: .8em; align-items: start; }
+.l-tlist { display: grid; gap: .4em; }
+.l-tbtn { text-align: left; display: grid; gap: .1em; padding: .5em .7em; border-radius: .6em; border: 1px solid var(--line); background: var(--panel); color: var(--fg); }
+.l-tbtn b { font: 700 1em/1.1 var(--font-display); }
+.l-tbtn span { font-size: .72em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.l-tbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.l-tmain { display: grid; gap: .7em; min-width: 0; }
+.l-ttitle { display: flex; gap: .3em .8em; align-items: baseline; flex-wrap: wrap; }
+.l-ttitle h2 { font: 700 1.9em/1 var(--font-display); }
+.l-ttitle h2 span { color: var(--accent); }
+.l-ttitle p { color: var(--muted); }
+.l-phase { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .3em; }
+.l-phase div { padding: .45em .6em; border-radius: .5em; background: var(--panel-2); color: var(--muted); font-size: .8em; display: grid; gap: .1em; }
+.l-phase div b { font: 700 1.1em/1.1 var(--font-display); }
+.l-phase div.done { color: var(--fg); }
+.l-phase div.on { background: var(--accent); color: var(--accent-ink); }
+.l-phasetext { font-size: 1em; }
+.l-gauges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7em; }
+.l-gauge { display: grid; gap: .35em; align-content: start; }
+.l-gauge .v { font: 700 2.2em/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.l-gauge .v small { font-size: .45em; color: var(--muted); font-weight: 500; margin-left: .2em; }
+.l-gauge p { font-size: .88em; }
+.l-gauge.ph .v { color: var(--ph); } .l-gauge.temp .v { color: var(--temp); } .l-gauge.do .v { color: var(--do); } .l-gauge.sugar .v { color: var(--amber); } .l-gauge.pres .v { color: var(--pres); }
+.l-scale { position: relative; height: 3.3em; margin: .2em 0 .1em; }
+.l-scale .bar { position: absolute; left: 0; right: 0; top: 0; height: .9em; border-radius: .45em; background: linear-gradient(90deg, #d8423a, #ef8a2b 25%, #e8c534 45%, #7cbf4a 70%, #3b8fd6); }
+.l-scale .danger { position: absolute; top: -.25em; height: 1.4em; border: 2px dashed var(--alarm); border-left: 0; border-right-style: none; }
+.l-scale .line46 { position: absolute; top: -.35em; height: 1.6em; width: 0; border-left: 3px solid var(--alarm); }
+.l-scale .line46 i { position: absolute; left: .3em; top: -.15em; font: 700 .55em/1 var(--font-body); color: var(--alarm); white-space: nowrap; font-style: normal; }
+.l-scale .mk { position: absolute; top: -.3em; width: 1.5em; height: 1.5em; margin-left: -.75em; border-radius: 50%; background: var(--panel); border: .3em solid var(--ph); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.l-scale .food { position: absolute; top: 1.2em; transform: translateX(-50%); font-size: .6em; color: var(--muted); text-align: center; white-space: nowrap; line-height: 1.15; }
+.l-scale .food.low { top: 2.45em; }
+.l-scale .food::before { content: ""; display: block; width: 1px; height: .5em; background: var(--muted); margin: 0 auto .1em; }
+.l-meter { height: .9em; border-radius: .45em; background: var(--line); overflow: hidden; }
+.l-meter i { display: block; height: 100%; border-radius: .45em; background: var(--c, var(--amber)); transition: width .4s; }
+.l-check { display: flex; gap: .5em; align-items: center; font-size: .85em; padding: .4em .6em; border-radius: .5em; background: var(--panel-2); }
+.l-check.ok { background: var(--ok-bg); color: var(--ok); }
+.l-check .ico { width: 1.2em; height: 1.2em; }
+.l-check.warn { background: var(--warn-bg); color: var(--warn); }
+
+/* Microbes */
+.l-mic { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 1em; align-items: start; }
+.l-micart { background: var(--panel); border: 1px solid var(--line); border-radius: 1em; padding: .8em; display: grid; gap: .5em; justify-items: center; }
+.l-micart svg { width: 100%; max-height: 46vh; }
+.l-micart p { font-size: .8em; color: var(--muted); text-align: center; }
+.l-micinfo { display: grid; gap: .6em; }
+.l-micinfo h2 { font: 700 2.3em/1 var(--font-display); }
+.l-micinfo .kind { color: var(--muted); font-size: 1em; }
+.l-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.4fr); gap: .5em; align-items: center; }
+.l-flow .arrow { font: 700 1.6em/1 var(--font-display); color: var(--accent); }
+.l-flow ul { margin: 0; padding-left: 1.1em; font-size: .88em; }
+.l-flow p { font-size: .88em; }
+.l-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6em; }
+.l-dl { display: grid; gap: .45em; margin: 0; font-size: .85em; }
+.l-dl dt { font-weight: 700; }
+.l-dl dd { margin: 0 0 .15em; color: var(--muted); }
+.l-dl dd i { color: var(--fg); }
+
+/* Flavor molecules */
+.l-flav { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 1em; align-items: start; }
+.l-mols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5em; }
+.l-molbtn { text-align: left; padding: .55em .7em; border-radius: .6em; border: 1px solid var(--line); background: var(--panel); color: var(--fg); display: grid; gap: .1em; }
+.l-molbtn b { font: 700 1em/1.15 var(--font-display); }
+.l-molbtn span { font-size: .75em; color: var(--muted); }
+.l-molbtn[aria-pressed="true"] { border-color: var(--c, var(--ph)); box-shadow: 0 0 0 2px var(--c, var(--ph)) inset; }
+.l-molbtn { position: relative; }
+.l-molbtn.seen::after { content: "✓"; position: absolute; top: .45em; right: .6em; color: var(--ok); font-weight: 700; }
+.l-moldet { display: grid; gap: .6em; }
+.l-moldet h2 { font: 700 2em/1 var(--font-display); }
+.l-moldet .smell { font: 600 1.25em/1.2 var(--font-display); color: var(--c, var(--ph)); }
+.l-molpic { background: var(--panel); border: 1px solid var(--line); border-radius: .8em; padding: .6em; display: grid; justify-items: center; gap: .2em; }
+.l-molpic svg { width: 100%; max-height: 13em; }
+.l-molpic .f { font-size: .8em; color: var(--muted); }
+.mol .b { stroke: var(--fg); stroke-width: 3; stroke-linecap: round; }
+.mol .a { font: 700 22px var(--font-body); dominant-baseline: central; text-anchor: middle; }
+.mol .a.O { fill: var(--alarm); } .mol .a.N { fill: var(--cool); }
+.mol .bg { fill: var(--panel); }
+
+/* Lab */
+.l-lab { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 1em; align-items: start; }
+.l-ctrl { display: grid; gap: .6em; }
+.l-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4em; }
+.l-mode { text-align: left; padding: .5em .7em; border-radius: .6em; border: 1px solid var(--line); background: var(--panel); color: var(--fg); display: grid; gap: .05em; }
+.l-mode b { font: 700 1em/1.1 var(--font-display); }
+.l-mode span { font-size: .7em; color: var(--muted); font-style: italic; }
+.l-mode[aria-pressed="true"] { border-color: var(--temp); box-shadow: 0 0 0 2px var(--temp) inset; }
+.l-slider { display: grid; gap: .25em; }
+.l-slider label { display: flex; justify-content: space-between; gap: .5em; font-weight: 600; font-size: .9em; }
+.l-slider label output { font: 700 1.15em/1 var(--font-display); color: var(--temp); font-variant-numeric: tabular-nums; }
+.l-slider small { color: var(--muted); font-size: .7em; }
+.learn input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 2.2em; background: transparent; margin: 0; }
+.learn input[type="range"]::-webkit-slider-runnable-track { height: .6em; border-radius: .3em; background: var(--line); }
+.learn input[type="range"]::-moz-range-track { height: .6em; border-radius: .3em; background: var(--line); }
+.learn input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 1.8em; height: 1.8em; margin-top: -.6em; border-radius: 50%; background: var(--temp); border: .2em solid var(--panel); box-shadow: 0 1px 5px rgba(0,0,0,.35); }
+.learn input[type="range"]::-moz-range-thumb { width: 1.4em; height: 1.4em; border-radius: 50%; background: var(--temp); border: .2em solid var(--panel); }
+.l-seg { display: inline-flex; border: 1px solid var(--line); border-radius: .55em; overflow: hidden; background: var(--panel); }
+.l-seg button { min-height: 2.2em; padding: 0 .9em; border: 0; background: transparent; font: 600 .85em/1 var(--font-body); color: var(--muted); }
+.l-seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.l-chal { display: grid; gap: .35em; }
+.l-chal button { text-align: left; padding: .45em .7em; border-radius: .55em; border: 1px dashed var(--line); background: transparent; color: var(--fg); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 .6em; align-items: center; font-size: .85em; }
+.l-chal button .ico { width: 1.4em; height: 1.4em; grid-row: span 2; color: var(--muted); }
+.l-chal button.won .ico { color: var(--amber); }
+.l-chal button span { color: var(--muted); font-size: .85em; }
+.l-chal button[aria-pressed="true"] { border-style: solid; border-color: var(--amber); background: var(--panel); }
+.l-out { display: grid; gap: .6em; }
+.l-simtop { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: .7em; align-items: stretch; }
+.l-simtop svg.tank { width: 100%; height: 100%; max-height: 14em; }
+.learn .chart { height: 14em; font-size: 16px; }
+.l-simclock { font: 700 1.2em/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.l-bars { display: grid; gap: .4em; }
+.l-bars > div { display: grid; grid-template-columns: 9em minmax(0, 1fr) 3.2em; gap: .6em; align-items: center; font-size: .85em; }
+.l-bars b { font: 700 1em/1 var(--font-display); text-align: right; font-variant-numeric: tabular-nums; }
+.l-verdict { font: 700 1.25em/1.2 var(--font-display); }
+.l-why { margin: 0; padding-left: 1.1em; font-size: .85em; display: grid; gap: .25em; }
+.l-win { background: var(--ok-bg); color: var(--ok); border-radius: .6em; padding: .6em .8em; font-weight: 600; }
+.l-lose { background: var(--warn-bg); color: var(--warn); border-radius: .6em; padding: .6em .8em; font-weight: 600; }
+
+/* Safety */
+.l-safe { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 1em; align-items: start; }
+.l-safe h2 { font: 700 2em/1.05 var(--font-display); }
+.l-safe p { font-size: .95em; }
+.l-safe .l-card p + p { margin-top: .5em; }
+.l-forms { display: flex; height: 2.6em; border-radius: .5em; overflow: hidden; font: 700 .7em/1 var(--font-body); }
+.l-forms div { display: grid; place-items: center; overflow: hidden; white-space: nowrap; color: #fff; min-width: 0; }
+.l-big { font: 700 2.4em/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.l-big small { font-size: .4em; color: var(--muted); font-weight: 500; }
+.l-rows { display: grid; gap: .35em; font-size: .85em; }
+.l-rows div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .6em; padding: .35em 0; border-top: 1px solid var(--line); }
+.l-rows div:first-child { border-top: 0; }
+.l-rows b { font-variant-numeric: tabular-nums; }
+.l-rows .ok { color: var(--ok); } .l-rows .warn { color: var(--warn); }
+
+/* Quiz and match */
+.l-quiz { display: grid; gap: .8em; max-width: 1400px; width: 100%; justify-self: center; }
+.l-qhead { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; color: var(--muted); }
+.l-qhead .score { margin-left: auto; font: 700 1.2em/1 var(--font-display); color: var(--fg); }
+.l-qbar { height: .5em; border-radius: .25em; background: var(--line); overflow: hidden; }
+.l-qbar i { display: block; height: 100%; background: var(--cmp-b); transition: width .3s; }
+.l-q { font: 700 2em/1.15 var(--font-display); text-wrap: balance; }
+.l-q small { display: block; font: 600 .45em/1.4 var(--font-body); color: var(--ok); letter-spacing: .08em; text-transform: uppercase; }
+.l-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6em; }
+.l-opt { min-height: 3.2em; padding: .5em 1em; border-radius: .7em; border: 2px solid var(--line); background: var(--panel); color: var(--fg); font: 600 1.1em/1.2 var(--font-body); text-align: left; display: flex; align-items: center; gap: .6em; }
+.l-opt i { font: 700 .8em/1 var(--font-display); font-style: normal; width: 1.8em; height: 1.8em; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); color: var(--muted); flex: none; }
+.l-opt.right { border-color: var(--ok); background: var(--ok-bg); }
+.l-opt.right i { background: var(--ok); color: var(--panel); }
+.l-opt.wrong { border-color: var(--alarm); background: var(--alarm-bg); animation: l-shake .4s; }
+.l-opt.wrong i { background: var(--alarm); color: var(--panel); }
+.l-opt[disabled] { cursor: default; }
+.l-fb { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; background: var(--panel); border: 1px solid var(--line); border-radius: .7em; padding: .7em 1em; }
+.l-fb p { flex: 1 1 20em; font-size: .95em; }
+.l-fb b.r { color: var(--ok); } .l-fb b.w { color: var(--alarm); }
+.l-end { display: grid; justify-items: center; text-align: center; gap: .6em; padding: 1em 0; }
+.l-end .stars { display: flex; gap: .3em; }
+.l-end .stars .ico { width: 3em; height: 3em; color: var(--line); }
+.l-end .stars .ico.on { color: var(--amber); }
+.l-end .stars .ico.on .fill { fill: currentColor; }
+.l-match { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.4em; }
+.l-match .col { display: grid; gap: .5em; align-content: start; }
+.l-match .col h3 { font: 600 .7em/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.l-mbtn { min-height: 2.8em; padding: .3em 1em; border-radius: .7em; border: 2px solid var(--line); background: var(--panel); color: var(--fg); font: 600 1.05em/1.2 var(--font-body); text-align: left; }
+.l-mbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.l-mbtn.done { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.l-mbtn.bad { border-color: var(--alarm); animation: l-shake .4s; }
+
+/* Badge pop-up and confetti */
+.l-pop {
+  position: fixed; left: 50%; bottom: 8vh; z-index: 41; transform: translateX(-50%);
+  display: flex; gap: .7em; align-items: center; padding: .7em 1.3em .7em .8em; border-radius: 999px;
+  background: var(--fg); color: var(--bg); box-shadow: 0 10px 40px rgba(0,0,0,.35); animation: l-pop 3.2s ease-out forwards;
+  font-size: clamp(17px, calc(.95vw + .55vh), 30px);
+}
+.l-pop .bd { width: 2.3em; height: 2.3em; border-radius: 50%; display: grid; place-items: center; background: var(--amber); color: var(--panel); }
+.l-pop .bd .ico { width: 1.3em; height: 1.3em; }
+.l-pop span { display: block; font-size: .7em; opacity: .75; }
+.l-pop b { font: 700 1.2em/1.1 var(--font-display); }
+.l-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
+.l-confetti i { position: absolute; top: 0; width: .6em; height: 1em; animation: l-fall var(--d, 3s) linear forwards; animation-delay: var(--t, 0s); font-size: clamp(14px, 1vw, 24px); }
+
+/* Narrower screens: the 32" kiosk at 150% scaling, and phones */
+@media (max-width: 1500px) {
+  .l-hub { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .l-tile { min-height: 7.5em; }
+}
+@media (max-width: 1100px) {
+  .l-attract, .l-tour, .l-mic, .l-flav, .l-lab, .l-safe, .l-tanks { grid-template-columns: minmax(0, 1fr); }
+  .la-art { order: -1; max-height: 34vh; } .la-art svg { max-height: 34vh; }
+  .lt-vis { min-height: 0; }
+  .l-hub { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .l-tlist { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .l-badgelist { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .learn { font-size: 16px; }
+  .l-gauges, .l-opts, .l-two, .l-match, .l-mols { grid-template-columns: minmax(0, 1fr); }
+  .l-tlist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lt-live { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .la-text h2 { font-size: 2.4em; }
+  .l-badges .bd { display: none; }
+  .l-phase { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { .learn *, .l-pop, .l-confetti * { animation: none !important; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -501,6 +838,10 @@ body.view-only .edit-only { display: none !important; }
     </div>
     <div class="summary" id="summary"></div>
     <div class="tools">
+      <div class="seg layer" role="group" aria-label="Screen">
+        <button type="button" data-layer="monitor" aria-pressed="true">Live tanks</button>
+        <button type="button" data-layer="learn" aria-pressed="false">Learn</button>
+      </div>
       <button type="button" class="btn" id="bRecipes">Recipes</button>
       <button type="button" class="btn" id="bCompare">Compare runs</button>
       <span class="source" id="source">Demo data</span>
@@ -715,6 +1056,21 @@ body.view-only .edit-only { display: none !important; }
 </div>
 
 <div class="toast" id="toast" hidden role="status"></div>
+<section class="learn" id="learn" hidden aria-label="Fermentation Explorer">
+  <header class="l-top">
+    <img class="logo" src="assets/cafe-lab-logo.png" alt="The CAFE Lab">
+    <div class="l-name"><h1>Fermentation Explorer</h1><p id="lCrumb">The chemistry and microbiology inside our tanks</p></div>
+    <button type="button" class="l-btn" id="lBack" hidden>← All topics</button>
+    <div class="l-badges" id="lBadges" role="img"></div>
+    <div class="seg layer" role="group" aria-label="Screen">
+      <button type="button" data-layer="monitor" aria-pressed="false">Live tanks</button>
+      <button type="button" data-layer="learn" aria-pressed="true">Learn</button>
+    </div>
+  </header>
+  <div class="l-body" id="lBody"></div>
+</section>
+<div class="l-pop" id="lPop" hidden role="status"></div>
+<div class="l-confetti" id="lConfetti" hidden></div>
 
 <script>
 /* ============================================================
@@ -727,6 +1083,10 @@ const CONFIG = {
   staleMinutes: 45,      // flag a tank when its newest reading is older than this (Ignition sends every 20 min)
   tempWarnC: 1.0,        // warn when temperature is this far from setpoint (°C)
   tempAlarmC: 2.5,       // alarm when this far (°C)
+  homeLayer: 'monitor',  // 'learn' makes the Learn layer this screen's home: it opens there and goes back there when idle.
+                         // Adding ?home=learn to the address does the same, for the hallway screen.
+  learnIdleSeconds: 90,  // with no touches for this long, the Learn layer starts over (or the screen goes back to its home)
+  courseUrl: '',         // optional link to a CHEM 337 / CHEM 339 page; when set, the Learn layer shows it as a QR code
 };
 
 const H = 3600e3, MIN = 60e3, DAY = 24 * H;
@@ -1506,6 +1866,7 @@ function drawChart(svg, { from, to, series, markers = [], floor = null, minSpan 
     g += `<line class="gc" x1="${x(m)}" x2="${x(m)}" y1="${T}" y2="${Hh - B}"></line><text class="gct" x="${x(m) + 3}" y="${T + 9}">GC</text>`;
   }
   for (const s of series) {
+    if (s.kind === 'ghost') continue;   // only widens the value range
     const pts = s.pts.filter(p => p.v != null && p.ts >= from - H && p.ts <= to + H);
     if (!pts.length) continue;
     const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.ts).toFixed(1)},${y(p.v).toFixed(1)}`).join('');
@@ -2315,6 +2676,7 @@ async function start() {
   for (const m of ['mEntry', 'mRecipe', 'mRun', 'mRecipes', 'mEdit']) $(m).addEventListener('click', e => { if (e.target === $(m)) $(m).hidden = true; });
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
+    if (!$('learn').hidden) { if (!['attract', 'hub'].includes(L.view)) learnGo('hub'); return; }
     if (!$('mEdit').hidden) $('mEdit').hidden = true;
     else if (!$('mRecEdit').hidden) $('mRecEdit').hidden = true;
     else if (!$('mEntry').hidden) $('mEntry').hidden = true;
@@ -2346,6 +2708,7 @@ async function start() {
   buildRooms();
   await refresh();
   refreshHistory();
+  initLearn();
   pickStore().then(st => {
     state.store = st;
     st.onChange(() => { renderTanks(); if (state.open != null) drawDetail(); });
@@ -2361,6 +2724,1004 @@ async function start() {
   setInterval(() => { reloadRuns(); reloadMeasurements(); reloadRecipes(); }, 5 * MIN);
   setInterval(renderTanks, 5000);
 }
+/* ============================================================
+   Learn layer: a touch exhibit about the chemistry and microbiology of fermentation, for the hallway
+   screen and for CHEM 337 and CHEM 339. A start screen and a short guided tour lead to topics people
+   explore on their own: the live tanks explained, microbes, flavor molecules, a virtual fermentation lab,
+   safety and quality, and two games. Badges reward finishing topics and reset when the screen goes idle.
+   Live numbers come from the same data source as the dashboard (state, viewFor, gravityInfo).
+   ============================================================ */
+const ICONS = {
+  play: '<path class="fill" d="M8 5v14l11-7z"/>',
+  tank: '<path d="M7 3h10v10l-5 6-5-6z"/><path d="M12 19v2M9.5 8h5"/>',
+  microbe: '<ellipse cx="10" cy="13" rx="6" ry="5"/><circle cx="17.5" cy="8" r="2.5"/><circle cx="9" cy="12" r="1.5"/>',
+  molecule: '<circle cx="6" cy="17" r="2.5"/><circle cx="12" cy="7" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M7.3 14.8l3.4-5.6M13.3 9.2l3.4 5.6M8.5 17h7"/>',
+  flask: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/>',
+  shield: '<path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  game: '<rect x="3" y="7" width="18" height="11" rx="4"/><path d="M8 10v4M6 12h4"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13.5" r="1"/>',
+  cap: '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5M22 9v6"/>',
+  check: '<path d="M5 12l5 5 9-10"/>',
+};
+const ico = (n, cls = '') => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const rnd = i => hashNoise(i * 977 + 13) * .5 + .5;
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const tUnit = c => `${fmtT(c)} °${unit}`;
+
+const BADGES = [
+  { id: 'tour', name: 'Tour Guide', how: 'Finish the tour', icon: 'play' },
+  { id: 'tanks', name: 'Tank Watcher', how: 'Check 3 live tanks', icon: 'tank' },
+  { id: 'microbes', name: 'Microbe Spotter', how: 'Meet all 3 microbes', icon: 'microbe' },
+  { id: 'flavor', name: 'Flavor Chemist', how: 'Win Flavor Match', icon: 'molecule' },
+  { id: 'lab', name: 'Brewmaster', how: 'Beat a lab challenge', icon: 'flask' },
+  { id: 'safety', name: 'Safety Inspector', how: 'Read all 3 safety topics', icon: 'shield' },
+  { id: 'quiz', name: 'Quiz Champ', how: 'Get 4 of 5 in the quiz', icon: 'star' },
+];
+const COURSE = {
+  title: 'Learn this hands-on in CHEM 337 (Beer Chemistry) and CHEM 339',
+  text: 'Students in these courses brew, ferment and analyze in the CAFE Lab, using the same tanks and probes shown here.',
+};
+const TIPS = [
+  'The fizz in beer, bread dough and kombucha is carbon dioxide made by yeast.',
+  'Banana-smelling beer and a real banana share the same molecule: isoamyl acetate.',
+  'Salt in sauerkraut doesn’t stop the good bacteria. It holds back spoilers so lactic acid bacteria can win.',
+  'Botulism bacteria can’t grow at pH 4.6 or below, so a safe fermentation gets acidic fast.',
+  'Oxygen helps yeast at the start of a fermentation, but in finished beer it makes stale, cardboard flavors.',
+  'Soy sauce, miso and sake all start with koji, a mold called Aspergillus oryzae.',
+  'Lager yeast work colder than ale yeast, which is one reason lagers taste cleaner.',
+  'Winemakers add sulfur dioxide to protect wine, and how well it works depends on the wine’s pH.',
+  'Probes in our Spike tanks measure pH, temperature and dissolved oxygen day and night.',
+];
+
+// Where the screen goes when idle: the hallway screen (?home=learn) comes back to the Learn start screen,
+// the lab kiosk back to the dashboard.
+const learnHome = new URLSearchParams(location.search).get('home') === 'learn' || CONFIG.homeLayer === 'learn';
+let layer = 'monitor';
+const L = {
+  view: 'attract', step: 0, badges: new Set(), lastTouch: Date.now(), tipI: 0, spotI: 0,
+  tank: null, seenTanks: new Set(), microbe: 'yeast', seenMicrobes: new Set(),
+  molCat: 'fruity', mol: 'isoamylAcetate', seenMols: new Set(), safety: 'ph', seenSafety: new Set(), so2pH: 3.4,
+  ph46: {}, sim: null, quiz: null, match: null,
+};
+function newSim() {
+  return { mode: 'ale', temp: { ale: 19, lager: 11, sour: 40, kraut: 20 }, o2: 8, pitch: 'normal', ibu: 0, preacid: false, salt: 2,
+    challenge: null, result: null, t: 0, won: new Set() };
+}
+L.sim = newSim();
+
+/* ---------- Pictures ---------- */
+function artTank(id = 'a') {
+  let bub = '', yeast = '', words = '';
+  for (let i = 0; i < 16; i++) {
+    const x = 135 + rnd(i) * 130, r = 3 + rnd(i + 40) * 5;
+    bub += `<circle class="anim-rise" cx="${x.toFixed(0)}" cy="${(450 - rnd(i + 80) * 30).toFixed(0)}" r="${r.toFixed(1)}" fill="#fff" fill-opacity=".75"
+      style="--d:${(3 + rnd(i + 7) * 3).toFixed(1)}s;--t:-${(rnd(i + 9) * 6).toFixed(1)}s;--rise:-${(250 + rnd(i + 3) * 40).toFixed(0)}px;--dx:${((rnd(i + 5) - .5) * 30).toFixed(0)}px"/>`;
+  }
+  for (let i = 0; i < 9; i++) {
+    const x = 140 + rnd(i + 100) * 120, y = 200 + rnd(i + 120) * 190;
+    yeast += `<g class="anim-drift" style="--d:${(5 + rnd(i + 3) * 5).toFixed(1)}s;--t:-${(rnd(i + 4) * 5).toFixed(1)}s;--dx:${((rnd(i + 6) - .5) * 40).toFixed(0)}px;--dy:${((rnd(i + 8) - .5) * 40).toFixed(0)}px">
+      <ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="9" ry="7.5" fill="#fff4d6" stroke="#9a6400" stroke-width="2"/>${i % 3 === 0 ? `<circle cx="${(x + 10).toFixed(0)}" cy="${(y - 4).toFixed(0)}" r="4" fill="#fff4d6" stroke="#9a6400" stroke-width="1.5"/>` : ''}</g>`;
+  }
+  ['CO₂', 'esters', 'ethanol', 'CO₂', 'acids'].forEach((w, i) => {
+    words += `<text class="anim-rise" x="${150 + i * 25}" y="${430 - i * 8}" font-size="17" font-weight="700" fill="#5a3b00" fill-opacity=".75" style="--d:${(6 + i).toFixed(1)}s;--t:-${(i * 1.7).toFixed(1)}s;--rise:-240px">${w}</text>`;
+  });
+  const shape = 'M110 92Q110 50 200 50Q290 50 290 92L290 360L212 468L188 468L110 360Z';
+  return `<svg viewBox="0 0 400 560" role="img" aria-label="A fermenting tank with yeast and rising bubbles">
+    <defs><clipPath id="clip-${id}"><path d="${shape}"/></clipPath>
+      <linearGradient id="beer-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c95a"/><stop offset="1" stop-color="#c47f12"/></linearGradient></defs>
+    <path d="M132 330L112 545M268 330L288 545M200 468v40" stroke="var(--muted)" stroke-width="7" stroke-linecap="round"/>
+    <g clip-path="url(#clip-${id})">
+      <rect x="100" y="150" width="200" height="330" fill="url(#beer-${id})"/>
+      <path d="M100 150 Q125 136 150 150 T200 150 T250 150 T300 150 V172 H100Z" fill="#fff8e6"/>
+      ${yeast}${bub}${words}
+    </g>
+    <rect x="104" y="210" width="192" height="110" fill="none" stroke="var(--cool)" stroke-width="3" stroke-dasharray="10 8" opacity=".6"/>
+    <path d="${shape}" fill="none" stroke="var(--muted)" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M200 50V28M186 28h28" stroke="var(--muted)" stroke-width="6" stroke-linecap="round"/>
+    <text x="300" y="268" font-size="16" fill="var(--cool)" font-weight="600">glycol</text><text x="300" y="288" font-size="16" fill="var(--cool)" font-weight="600">jacket</text>
+  </svg>`;
+}
+function hex(cx, cy, r) {
+  return Array.from({ length: 6 }, (_, k) => { const a = Math.PI / 3 * k; return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`; }).join(' ');
+}
+function artYeast(small) {
+  let flow = '', out = '';
+  if (!small) {
+    for (let i = 0; i < 5; i++) flow += `<polygon class="anim-flow" points="${hex(170, 160, 11)}" fill="none" stroke="var(--amber)" stroke-width="3" style="--fx:-150px;--fy:${(i - 2) * 26}px;--d:4s;--t:-${(i * .8).toFixed(1)}s"/>`;
+    for (let i = 0; i < 6; i++) out += `<circle class="anim-rise" cx="${215 + i * 9}" cy="105" r="${4 + (i % 3)}" fill="none" stroke="var(--do)" stroke-width="2.5" style="--d:3.2s;--t:-${(i * .55).toFixed(1)}s;--rise:-90px;--dx:${(i - 2) * 12}px"/>`;
+  }
+  return `<svg viewBox="0 0 400 300" role="img" aria-label="A budding yeast cell">
+    ${flow}
+    <ellipse class="anim-bud" cx="${274}" cy="118" rx="36" ry="31" fill="var(--amber)" fill-opacity=".2" stroke="var(--amber)" stroke-width="4"/>
+    <ellipse cx="190" cy="160" rx="88" ry="76" fill="var(--amber)" fill-opacity=".18" stroke="var(--amber)" stroke-width="5"/>
+    <circle cx="170" cy="170" r="22" fill="var(--amber)" fill-opacity=".45"/>
+    <ellipse cx="220" cy="185" rx="24" ry="18" fill="none" stroke="var(--amber)" stroke-width="3" stroke-dasharray="4 5"/>
+    <circle cx="150" cy="125" r="5" fill="var(--amber)"/><circle cx="235" cy="135" r="4" fill="var(--amber)"/><circle cx="200" cy="215" r="4" fill="var(--amber)"/>
+    ${out}
+    ${small ? '' : '<path d="M40 270h80" stroke="var(--muted)" stroke-width="4"/><text x="80" y="292" text-anchor="middle" font-size="16" fill="var(--muted)">about 5 µm</text>'}
+  </svg>`;
+}
+function artBacteria(small) {
+  const rod = (x, y, rot, split, i) => `<g transform="translate(${x} ${y}) rotate(${rot})">
+    ${split ? `<g class="anim-split" style="--sx:-9px"><rect x="-46" y="-13" width="46" height="26" rx="13" fill="var(--ph)" fill-opacity=".22" stroke="var(--ph)" stroke-width="4"/></g>
+      <g class="anim-split" style="--sx:9px"><rect x="0" y="-13" width="46" height="26" rx="13" fill="var(--ph)" fill-opacity=".22" stroke="var(--ph)" stroke-width="4"/></g>`
+      : `<g class="anim-drift" style="--d:${6 + i}s;--dx:6px;--dy:-6px;--rot:8deg"><rect x="-44" y="-13" width="88" height="26" rx="13" fill="var(--ph)" fill-opacity=".22" stroke="var(--ph)" stroke-width="4"/></g>`}</g>`;
+  return `<svg viewBox="0 0 400 300" role="img" aria-label="Rod-shaped bacteria, one dividing in two">
+    ${rod(120, 90, 20, false, 0)}${rod(250, 80, -15, false, 1)}${rod(200, 165, 5, true, 2)}${rod(100, 215, -30, false, 3)}${rod(300, 210, 35, false, 4)}
+    ${small ? '' : '<path d="M40 270h32" stroke="var(--muted)" stroke-width="4"/><text x="56" y="292" text-anchor="middle" font-size="16" fill="var(--muted)">about 2 µm</text><text x="200" y="292" text-anchor="middle" font-size="16" fill="var(--muted)">the middle cell is splitting in two</text>'}
+  </svg>`;
+}
+function artMold(small) {
+  const paths = [
+    ['M30 250 C90 230 120 200 160 190 S240 150 270 110', 320], ['M160 190 C170 150 150 120 160 80', 130], ['M30 250 C70 270 140 270 190 255 S290 240 350 250', 330],
+    ['M190 255 C200 220 230 210 240 180', 100], ['M270 110 C300 100 330 70 345 50', 100], ['M350 250 C360 220 350 190 370 160', 110],
+  ];
+  const tips = [[270, 110], [160, 80], [240, 180], [345, 50], [370, 160]];
+  return `<svg viewBox="0 0 400 300" role="img" aria-label="Branching mold threads with spore heads">
+    ${paths.map(([d, len], i) => `<path class="anim-grow" d="${d}" fill="none" stroke="var(--ok)" stroke-width="7" stroke-linecap="round" style="--len:${len};--d:4s;--t:-${(i * .3).toFixed(1)}s"/>`).join('')}
+    ${tips.map(([x, y], i) => `<g class="anim-drift" style="--d:${4 + i}s;--dx:0px;--dy:-3px;--rot:0deg"><circle cx="${x}" cy="${y}" r="13" fill="var(--ok)" fill-opacity=".3" stroke="var(--ok)" stroke-width="3"/>
+      ${[0, 1, 2, 3, 4, 5].map(k => `<circle cx="${(x + 18 * Math.cos(k * 1.05)).toFixed(0)}" cy="${(y + 18 * Math.sin(k * 1.05)).toFixed(0)}" r="4" fill="var(--ok)"/>`).join('')}</g>`).join('')}
+    ${small ? '' : '<text x="200" y="292" text-anchor="middle" font-size="16" fill="var(--muted)">threads (hyphae) a few µm wide, with heads of spores</text>'}
+  </svg>`;
+}
+function visConditions() {
+  const d = [['Temperature', '°', 'var(--temp)'], ['Oxygen', 'O₂', 'var(--do)'], ['Salt', 'NaCl', 'var(--cool)'], ['Acidity', 'pH', 'var(--ph)']];
+  return `<svg viewBox="0 0 400 320" role="img" aria-label="Temperature, oxygen, salt and acidity">
+    ${d.map(([w, s, c], i) => { const x = 100 + (i % 2) * 200, y = 85 + Math.floor(i / 2) * 150; return `
+      <circle class="anim-drift" cx="${x}" cy="${y}" r="58" fill="none" stroke="${c}" stroke-width="3" stroke-dasharray="6 8" style="--d:${8 + i}s;--dx:0px;--dy:0px;--rot:90deg"/>
+      <circle cx="${x}" cy="${y}" r="46" fill="${c}" fill-opacity=".15" stroke="${c}" stroke-width="4"/>
+      <text x="${x}" y="${y + 11}" text-anchor="middle" font-size="32" font-weight="700" fill="${c}">${s}</text>
+      <text x="${x}" y="${y + 80}" text-anchor="middle" font-size="18" font-weight="600" fill="var(--fg)">${w}</text>`; }).join('')}
+  </svg>`;
+}
+
+/* ---------- Molecules: atoms [element, x, y, label], bonds [a, b, order]; carbons are drawn as corners ---------- */
+const RING = [['C', 0, -1], ['C', .866, -.5], ['C', .866, .5], ['C', 0, 1], ['C', -.866, .5], ['C', -.866, -.5]];
+const RINGB = [[0, 1, 2], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 2], [5, 0, 1]];
+const MOLS = {
+  isoamylAcetate: { name: 'Isoamyl acetate', formula: 'C₇H₁₄O₂', cat: 'fruity', smell: 'Banana, pear drops', match: 'Banana',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', .866, -1], ['O', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['C', 5.196, .5], ['C', 4.33, -1]],
+    bonds: [[0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1], [6, 8, 1]],
+    made: 'Yeast join isoamyl alcohol to acetic acid (carried as acetyl-CoA) using an enzyme called alcohol acetyltransferase.',
+    more: 'Warmer fermentation, stronger wort and pitching too little yeast all raise it.',
+    found: 'German wheat beer (hefeweizen), many ales, sake, and ripe bananas.' },
+  ethylAcetate: { name: 'Ethyl acetate', formula: 'C₄H₈O₂', cat: 'fruity', smell: 'Pear; nail-polish remover when strong', match: 'Nail polish',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', .866, -1], ['O', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5]],
+    bonds: [[0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 1], [4, 5, 1]],
+    made: 'Yeast join ethanol to acetic acid (as acetyl-CoA). It is the most plentiful ester in beer. Acetic acid bacteria make it too.',
+    more: 'Warm fermentation and stressed yeast; in wine, acetic acid bacteria.',
+    found: 'Beer, wine, cider and kombucha in small amounts; nail-polish remover in large ones.' },
+  ethylHexanoate: { name: 'Ethyl hexanoate', formula: 'C₈H₁₆O₂', cat: 'fruity', smell: 'Red apple, aniseed', match: null,
+    atoms: [['C', 0, .5], ['C', .866, 0], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['O', 4.33, -1], ['O', 5.196, .5], ['C', 6.062, 0], ['C', 6.928, .5]],
+    bonds: [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 2], [5, 7, 1], [7, 8, 1], [8, 9, 1]],
+    made: 'Yeast join ethanol to hexanoic acid, a short fatty acid from their own fat-making pathway.',
+    more: 'Yeast strain matters most; some sake yeasts are bred to make extra.',
+    found: 'Prized in premium (ginjo) sake; also beer, wine and cider.' },
+  lactic: { name: 'Lactic acid', formula: 'C₃H₆O₃', cat: 'sour', smell: 'Clean, tangy sour, like yogurt', match: 'Yogurt tang',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', .866, -1, 'OH'], ['C', 1.732, .5], ['O', 1.732, 1.5], ['O', 2.598, 0, 'OH']],
+    bonds: [[0, 1, 1], [1, 2, 1], [1, 3, 1], [3, 4, 2], [3, 5, 1]],
+    made: 'Lactic acid bacteria break sugar down to lactic acid to get energy. The acid lowers pH and protects the food.',
+    more: 'Warmth, no hops (hop acids hold the bacteria back), and time.',
+    found: 'Yogurt, sauerkraut, kimchi, sourdough and sour beer.' },
+  acetic: { name: 'Acetic acid', formula: 'C₂H₄O₂', cat: 'sour', smell: 'Vinegar', match: 'Vinegar',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', .866, -1], ['O', 1.732, .5, 'OH']],
+    bonds: [[0, 1, 1], [1, 2, 2], [1, 3, 1]],
+    made: 'Acetic acid bacteria such as Acetobacter use oxygen to turn ethanol into acetic acid.',
+    more: 'Oxygen getting into beer, wine or cider.',
+    found: 'Vinegar and kombucha. In wine too much is a fault called volatile acidity.' },
+  butyric: { name: 'Butyric acid', formula: 'C₄H₈O₂', cat: 'sour', smell: 'Rancid butter, vomit', match: 'Rancid, cheesy',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['C', 1.732, .5], ['C', 2.598, 0], ['O', 2.598, -1], ['O', 3.464, .5, 'OH']],
+    bonds: [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 2], [3, 5, 1]],
+    made: 'Clostridium bacteria and a few others make it when a fermentation doesn’t get acidic fast enough.',
+    more: 'A slow pH drop, especially in warm kettle sours and under-salted vegetables.',
+    found: 'A warning sign of spoilage. Aged cheeses such as Parmesan have some too.' },
+  glutamate: { name: 'Glutamate', formula: 'C₅H₉NO₄ (glutamic acid)', cat: 'savory', smell: 'Savory, brothy: the umami taste', match: 'Savory (umami)',
+    atoms: [['O', 0, .5, 'HO'], ['C', .866, 0], ['O', .866, -1], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['N', 3.464, 1.5, 'NH₂'], ['C', 4.33, 0], ['O', 4.33, -1], ['O', 5.196, .5, 'OH']],
+    bonds: [[0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1], [5, 7, 1], [7, 8, 2], [7, 9, 1]],
+    made: 'Proteases, enzymes released by koji mold or by yeast as they break down, cut proteins into amino acids. Glutamate is the one that tastes savory.',
+    more: 'Long aging, which gives the enzymes time to work.',
+    found: 'Soy sauce, miso, aged cheese, fish sauce and yeast extract.' },
+  octenol: { name: '1-Octen-3-ol', formula: 'C₈H₁₆O', cat: 'savory', smell: 'Mushroom, earthy', match: 'Mushroom',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['C', 1.732, .5], ['O', 1.732, 1.5, 'OH'], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['C', 5.196, .5], ['C', 6.062, 0]],
+    bonds: [[0, 1, 2], [1, 2, 1], [2, 3, 1], [2, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1], [7, 8, 1]],
+    made: 'Molds and mushrooms make it by breaking down linoleic acid, a fat.',
+    more: 'Mold growing on the surface of a food.',
+    found: 'Mushrooms, Camembert and Brie rinds, and koji.' },
+  vg4: { name: '4-Vinylguaiacol', formula: 'C₉H₁₀O₂', cat: 'spicy', ring: true, smell: 'Clove, spicy', match: 'Clove',
+    atoms: [...RING, ['O', 0, -2, 'OH'], ['O', 1.732, -1], ['C', 2.598, -.5], ['C', 0, 2], ['C', .866, 2.5]],
+    bonds: [...RINGB, [0, 6, 1], [1, 7, 1], [7, 8, 1], [3, 9, 1], [9, 10, 2]],
+    made: 'Some yeast strains, called phenolic or POF+, cut CO₂ off ferulic acid, which comes from the malt.',
+    more: 'Choosing a phenolic yeast; a warm ferulic acid rest in the mash gives it more to work with.',
+    found: 'Hefeweizen, Belgian witbier and saison.' },
+  ep4: { name: '4-Ethylphenol', formula: 'C₈H₁₀O', cat: 'spicy', ring: true, smell: 'Barnyard, horse blanket, bandage', match: 'Barnyard',
+    atoms: [...RING, ['O', 0, -2, 'OH'], ['C', 0, 2], ['C', .866, 2.5]],
+    bonds: [...RINGB, [0, 6, 1], [3, 7, 1], [7, 8, 1]],
+    made: 'Brettanomyces yeast turn p-coumaric acid, from grapes or malt, into 4-vinylphenol and then into 4-ethylphenol.',
+    more: 'Brettanomyces living in barrels, and long aging.',
+    found: 'Some Belgian and barrel-aged beers, where it is wanted, and red wine, where it is usually a fault.' },
+  diacetyl: { name: 'Diacetyl', formula: 'C₄H₆O₂ (2,3-butanedione)', cat: 'off', smell: 'Butter, butterscotch, buttered popcorn', match: 'Buttered popcorn',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', .866, -1], ['C', 1.732, .5], ['O', 1.732, 1.5], ['C', 2.598, 0]],
+    bonds: [[0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 2], [3, 5, 1]],
+    made: 'Growing yeast leak a precursor, α-acetolactate, that turns into diacetyl outside the cell. Given time and warmth, healthy yeast take it back up and break it down. Pediococcus bacteria make it too.',
+    more: 'Taking beer off the yeast too early, fermenting cold without a warm “diacetyl rest”, or a bacterial infection.',
+    found: 'A fault in most beers, especially lagers. Wanted in some Chardonnay and in butter.' },
+  acetaldehyde: { name: 'Acetaldehyde', formula: 'C₂H₄O', cat: 'off', smell: 'Green apple, fresh-cut pumpkin', match: 'Green apple',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', 1.732, .5]],
+    bonds: [[0, 1, 1], [1, 2, 2]],
+    made: 'It is the step just before ethanol: yeast make it from sugar and then turn it into ethanol. Oxygen can turn ethanol back into it.',
+    more: 'Beer packaged too young, unhealthy yeast, or oxygen.',
+    found: 'Young beer and cider. Fino sherry has a lot on purpose.' },
+  nonenal: { name: 'trans-2-Nonenal', formula: 'C₉H₁₆O', cat: 'off', smell: 'Wet cardboard, paper', match: 'Wet cardboard',
+    atoms: [['O', 0, .5], ['C', .866, 0], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['C', 5.196, .5], ['C', 6.062, 0], ['C', 6.928, .5], ['C', 7.794, 0]],
+    bonds: [[0, 1, 2], [1, 2, 1], [2, 3, 2], [3, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1], [7, 8, 1], [8, 9, 1]],
+    made: 'Oxygen breaks down fats (lipids) that come from the malt, and this aldehyde is one of the pieces.',
+    more: 'Oxygen in packaged beer, warm storage, and age.',
+    found: 'Stale beer. People can smell it at less than one part per billion.' },
+  isoamylAlcohol: { name: 'Isoamyl alcohol', formula: 'C₅H₁₂O', cat: 'off', smell: 'Hot, solventy, harsh alcohol', match: null,
+    atoms: [['O', 0, .5, 'HO'], ['C', .866, 0], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 2.598, -1], ['C', 3.464, .5]],
+    bonds: [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [3, 5, 1]],
+    made: 'Yeast make it from the amino acid leucine and from sugar. It is a “fusel” or higher alcohol.',
+    more: 'Hot fermentations and stressed or underpitched yeast.',
+    found: 'Most beers and spirits in small amounts. Yeast also turn it into banana-smelling isoamyl acetate.' },
+};
+const MOLCATS = [
+  ['fruity', 'Fruity', 'var(--amber)'], ['sour', 'Sour', 'var(--ph)'], ['savory', 'Savory & earthy', 'var(--ok)'],
+  ['spicy', 'Spicy & funky', 'var(--temp)'], ['off', 'Off-flavors', 'var(--alarm)'],
+];
+function molSvg(m) {
+  const S = 46, pad = 30;
+  const xs = m.atoms.map(a => a[1]), ys = m.atoms.map(a => a[2]);
+  const x0 = Math.min(...xs), y0 = Math.min(...ys);
+  const W = (Math.max(...xs) - x0) * S + pad * 2, Hh = (Math.max(...ys) - y0) * S + pad * 2;
+  const P0 = (x, y) => [(x - x0) * S + pad, (y - y0) * S + pad], P = i => P0(m.atoms[i][1], m.atoms[i][2]);
+  const lab = i => m.atoms[i][0] === 'C' ? null : (m.atoms[i][3] || m.atoms[i][0]);
+  const ln = (a, b, c, d) => `<line class="b" x1="${a.toFixed(1)}" y1="${b.toFixed(1)}" x2="${c.toFixed(1)}" y2="${d.toFixed(1)}"/>`;
+  let g = '';
+  for (const [a, b, o] of m.bonds) {
+    let [x1, y1] = P(a), [x2, y2] = P(b);
+    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+    const ca = lab(a) ? 15 : 0, cb = lab(b) ? 15 : 0;
+    x1 += ux * ca; y1 += uy * ca; x2 -= ux * cb; y2 -= uy * cb;
+    if (o === 2 && m.ring && a < 6 && b < 6) {
+      // aromatic ring: second line inside the ring, a little shorter
+      const [cx, cy] = P0(0, 0), mx = (x1 + x2) / 2, my = (y1 + y2) / 2, d = Math.hypot(cx - mx, cy - my), ix = (cx - mx) / d * 8, iy = (cy - my) / d * 8;
+      g += ln(x1, y1, x2, y2) + ln(x1 + ix + dx * .15, y1 + iy + dy * .15, x2 + ix - dx * .15, y2 + iy - dy * .15);
+    } else if (o === 2) { const nx = -uy * 4.5, ny = ux * 4.5; g += ln(x1 + nx, y1 + ny, x2 + nx, y2 + ny) + ln(x1 - nx, y1 - ny, x2 - nx, y2 - ny); }
+    else g += ln(x1, y1, x2, y2);
+  }
+  m.atoms.forEach((a, i) => { const l = lab(i); if (l) { const [x, y] = P(i); g += `<text class="a ${a[0]}" x="${x.toFixed(1)}" y="${y.toFixed(1)}">${l}</text>`; } });
+  return `<svg class="mol" viewBox="0 0 ${W.toFixed(0)} ${Hh.toFixed(0)}" role="img" aria-label="Structure of ${esc(m.name)}">${g}</svg>`;
+}
+
+/* ---------- Microbes ---------- */
+const MICROBES = {
+  yeast: { name: 'Yeast', kind: 'Single-celled fungi', art: artYeast, color: 'var(--amber)',
+    size: 'About 5–10 µm across. A human hair is about 70 µm wide.',
+    grow: 'They multiply by budding: a small daughter cell swells off the side of the mother cell.',
+    eats: 'Sugars: glucose, fructose, sucrose and the maltose in malt',
+    makes: ['Ethanol (alcohol)', 'Carbon dioxide (the bubbles)', 'Fruity esters', 'Fusel alcohols', 'Clove-like phenols (some strains)'],
+    stars: [['Saccharomyces cerevisiae', 'Ale, bread, wine, sake'], ['Saccharomyces pastorianus', 'Lager'], ['Brettanomyces', 'Funky Belgian beers; a spoiler in wine']],
+    likes: [['Temperature', 'Ale yeast work best around 60–72 °F (15–22 °C), lager yeast around 48–58 °F (9–14 °C). Warmer means faster and fruitier.'],
+      ['Oxygen', 'A little at the start, to build cell membranes. After that they ferment without it.'],
+      ['Acid and alcohol', 'They tolerate both well, which helps them crowd out other microbes.']] },
+  bacteria: { name: 'Bacteria', kind: 'Single cells, much smaller than yeast', art: artBacteria, color: 'var(--ph)',
+    size: 'Most are about 1–5 µm long.',
+    grow: 'They multiply by splitting in two, over and over.',
+    eats: 'Sugars. Acetic acid bacteria also eat alcohol.',
+    makes: ['Lactic acid (clean, tangy sour)', 'Acetic acid (vinegar)', 'Diacetyl (butter), from some strains', 'Carbon dioxide, from some strains'],
+    stars: [['Lactic acid bacteria: Lactobacillus, Pediococcus, Leuconostoc', 'Yogurt, sauerkraut, kimchi, sourdough, sour beer'], ['Acetic acid bacteria: Acetobacter, Gluconobacter', 'Vinegar, kombucha'], ['Clostridium botulinum', 'Not one we want: it makes botulinum toxin in airless, low-acid food']],
+    likes: [['Salt', 'Lactic acid bacteria tolerate salt that stops many spoilage microbes. That is why sauerkraut and kimchi are salted.'],
+      ['Oxygen', 'Lactic acid bacteria don’t need it. Acetic acid bacteria must have it.'],
+      ['Hops', 'Hop acids hold back many lactic acid bacteria, so sour beers are soured with few or no hops.']] },
+  mold: { name: 'Molds', kind: 'Fungi that grow as threads', art: artMold, color: 'var(--ok)',
+    size: 'Each thread (hypha) is a few µm wide, but a colony grows big enough to see as fuzz.',
+    grow: 'Branching threads called hyphae form a mat (mycelium), and spores spread them to new places.',
+    eats: 'Starch, protein and fat, which they break down with enzymes they release',
+    makes: ['Amylases: cut starch into sugars yeast can ferment', 'Proteases: cut protein into amino acids such as glutamate (umami)', 'Earthy, mushroom aromas such as 1-octen-3-ol'],
+    stars: [['Aspergillus oryzae (koji)', 'Soy sauce, miso, sake, mirin; brewers are trying it in beer'], ['Rhizopus', 'Tempeh'], ['Penicillium', 'Blue cheese, Camembert and Brie rinds, salami']],
+    likes: [['Oxygen', 'Molds need air, so they grow on surfaces.'],
+      ['Warmth and moisture', 'Koji is grown in a warm, humid room for about two days.'],
+      ['Safety', 'Some wild molds make toxins (mycotoxins), so food makers use known, safe strains.']] },
+};
+
+/* ---------- Tour ---------- */
+const TOUR = [
+  { t: 'Fermentation is microbes making food', vis: () => artYeast(false),
+    p: ['Yeast, bacteria and molds are living things too small to see. They eat sugar and turn it into new molecules.',
+      'In beer and wine, yeast make alcohol and carbon dioxide, and hundreds of flavor molecules along the way.'],
+    eq: 'C₆H₁₂O₆ → 2 C₂H₅OH + 2 CO₂<small>glucose → ethanol + carbon dioxide</small>' },
+  { t: 'Meet the three microbe teams', vis: () => `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5em;width:100%;text-align:center;font-weight:700">
+      <div>${artYeast(true)}Yeast</div><div>${artBacteria(true)}Bacteria</div><div>${artMold(true)}Molds</div></div>`,
+    p: ['Yeast are single-celled fungi that raise bread and turn juice into wine.', 'Bacteria are even smaller cells that sour yogurt, sauerkraut and some beers.', 'Molds are threadlike fungi that help make soy sauce, miso and cheese.'] },
+  { t: 'Every flavor is a molecule', vis: () => `<div class="l-molpic" style="border:0;width:100%">${molSvg(MOLS.isoamylAcetate)}<b style="font:700 1.3em var(--font-display)">Isoamyl acetate</b><span class="f">smells like banana</span></div>`,
+    p: ['The banana smell of a German wheat beer is isoamyl acetate, made by yeast.', 'The tang of yogurt is lactic acid. The savory taste of soy sauce is glutamate.'] },
+  { t: 'Conditions steer the microbes', vis: visConditions,
+    p: ['Temperature, oxygen, salt and acidity decide which microbes grow and which flavors they make.', 'Warm yeast make fruitier beer. Salt lets the right bacteria win in sauerkraut. Acid keeps dangerous bacteria out.'] },
+  { t: 'Watch it happen live', vis: () => liveMini(),
+    p: ['These readings come from the fermentation tanks in the CAFE Lab right now.', 'pH falls as microbes make acids. Temperature is held steady while the yeast give off heat.'] },
+];
+function liveMini() {
+  const cells = state.tanks.map(t => {
+    const v = viewFor(t.id); if (!v) return '';
+    const r = v.r;
+    return `<div><b>${esc(t.name)}</b><span>${esc(v.run ? (v.run.experiment || v.run.name) : 'Empty')}${v.hist ? ' · finished' : ''}</span>
+      <em>${r?.ph != null ? 'pH ' + fmtPh(r.ph) : r?.tempC != null ? tUnit(r.tempC) : '–'}</em></div>`;
+  }).join('');
+  return `<div class="lt-live">${cells || '<div>No tank data yet.</div>'}</div>`;
+}
+
+/* ---------- Live tanks explained ---------- */
+const PHASES = [
+  { name: 'Wake-up', sub: 'Lag phase', text: 'The yeast just went in. They are soaking up oxygen and nutrients and building cell membranes before they multiply.' },
+  { name: 'Feast', sub: 'Active fermentation', text: 'Yeast are eating sugar fast, making alcohol, carbon dioxide and most of the fruity esters. This is when the tank gives off the most heat.' },
+  { name: 'Clean-up', sub: 'Slowing down', text: 'Most of the sugar is gone. Yeast now take back byproducts like buttery diacetyl and green-apple acetaldehyde.' },
+  { name: 'Conditioning', sub: 'Finishing', text: 'Fermentation is basically done. Yeast settle, flavors smooth out, and the batch gets ready for packaging.' },
+];
+const CRASH = { name: 'Cold crash', sub: 'Near freezing', text: 'The tank has been chilled close to freezing so yeast and haze sink to the bottom and the batch clears.' };
+function phaseOf(v) {
+  if (!v?.run) return null;
+  if (v.hist) return { i: 4 };
+  if (v.s.mode === 'crash') return { i: 3, crash: true };
+  const h = (Date.now() - v.run.start) / H, p = gravityInfo(v.run, v.pts)?.prog;
+  const i = h < 12 && (p == null || p < .1) ? 0 : (p != null ? p < .6 : h < 96) ? 1 : (p != null ? p < .95 : h < 168) ? 2 : 3;
+  return { i };
+}
+const phaseName = ph => !ph ? 'Empty' : ph.i === 4 ? 'Finished' : ph.crash ? CRASH.name : PHASES[ph.i].name;
+const fmtHours = h => h < 48 ? `${Math.round(h)} hours` : `${(h / 24).toFixed(1)} days`;
+
+// How long a run took to reach pH 4.6, from its own readings. Cached per run.
+async function loadPh46(v) {
+  const run = v?.run; if (!run || L.ph46[run.runId]) return;
+  L.ph46[run.runId] = { loading: true };
+  let pts = v.hist ? v.pts : null;
+  try { if (!pts) pts = await source.history(v.tank.id, run.start, Math.min(Date.now(), run.start + 5 * DAY)); } catch { pts = []; }
+  const ph = (pts || []).filter(p => p.ph != null && p.ts >= run.start);
+  const hit = ph.find(p => p.ph <= 4.6);
+  L.ph46[run.runId] = { start: ph[0]?.ph ?? null, hours: hit ? (hit.ts - run.start) / H : null, any: ph.length > 0 };
+  if (!$('learn').hidden && (L.view === 'tanks' || L.view === 'safety')) learnRender(true);
+}
+function ph46Text(v) {
+  const run = v?.run; if (!run) return null;
+  const c = L.ph46[run.runId];
+  if (!c || c.loading) return ['', 'Checking how fast this batch got acidic…'];
+  if (!c.any) return null;
+  if (c.start != null && c.start <= 4.6) return ['ok', `Started at pH ${fmtPh(c.start)}, already below the 4.6 safety line.`];
+  if (c.hours != null) return c.hours <= 72 ? ['ok', `Reached pH 4.6 after ${fmtHours(c.hours)}, inside the 3-day goal.`]
+    : ['warn', `Took ${fmtHours(c.hours)} to reach pH 4.6, longer than the 3-day goal.`];
+  const age = ((run.end ?? Date.now()) - run.start) / H;
+  return age < 72 ? ['', `Not below pH 4.6 yet. ${fmtHours(72 - age)} left in the 3-day goal.`]
+    : ['warn', 'Still above pH 4.6 after 3 days. (Beer has extra protection from alcohol and hops.)'];
+}
+const PH_FOODS = [[2.3, 'Lemon juice'], [3.5, 'Wine'], [4.3, 'Beer'], [5, 'Coffee'], [6.7, 'Milk'], [7, 'Water']];
+function phScale(ph, marks = []) {
+  const lo = 2, hi = 8, pc = v => Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100));
+  return `<div class="l-scale"><div class="bar"></div>
+    <div class="line46" style="left:${pc(4.6)}%"><i>4.6</i></div>
+    ${PH_FOODS.map(([v, n], i) => `<div class="food${i % 2 ? ' low' : ''}" style="left:${pc(v)}%">${n}</div>`).join('')}
+    ${marks.map(m => `<div class="mk" style="left:${pc(m.ph)}%" title="${esc(m.name || '')}"></div>`).join('')}
+    ${ph != null ? `<div class="mk" style="left:${pc(ph)}%"></div>` : ''}</div>`;
+}
+function tankCards(v) {
+  const { r, run, s } = v, sennos = isSennos(v.tank), cards = [];
+  const h = run ? (Date.now() - run.start) / H : null;
+  // pH
+  if (r?.ph != null) {
+    const p0 = v.p0?.ph, chk = ph46Text(v);
+    cards.push(`<div class="l-card l-gauge ph"><h3>Acidity (pH)</h3><div class="v">${fmtPh(r.ph)}</div>${phScale(r.ph)}
+      <p>${p0 != null && p0 - r.ph > .05 ? `It started at ${fmtPh(p0)}. As microbes work they release acids and carbon dioxide, so the pH falls.` : 'pH falls as microbes release acids and carbon dioxide.'}
+      ${r.ph <= 4.6 ? 'It is below 4.6, a line botulism bacteria can’t grow past.' : 'A healthy fermentation gets below 4.6 within the first few days.'}</p>
+      ${chk ? `<div class="l-check ${chk[0]}">${chk[0] === 'ok' ? ico('check') : ''}${esc(chk[1])}</div>` : ''}</div>`);
+  }
+  // Temperature
+  if (r?.tempC != null) {
+    const y = run?.yeast || '';
+    const hint = /lager|34\/70|w-?34/i.test(y) ? 'Lager yeast work cool, around 48–58 °F (9–14 °C), for a clean, crisp taste.'
+      : /kveik/i.test(y) ? 'Norwegian kveik yeast are unusual: they ferment cleanly even around 90 °F (32 °C).'
+      : /cider|sour|philly/i.test(y + (run?.experiment || '')) ? 'Warmer microbes work faster and make more aroma; cooler ones work slower and cleaner.'
+      : 'Ale yeast work around 60–72 °F (15–22 °C). Warmer makes fruitier beer; cooler makes cleaner beer.';
+    const how = s.mode === 'crash' ? 'Chilled for the cold crash.'
+      : sennos ? 'Measured by the Sennos sensor in the tank.'
+      : `${s.setpointC != null ? `Set to ${tUnit(s.setpointC)}. ` : ''}Yeast give off heat while they ferment. The glycol jacket around the tank carries it away and holds the temperature steady.`;
+    cards.push(`<div class="l-card l-gauge temp"><h3>Temperature</h3><div class="v">${fmtT(r.tempC)}<small>°${unit}</small></div><p>${how} ${hint}</p></div>`);
+  }
+  // Dissolved oxygen
+  if (r?.doMgL != null) {
+    const txt = v.hist ? 'Oxygen at the end of the run. Brewers keep it low once fermentation is underway.'
+      : h != null && h < 36 && r.doMgL > 1 ? 'Yeast are using up the oxygen they were given at the start. They need it to build membranes so they can multiply.'
+      : r.doMgL < .5 ? 'Close to zero: the yeast used the oxygen up. From now on, keeping oxygen out protects the flavor from going stale.'
+      : 'After the first day, brewers try to keep oxygen low, because it causes stale flavors and lets vinegar bacteria grow.';
+    cards.push(`<div class="l-card l-gauge do"><h3>Dissolved oxygen</h3><div class="v">${fmtDo(r.doMgL)}<small>mg/L</small></div>
+      <div class="l-meter" style="--c:var(--do)"><i style="width:${Math.min(100, r.doMgL / 10 * 100)}%"></i></div><p>${txt}</p></div>`);
+  }
+  // Sugar left, from gravity
+  const gi = run ? gravityInfo(run, v.pts) : null;
+  if (gi) {
+    const pct = gi.prog != null ? Math.round(gi.prog * 100) : gi.att != null ? Math.round(gi.att) : null;
+    cards.push(`<div class="l-card l-gauge sugar"><h3>Sugar eaten</h3><div class="v">${pct != null ? pct + '<small>%</small>' : fmtSG(gi.cur.value)}</div>
+      ${pct != null ? `<div class="l-meter"><i style="width:${Math.min(100, pct)}%"></i></div>` : ''}
+      <p>Gravity (how dense the liquid is) fell from ${fmtSG(gi.og)} to ${fmtSG(gi.cur.value)}. Sugar makes it dense; alcohol is lighter than water. That puts the alcohol at about ${gi.abvEst.toFixed(1)}% so far.</p></div>`);
+  }
+  if (r?.pressurePsi != null) cards.push(`<div class="l-card l-gauge pres"><h3>Pressure</h3><div class="v">${fmtPsi(r.pressurePsi)}<small>psi</small></div><p>Carbon dioxide from the yeast builds pressure in the tank.</p></div>`);
+  return cards.join('') || '<div class="l-card"><p>No readings from this tank yet.</p></div>';
+}
+function renderTanksView() {
+  const list = state.tanks.map(t => ({ t, v: viewFor(t.id) })).filter(x => x.v);
+  if (L.tank == null || !list.some(x => x.t.id === L.tank)) L.tank = (list.find(x => x.v.run && !x.v.hist) || list[0])?.t.id ?? null;
+  const cur = list.find(x => x.t.id === L.tank);
+  if (!cur) return '<p class="l-lead">No tanks to show yet.</p>';
+  const v = cur.v, ph = phaseOf(v);
+  L.seenTanks.add(L.tank); if (L.seenTanks.size >= 3) earn('tanks');
+  if (v.run) loadPh46(v);
+  const steps = PHASES.map((p, i) => i === 3 && ph?.crash ? CRASH : p);
+  return `<div class="l-tanks">
+    <div class="l-tlist">${list.map(({ t, v }) => `<button type="button" class="l-tbtn" data-act="tank" data-id="${t.id}" aria-pressed="${t.id === L.tank}">
+      <b>${esc(t.name)}</b><span>${esc(phaseName(phaseOf(v)))}${v.run ? ' · ' + esc(v.run.experiment || v.run.name) : ''}</span></button>`).join('')}</div>
+    <div class="l-tmain">
+      <div class="l-ttitle"><h2>${esc(v.tank.name)}${v.run ? ` · <span>${esc(v.run.experiment || v.run.name)}</span>` : ''}</h2>
+        <p>${v.run ? `${v.hist ? 'Finished run' : `Day ${dayOf(v.run)}`}${v.run.yeast ? ` · ${esc(v.run.yeast)}` : ''}` : 'No fermentation running'}</p></div>
+      ${v.run && ph.i < 4 ? `<div class="l-phase">${steps.map((p, i) => `<div class="${i === ph.i ? 'on' : i < ph.i ? 'done' : ''}"><b>${p.name}</b>${p.sub}</div>`).join('')}</div>
+        <p class="l-phasetext">${(ph.crash ? CRASH : PHASES[ph.i]).text}</p>`
+        : v.hist ? '<p class="l-phasetext">Nothing is fermenting in this tank right now. These are the last readings from its most recent run.</p>' : ''}
+      <div class="l-gauges">${tankCards(v)}</div>
+      ${source.live ? '' : '<p class="l-note">Demo data: these readings are made up until the lab’s live data link is turned on.</p>'}
+    </div></div>`;
+}
+
+/* ---------- Virtual fermentation lab (a simplified teaching model, not a prediction) ---------- */
+const SIM = {
+  ale: { label: 'Ale', sub: 'Saccharomyces cerevisiae', kind: 'beer', tOpt: 19, tMin: 12, ester: .45, min: 4, max: 32 },
+  lager: { label: 'Lager', sub: 'Saccharomyces pastorianus', kind: 'beer', tOpt: 11, tMin: 5, ester: .2, min: 4, max: 32 },
+  sour: { label: 'Kettle sour', sub: 'Lactobacillus in wort', kind: 'sour', min: 20, max: 50 },
+  kraut: { label: 'Sauerkraut', sub: 'Lactic acid bacteria + salt', kind: 'kraut', min: 8, max: 32 },
+};
+const CHALLENGES = [
+  { id: 'lager', mode: 'lager', title: 'Brew a clean, crisp lager', goal: 'Little fruitiness, no butter, no harsh alcohol, fully fermented.',
+    test: r => r.done && r.esters < .35 && r.fusel < .3 && r.diacetyl < .35 },
+  { id: 'fruity', mode: 'ale', title: 'Brew a fruity ale', goal: 'Lots of fruity esters without harsh, solventy alcohol.',
+    test: r => r.done && r.esters >= .65 && r.fusel < .5 },
+  { id: 'kraut', mode: 'kraut', title: 'Make safe, crunchy sauerkraut', goal: 'Reach pH 4.6 within 3 days and keep it crisp.',
+    test: r => r.safe3 && r.salt >= 1.5 && r.salt <= 3 && r.temp <= 24 },
+  { id: 'sour', mode: 'sour', title: 'Sour a beer fast and clean', goal: 'Reach pH 3.5 within 48 hours with no butyric acid risk.',
+    test: r => r.t35 != null && r.t35 <= 48 && !r.butyric },
+];
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const smoothstep = (x, a, b) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+function simulate(sim) {
+  const mode = sim.mode, s = SIM[mode], T = sim.temp[mode], out = { mode, temp: T, why: [] };
+  if (s.kind === 'beer') {
+    const tf = Math.pow(2, (T - 18) / 10) * smoothstep(T, s.tMin - 4, s.tMin + 2) * (T > 34 ? .2 : 1);
+    const of = Math.min(1.1, .35 + sim.o2 / 10), pf = { low: .6, normal: 1, high: 1.35 }[sim.pitch];
+    const speed = Math.max(.05, tf * Math.sqrt(of) * pf);
+    const att = (.55 + .25 * Math.min(1, sim.o2 / 7)) * (speed < .25 ? .6 : 1);
+    const lagD = 14 / (pf * of) / 24, t50 = lagD + 2.2 / speed, sD = .9 / speed;
+    const Lg = t => 1 / (1 + Math.exp(-(t - t50) / sD)), L0 = Lg(0);
+    const frac = t => (Lg(t) - L0) / (1 - L0);
+    const OG = 1.050, FG = 1 + (OG - 1) * (1 - att);
+    out.days = 14; out.og = OG;
+    out.series = t => ({ g: OG - (OG - FG) * frac(t), ph: 5.2 - .95 * frac(t) * (att / .8), act: Math.max(0, Lg(t) * (1 - Lg(t)) * 4) });
+    const pL = { low: 1.35, normal: 1, high: .85 }[sim.pitch];
+    out.done = frac(14) > .95 && att > .7;
+    out.att = att * frac(14);
+    out.esters = clamp01(s.ester * Math.pow(2, (T - s.tOpt) / 6) * pL * (sim.o2 < 5 ? 1.2 : sim.o2 > 10 ? .9 : 1));
+    out.fusel = clamp01(.15 * Math.pow(2, (T - s.tOpt - 2) / 3.5) * (sim.pitch === 'low' ? 1.3 : 1));
+    out.diacetyl = clamp01(.25 * Math.pow(2, -(T - s.tOpt) / 6) * { low: 1.4, normal: 1, high: .8 }[sim.pitch] + (out.done ? 0 : .4));
+    out.bars = [['Fruity esters', out.esters, 'var(--amber)'], ['Harsh fusel alcohol', out.fusel, 'var(--temp)'], ['Butter (diacetyl)', out.diacetyl, 'var(--warn)'], ['Sugar fermented', clamp01(out.att / .8), 'var(--ok)']];
+    if (T > s.tOpt + 4) out.why.push('Warm yeast grow fast and make more fruity esters and harsh fusel alcohols.');
+    if (T < s.tMin + 2) out.why.push(`Too cold for ${mode === 'ale' ? 'ale' : 'lager'} yeast: fermentation crawls and buttery diacetyl lingers.`);
+    if (mode === 'lager' && T >= 9 && T <= 14) out.why.push('Cool and steady: classic lager conditions for a clean taste.');
+    if (sim.o2 < 5) out.why.push('Too little oxygen at the start: yeast can’t build enough cell membrane to multiply, so fermentation is slow and may stop early.');
+    if (sim.pitch === 'low') out.why.push('Too little yeast: the cells that are there have to grow more, which raises esters and fusel alcohols.');
+    if (sim.pitch === 'high') out.why.push('Plenty of yeast: a quick start and a cleaner flavor.');
+    out.verdict = !out.done ? 'Stuck: the fermentation didn’t finish' : out.fusel >= .5 ? 'Hot and solventy' : out.diacetyl >= .45 ? 'Buttery' : out.esters >= .65 ? 'Fruity and estery' : out.esters < .35 ? 'Clean and crisp' : 'Balanced';
+  } else if (s.kind === 'sour') {
+    const rate = Math.exp(-Math.pow((T - 38) / 10, 2)), hf = Math.exp(-sim.ibu / 4), k = .065 * rate * hf, lag = 4;
+    const ph0 = sim.preacid ? 4.5 : 5.2;
+    const pH = h => 3.3 + (ph0 - 3.3) * Math.exp(-k * Math.max(0, h - lag));
+    out.days = 3;
+    out.series = t => ({ ph: pH(t * 24), act: k / .065 });
+    const tAt = x => { for (let h = 0; h <= 72; h += .5) if (pH(h) <= x) return h; return null; };
+    out.t35 = tAt(3.5); out.t46 = ph0 <= 4.6 ? 0 : tAt(4.6);
+    out.butyric = !sim.preacid && T >= 25 && (out.t46 == null || out.t46 > 12);
+    out.finalPh = pH(72);
+    out.bars = [['Sourness', clamp01((5.2 - pH(48)) / 1.9), 'var(--ph)'], ['Butyric acid risk', out.butyric ? clamp01(.5 + (out.t46 == null ? .5 : (out.t46 - 12) / 24)) : .05, 'var(--alarm)']];
+    if (sim.ibu > 3) out.why.push('Hop acids hold back Lactobacillus, so hopped wort sours slowly. Sour brewers add the hops after souring.');
+    if (T < 30) out.why.push('Too cool for this Lactobacillus: souring is slow.');
+    if (T > 47) out.why.push('Too hot: even heat-loving Lactobacillus slow down.');
+    if (T >= 30 && T <= 47 && sim.ibu <= 3) out.why.push('Warm, unhopped wort: Lactobacillus at its best.');
+    if (sim.preacid) out.why.push('Starting at pH 4.5 shuts out many unwanted bacteria from the first hour.');
+    if (out.butyric) out.why.push(`The warm wort stayed above pH 4.6 for ${out.t46 == null ? 'the whole run' : Math.round(out.t46) + ' hours'}. That gives Clostridium a chance to make butyric acid (vomit flavor). Pre-acidifying closes that window.`);
+    out.verdict = out.butyric ? 'Risky: butyric acid likely' : out.t35 != null && out.t35 <= 48 ? 'Bright and tart' : pH(72) < 4 ? 'Mildly sour' : 'Barely sour';
+  } else {
+    const salt = sim.salt, rate = Math.pow(2, (T - 21) / 10) * (T > 28 ? .8 : 1);
+    const sf = salt < 1 ? 1.15 : salt <= 2.5 ? 1 : Math.max(.1, 1 - (salt - 2.5) * .35);
+    const k = .45 * rate * sf, pH = d => 3.5 + 2.7 * Math.exp(-k * d);
+    out.days = 21; out.salt = salt;
+    out.series = t => ({ ph: pH(t), act: rate * sf });
+    out.safe3 = pH(3) <= 4.6; out.finalPh = pH(21);
+    const crisp = clamp01(1 - Math.abs(salt - 2.25) / 1.5) * clamp01(1 - Math.max(0, T - 22) / 8);
+    const spoil = clamp01((salt < 1.5 ? (1.5 - salt) / 1.5 : 0) + (out.safe3 ? 0 : .4) + (T > 26 ? .3 : 0));
+    out.bars = [['Sourness', clamp01((6.2 - pH(21)) / 2.7), 'var(--ph)'], ['Crunch', crisp, 'var(--ok)'], ['Spoilage risk', spoil, 'var(--alarm)']];
+    if (salt < 1.5) out.why.push('Too little salt: spoilage bacteria can grow before the acid builds up, and the cabbage turns soft.');
+    if (salt > 3) out.why.push('Very salty: the lactic acid bacteria slow down, and salt-tolerant yeasts can take over.');
+    if (T > 24) out.why.push('Warm: it sours fast, but the cabbage softens and can taste off.');
+    if (T < 15) out.why.push('Cool: souring is slow and may not reach a safe pH in time.');
+    if (salt >= 1.5 && salt <= 3 && T >= 15 && T <= 24) out.why.push('About 2–2.5% salt and room temperature is the classic recipe: lactic acid bacteria win quickly.');
+    out.why.push(out.safe3 ? `pH ${fmtPh(pH(3))} on day 3: below the 4.6 safety line in time.` : `pH ${fmtPh(pH(3))} on day 3: still above 4.6, so it isn’t safe yet.`);
+    out.verdict = !out.safe3 ? 'Not safe yet' : spoil > .4 ? 'Soft and off' : crisp > .6 ? 'Crisp and tangy' : 'Tangy but soft';
+  }
+  return out;
+}
+function simChart(svg, res, upTo) {
+  const n = 120, pts = [];
+  for (let i = 0; i <= n; i++) { const t = res.days * i / n; pts.push({ t, ...res.series(t) }); }
+  const shown = pts.filter(p => p.t <= upTo + 1e-9), ts = p => p.t * DAY;
+  const kind = SIM[res.mode].kind, series = [];
+  if (kind === 'beer') {
+    series.push({ kind: 'ghost', pts: [{ ts: 0, v: 1.0 }, { ts: 0, v: res.og }] });
+    series.push({ kind: 'line', cls: 's-amber', main: true, pts: shown.map(p => ({ ts: ts(p), v: p.g })) });
+  } else {
+    series.push({ kind: 'ghost', pts: [{ ts: 0, v: 3.2 }, { ts: 0, v: kind === 'kraut' ? 6.3 : 5.3 }] });
+    series.push({ kind: 'hline', pts: [{ ts: 0, v: 4.6 }] });
+    series.push({ kind: 'area', cls: 's-ph', main: true, pts: shown.map(p => ({ ts: ts(p), v: p.ph })) });
+  }
+  drawChart(svg, { from: 0, to: res.days * DAY, series, elapsed: true, dec: kind === 'beer' ? 3 : 1, empty: 'Press Start to ferment' });
+}
+function simTank(act, foam) {
+  let bub = '';
+  for (let i = 0; i < 10; i++) bub += `<circle class="anim-rise" cx="${30 + rnd(i + 200) * 60}" cy="${150 - rnd(i + 210) * 10}" r="${2 + rnd(i + 220) * 3}" fill="#fff" fill-opacity=".8" style="--d:${(2 + rnd(i + 230) * 2).toFixed(1)}s;--t:-${(rnd(i + 240) * 3).toFixed(1)}s;--rise:-110px"/>`;
+  return `<svg class="tank" viewBox="0 0 120 190" role="img" aria-label="Virtual fermenter">
+    <defs><clipPath id="simclip"><path d="M20 30Q20 12 60 12Q100 12 100 30V130L66 170H54L20 130Z"/></clipPath></defs>
+    <g clip-path="url(#simclip)"><rect x="0" y="45" width="120" height="140" fill="${SIM[L.sim.mode].kind === 'kraut' ? '#c9d98a' : '#f0b941'}"/>
+      <rect x="0" y="${45 - foam * 14}" width="120" height="${foam * 14 + 4}" fill="#fff8e6"/>
+      <g id="simBub" style="opacity:${act.toFixed(2)}">${bub}</g></g>
+    <path d="M20 30Q20 12 60 12Q100 12 100 30V130L66 170H54L20 130Z" fill="none" stroke="var(--muted)" stroke-width="4"/>
+    <path d="M32 125L24 185M88 125L96 185" stroke="var(--muted)" stroke-width="4" stroke-linecap="round"/></svg>`;
+}
+function simSlider(key, label, min, max, step, val, fmt, hint) {
+  return `<div class="l-slider"><label for="sl-${key}">${label}<output id="out-${key}">${fmt(val)}</output></label>
+    <input type="range" id="sl-${key}" data-sl="${key}" min="${min}" max="${max}" step="${step}" value="${val}" aria-label="${esc(label)}">${hint ? `<small>${hint}</small>` : ''}</div>`;
+}
+const SIM_FMT = {
+  temp: v => tUnit(+v), o2: v => `${(+v).toFixed(1)} mg/L`, ibu: v => `${Math.round(v)} IBU`, salt: v => `${(+v).toFixed(2)}%`,
+};
+function renderLab() {
+  const sim = L.sim, s = SIM[sim.mode];
+  const ctl = s.kind === 'beer'
+    ? simSlider('temp', 'Temperature', s.min, s.max, .5, sim.temp[sim.mode], SIM_FMT.temp, `${s.label} yeast like about ${tUnit(s.tOpt - 3)} to ${tUnit(s.tOpt + 3)}.`)
+      + simSlider('o2', 'Oxygen at the start', 0, 12, .5, sim.o2, SIM_FMT.o2, 'Brewers usually add about 8–10 mg/L before pitching the yeast.')
+      + `<div class="l-slider"><label>Amount of yeast</label><div class="l-seg">${['low', 'normal', 'high'].map(p => `<button type="button" data-act="pitch" data-v="${p}" aria-pressed="${sim.pitch === p}">${p[0].toUpperCase() + p.slice(1)}</button>`).join('')}</div></div>`
+    : s.kind === 'sour'
+    ? simSlider('temp', 'Temperature', s.min, s.max, .5, sim.temp.sour, SIM_FMT.temp, 'Kettle-souring Lactobacillus often work best around 95–113 °F (35–45 °C).')
+      + simSlider('ibu', 'Hops', 0, 20, 1, sim.ibu, SIM_FMT.ibu, 'Hop bitterness, in International Bitterness Units.')
+      + `<div class="l-slider"><label>Pre-acidify the wort to pH 4.5 first</label><div class="l-seg">${[[false, 'No'], [true, 'Yes']].map(([b, w]) => `<button type="button" data-act="preacid" data-v="${b}" aria-pressed="${sim.preacid === b}">${w}</button>`).join('')}</div></div>`
+    : simSlider('salt', 'Salt (by weight of cabbage)', 0, 5, .25, sim.salt, SIM_FMT.salt, 'Most recipes use about 2–2.5%.')
+      + simSlider('temp', 'Room temperature', s.min, s.max, .5, sim.temp.kraut, SIM_FMT.temp, '');
+  const res = sim.result;
+  const ch = CHALLENGES.find(c => c.id === sim.challenge);
+  return `<div class="l-lab">
+    <div class="l-ctrl">
+      <div><h2 class="l-h">Fermentation lab</h2><p class="l-lead">Set the conditions, press Start, and watch two weeks happen in seconds.</p></div>
+      <div class="l-modes">${Object.entries(SIM).map(([k, m]) => `<button type="button" class="l-mode" data-act="mode" data-v="${k}" aria-pressed="${sim.mode === k}"><b>${m.label}</b><span>${m.sub}</span></button>`).join('')}</div>
+      ${ctl}
+      <button type="button" class="l-btn primary big" data-act="run" ${sim.running ? 'disabled' : ''}>${ico('play')}${res ? 'Ferment again' : 'Start fermenting'}</button>
+    </div>
+    <div class="l-out">
+      <div class="l-simtop"><div id="simTankBox">${simTank(0, 0)}</div>
+        <div class="chart"><h3>${s.kind === 'beer' ? 'Gravity (sugar left)' : 'pH'} <b class="l-simclock" id="simClock">Day 0</b>${s.kind === 'beer' ? '' : '<span class="key"><span><i class="k-sp"></i>Safety line, pH 4.6</span></span>'}</h3><svg id="simChart" role="img" aria-label="Simulated fermentation chart"></svg></div></div>
+      <div class="l-card" id="simRes">${res && !sim.running ? simResultHtml(res, ch) : `<p class="l-note">${ch ? `Challenge: ${esc(ch.goal)}` : 'Pick a microbe, set the conditions, and press Start.'} This is a simplified teaching model that shows trends, not exact numbers.</p>`}</div>
+      <div class="l-chal"><h3 class="l-note" style="text-transform:uppercase;letter-spacing:.08em;font-weight:600">Challenges: tap one, then press Start</h3>
+        ${CHALLENGES.map(c => `<button type="button" data-act="chal" data-v="${c.id}" aria-pressed="${sim.challenge === c.id}" class="${sim.won.has(c.id) ? 'won' : ''}">${ico('star')}<b>${c.title}</b><span>${c.goal}</span></button>`).join('')}</div>
+    </div></div>`;
+}
+function simResultHtml(res, ch) {
+  const won = ch && ch.mode === res.mode && ch.test(res);
+  return `<div class="l-verdict">${esc(res.verdict)}</div>
+    <div class="l-bars">${res.bars.map(([n, v, c]) => `<div><span>${n}</span><div class="l-meter" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i></div><b>${Math.round(v * 100)}</b></div>`).join('')}</div>
+    ${res.why.length ? `<ul class="l-why">${res.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul>` : ''}
+    ${ch ? (ch.mode !== res.mode ? '' : won ? `<div class="l-win">Challenge complete: ${esc(ch.title)}!</div>` : `<div class="l-lose">Not quite. Goal: ${esc(ch.goal)} Adjust and try again.</div>`) : ''}
+    <p class="l-note">A simplified teaching model: it shows the direction things move, not exact numbers.</p>`;
+}
+let simAnim = null;
+function runSim() {
+  const sim = L.sim; cancelAnimationFrame(simAnim);
+  const res = simulate(sim); sim.result = null; sim.running = true;
+  learnRender(true);
+  const t0 = performance.now(), dur = 5200, svg = $('simChart');
+  const step = now => {
+    if (L.view !== 'lab' || !$('simChart')) { sim.running = false; return; }
+    const f = Math.min(1, (now - t0) / dur), day = f * res.days, p = res.series(day);
+    simChart(svg, res, day);
+    $('simClock').textContent = res.days <= 3 ? `Hour ${Math.round(day * 24)}` : `Day ${day.toFixed(0)}`;
+    const act = clamp01(p.act ?? 0);
+    $('simTankBox').innerHTML = simTank(Math.max(.15, act), act);
+    if (f < 1) { simAnim = requestAnimationFrame(t => setTimeout(() => step(t), 40)); return; }
+    sim.running = false; sim.result = res;
+    const ch = CHALLENGES.find(c => c.id === sim.challenge);
+    $('simRes').innerHTML = simResultHtml(res, ch);
+    document.querySelector('[data-act="run"]')?.removeAttribute('disabled');
+    if (ch && ch.mode === res.mode && ch.test(res)) {
+      sim.won.add(ch.id); earn('lab');
+      document.querySelector(`[data-act="chal"][data-v="${ch.id}"]`)?.classList.add('won');
+    }
+  };
+  simAnim = requestAnimationFrame(step);
+}
+
+/* ---------- Safety and quality ---------- */
+const SO2_PKA1 = 1.81;
+const molecularFrac = pH => 1 / (1 + Math.pow(10, pH - SO2_PKA1));
+function renderSafety() {
+  L.seenSafety.add(L.safety); if (L.seenSafety.size >= 3) earn('safety');
+  const tabs = [['ph', 'pH and botulism'], ['do', 'Oxygen and staling'], ['so2', 'Sulfites in wine']];
+  let main = '', side = '';
+  const views = state.tanks.map(t => viewFor(t.id)).filter(v => v?.run);
+  if (L.safety === 'ph') {
+    views.forEach(loadPh46);
+    main = `<h2>Acid keeps botulism away</h2>
+      <div class="l-card"><p><b>Clostridium botulinum</b> is a soil bacterium whose spores are common on vegetables and grain. In food with little oxygen and little acid, it can grow and make botulinum toxin, one of the most dangerous poisons known.</p>
+      <p>It can’t grow at <b>pH 4.6 or below</b>. So a safe fermentation gets acidic fast: a good rule is to reach pH 4.6 or lower within 3 days of starting, and to measure it rather than guess.</p>
+      <p>Beer has extra protection: alcohol, hop acids, carbon dioxide and almost no oxygen. That is why harmful bacteria rarely survive in it.</p></div>
+      <div class="l-card"><h3>Our tanks on the pH scale</h3>${phScale(null, views.filter(v => v.r?.ph != null).map(v => ({ ph: v.r.ph, name: v.tank.name })))}</div>`;
+    side = `<div class="l-card"><h3>How fast each batch got below 4.6</h3><div class="l-rows">${views.map(v => {
+      const c = ph46Text(v); return c ? `<div><span><b>${esc(v.tank.name)}</b> · ${esc(v.run.experiment || v.run.name)}</span><span class="${c[0]}">${esc(c[1])}</span></div>` : '';
+    }).join('') || '<div><span>No pH readings yet.</span></div>'}</div></div>`;
+  } else if (L.safety === 'do') {
+    main = `<h2>Oxygen: helpful at the start, harmful at the end</h2>
+      <div class="l-card"><h3>Before fermentation</h3><p>Brewers add oxygen to the wort, about 8–10 mg/L, right before the yeast go in. Yeast use it to build sterols and unsaturated fats for their cell membranes, so they can multiply.</p></div>
+      <div class="l-card"><h3>During fermentation</h3><p>The yeast use the oxygen up within about a day. Our probes show dissolved oxygen falling toward zero.</p></div>
+      <div class="l-card"><h3>After fermentation</h3><p>Any oxygen that gets in now does damage. Beer goes stale and papery (trans-2-nonenal) and loses hop aroma. Wine browns and loses its fruit. Acetic acid bacteria can turn either one toward vinegar. Breweries aim to keep packaged beer’s oxygen extremely low, in the parts-per-billion range.</p></div>`;
+    side = `<div class="l-card"><h3>Dissolved oxygen in our tanks</h3><div class="l-rows">${views.filter(v => v.r?.doMgL != null).map(v => {
+      const h = ((v.run.end ?? Date.now()) - v.run.start) / H;
+      return `<div><span><b>${esc(v.tank.name)}</b> · ${v.hist ? 'finished' : `hour ${Math.round(h)}`}</span><b class="${v.r.doMgL < .5 ? 'ok' : h < 36 ? '' : 'warn'}">${fmtDo(v.r.doMgL)} mg/L</b></div>`;
+    }).join('') || '<div><span>No oxygen readings yet.</span></div>'}</div></div>
+      <div class="l-card"><h3>Stale-flavor molecules</h3><p>${['nonenal', 'acetaldehyde', 'acetic'].map(k => `<b>${MOLS[k].name}</b>: ${esc(MOLS[k].smell.toLowerCase())}`).join('<br>')}</p></div>`;
+  } else {
+    const pH = L.so2pH, f = molecularFrac(pH), need = .8 / f;
+    const bis = 1 - f;
+    main = `<h2>Sulfur dioxide in wine</h2>
+      <div class="l-card"><p>Winemakers add sulfur dioxide (SO₂), usually as potassium metabisulfite powder, to stop spoilage microbes and protect the wine from oxygen. Yeast also make a little SO₂ on their own.</p>
+      <p>In wine, SO₂ splits into forms. Only <b>molecular SO₂</b> kills microbes well; most becomes <b>bisulfite</b> (HSO₃⁻). The wine’s pH decides the split, so the same dose protects an acidic wine far better.</p>
+      <p><b>Flavor:</b> SO₂ binds acetaldehyde, hiding bruised-apple, oxidized smells, and keeps fruit aromas fresh. Too much smells like a struck match. <b>pH:</b> a normal dose barely changes the wine’s pH; the bigger effect runs the other way, pH controlling how well the SO₂ works.</p></div>`;
+    side = `<div class="l-card"><h3>Try it: change the wine’s pH</h3>
+      ${simSlider('so2', 'Wine pH', 2.9, 4, .05, pH, v => (+v).toFixed(2), 'Most wines are between pH 3.0 and 4.0.')}
+      <div class="l-forms" aria-label="Forms of SO2 at this pH"><div style="flex:${Math.max(f, .06)};background:var(--alarm)">SO₂</div><div style="flex:${bis};background:var(--cool)">HSO₃⁻ (bisulfite)</div></div>
+      <div class="l-rows" style="margin-top:.5em"><div><span>Molecular SO₂ (the active form)</span><b id="so2f">${(f * 100).toFixed(1)}%</b></div>
+      <div><span>Free SO₂ needed for 0.8 mg/L molecular</span><b id="so2n">${Math.round(need)} mg/L</b></div></div>
+      <p class="l-note" style="margin-top:.4em">Uses pKa 1.81. 0.8 mg/L molecular SO₂ is a common target for white wine; reds often use about 0.5.</p></div>
+      <div class="l-card"><h3>On the label</h3><p>In the US, a wine with 10 mg/L (ppm) or more of sulfites must say “Contains sulfites.”</p></div>`;
+  }
+  return `<div class="l-tabs">${tabs.map(([k, w]) => `<button type="button" class="l-tab" data-act="safety" data-v="${k}" aria-pressed="${L.safety === k}">${w}${L.seenSafety.has(k) ? ' ✓' : ''}</button>`).join('')}</div>
+    <div class="l-safe"><div style="display:grid;gap:.7em">${main}</div><div style="display:grid;gap:.7em">${side}</div></div>`;
+}
+
+/* ---------- Quiz ---------- */
+const QUIZ = [
+  ['Yeast turn sugar into alcohol and which gas?', ['Carbon dioxide', 'Oxygen', 'Nitrogen', 'Helium'], 'Carbon dioxide is what makes beer fizzy and bread dough rise.'],
+  ['The banana smell in a German wheat beer comes from…', ['Isoamyl acetate', 'Lactic acid', 'Diacetyl', 'Glutamate'], 'Yeast make isoamyl acetate, the same molecule found in bananas.'],
+  ['Which microbes make yogurt sour?', ['Lactic acid bacteria', 'Ale yeast', 'Koji mold', 'Acetic acid bacteria'], 'Lactic acid bacteria turn milk sugar into lactic acid.'],
+  ['Koji, used for soy sauce, miso and sake, is a…', ['Mold', 'Yeast', 'Bacterium', 'Virus'], 'Koji is the mold Aspergillus oryzae. Its enzymes cut starch into sugar and protein into savory amino acids.'],
+  ['Below which pH can botulism bacteria not grow?', ['4.6', '7.0', '9.0', '5.8'], 'At pH 4.6 or below, Clostridium botulinum can’t grow or make toxin.'],
+  ['Fermenting an ale warmer usually makes it…', ['Fruitier', 'Less alcoholic', 'Saltier', 'Clearer'], 'Warm yeast make more fruity esters, and too warm adds harsh fusel alcohols.'],
+  ['Oxygen getting into finished beer makes it taste…', ['Stale, like wet cardboard', 'Sweeter', 'More bitter', 'Fizzier'], 'Oxygen breaks down malt fats into trans-2-nonenal, the cardboard molecule.'],
+  ['A buttery, popcorn flavor in beer is…', ['Diacetyl', 'Ethanol', 'Acetic acid', 'Isoamyl acetate'], 'Yeast make diacetyl early on and clean it up later if given time.'],
+  ['Acetobacter turns alcohol into vinegar. What does it need?', ['Oxygen', 'Salt', 'Darkness', 'Freezing cold'], 'Acetic acid bacteria use oxygen to turn ethanol into acetic acid.'],
+  ['Why is salt added to sauerkraut?', ['It holds back spoilers while lactic acid bacteria grow', 'It feeds the yeast', 'It adds the sour taste', 'It kills every microbe'], 'Lactic acid bacteria tolerate salt better than most spoilage microbes.'],
+  ['Which molecule makes soy sauce taste savory (umami)?', ['Glutamate', 'Ethanol', 'Isoamyl acetate', 'Diacetyl'], 'Mold enzymes cut soy proteins into amino acids, and glutamate tastes savory.'],
+  ['Compared with ale yeast, lager yeast prefer…', ['Colder temperatures', 'Hotter temperatures', 'More salt', 'More oxygen'], 'Lager yeast ferment around 48–58 °F (9–14 °C), which keeps flavors clean.'],
+  ['Sulfur dioxide protects wine best when the wine is…', ['More acidic (lower pH)', 'Less acidic (higher pH)', 'Warmer', 'Sweeter'], 'At lower pH more of it is in the active molecular form.'],
+  ['The clove flavor in hefeweizen comes from…', ['4-Vinylguaiacol', 'Lactic acid', 'Glutamate', 'Acetaldehyde'], 'Phenolic yeast make 4-vinylguaiacol from ferulic acid in the malt.'],
+  ['How do yeast reproduce?', ['By budding', 'By making seeds', 'By laying eggs', 'They don’t reproduce'], 'A daughter cell grows out of the side of the mother cell.'],
+  ['Brettanomyces yeast are known for…', ['Barnyard, funky aromas', 'Banana aromas', 'Making cheese', 'Glowing in the dark'], 'Brett make 4-ethylphenol: barnyard and horse blanket.'],
+  ['Why do brewers add oxygen to wort before adding yeast?', ['Yeast use it to build cell membranes and grow', 'To make the beer sour', 'To add bubbles', 'To kill bacteria'], 'Yeast need oxygen to make sterols for new cell membranes.'],
+  ['Molds grow as long, branching threads called…', ['Hyphae', 'Flagella', 'Buds', 'Roots'], 'A mat of hyphae is called a mycelium.'],
+  ['Which acid gives sauerkraut and sour beer their clean, tangy sourness?', ['Lactic acid', 'Sulfuric acid', 'Citric acid', 'Butyric acid'], 'Lactic acid bacteria make it from sugar. Butyric acid is the rancid one you don’t want.'],
+  ['A green-apple flavor in young beer is…', ['Acetaldehyde', 'Diacetyl', 'Ethyl acetate', 'Glutamate'], 'Acetaldehyde is the step right before ethanol; yeast clean it up given time.'],
+];
+// Questions made from the live readings, so the quiz changes with the tanks.
+function liveQuestions() {
+  const live = state.tanks.map(t => viewFor(t.id)).filter(v => v && !v.hist && v.r && Date.now() - v.r.ts < 6 * H);
+  const out = [];
+  const mk = (key, fmt, q, why) => {
+    const xs = shuffle(live.filter(v => v.r[key] != null)).slice(0, 4);
+    if (xs.length < 3) return;
+    const best = xs.reduce((a, b) => (key === 'ph' ? b.r.ph < a.r.ph : b.r[key] > a.r[key]) ? b : a);
+    if (xs.some(v => v !== best && Math.abs(v.r[key] - best.r[key]) < (key === 'ph' ? .02 : .1))) return;
+    out.push({ q, live: true, opts: xs.map(v => v.tank.name), ans: best.tank.name,
+      why: `${why} ${xs.map(v => `${v.tank.name}: ${fmt(v.r[key])}`).join(' · ')}` });
+  };
+  mk('ph', v => 'pH ' + fmtPh(v), 'Live from our tanks: which of these is the most acidic right now?', 'Lowest pH means most acidic.');
+  mk('tempC', v => tUnit(v), 'Live from our tanks: which of these is the warmest right now?', 'Lager tanks run cooler than ale tanks.');
+  return out;
+}
+function newQuiz() {
+  const live = liveQuestions().slice(0, 1);
+  const pool = shuffle(QUIZ).slice(0, 5 - live.length).map(([q, o, why]) => ({ q, opts: shuffle(o), ans: o[0], why }));
+  const qs = shuffle([...pool, ...live]);
+  return { qs, i: 0, score: 0, picked: null, streak: 0 };
+}
+function renderQuiz() {
+  const z = L.quiz;
+  if (z.i >= z.qs.length) {
+    const stars = z.score >= 5 ? 3 : z.score >= 4 ? 2 : z.score >= 2 ? 1 : 0;
+    return `<div class="l-quiz"><div class="l-end"><div class="stars">${[0, 1, 2].map(i => ico('star', i < stars ? 'on' : '')).join('')}</div>
+      <h2 class="l-h">${z.score} of ${z.qs.length} right</h2>
+      <p class="l-lead">${z.score >= 4 ? 'You earned the Quiz Champ badge!' : 'Get 4 or more to earn the Quiz Champ badge.'}</p>
+      <div class="la-btns"><button type="button" class="l-btn primary big" data-act="quiz-again">Play again</button><button type="button" class="l-btn big" data-go="hub">More topics</button></div></div></div>`;
+  }
+  const q = z.qs[z.i], picked = z.picked;
+  return `<div class="l-quiz">
+    <div class="l-qhead"><span>Question ${z.i + 1} of ${z.qs.length}</span>${z.streak >= 2 ? `<span>${z.streak} in a row!</span>` : ''}<span class="score">Score ${z.score}</span></div>
+    <div class="l-qbar"><i style="width:${z.i / z.qs.length * 100}%"></i></div>
+    <h2 class="l-q">${q.live ? '<small>Live data</small>' : ''}${esc(q.q)}</h2>
+    <div class="l-opts">${q.opts.map((o, i) => {
+      const cls = picked == null ? '' : o === q.ans ? 'right' : o === picked ? 'wrong' : '';
+      return `<button type="button" class="l-opt ${cls}" data-act="quiz-pick" data-v="${esc(o)}" ${picked != null ? 'disabled' : ''}><i>${'ABCD'[i]}</i>${esc(o)}</button>`;
+    }).join('')}</div>
+    ${picked != null ? `<div class="l-fb"><p><b class="${picked === q.ans ? 'r' : 'w'}">${picked === q.ans ? 'Right!' : `Not quite. It’s ${esc(q.ans)}.`}</b> ${esc(q.why)}</p>
+      <button type="button" class="l-btn primary big" data-act="quiz-next">${z.i + 1 < z.qs.length ? 'Next question' : 'See my score'}</button></div>` : ''}
+  </div>`;
+}
+
+/* ---------- Flavor match ---------- */
+function newMatch() {
+  const keys = shuffle(Object.keys(MOLS).filter(k => MOLS[k].match)).slice(0, 6);
+  return { keys, right: shuffle(keys), sel: null, done: new Set(), miss: 0, bad: null, t0: Date.now(), t1: null };
+}
+function renderMatch() {
+  const m = L.match;
+  if (m.done.size === m.keys.length) {
+    const s = Math.round((m.t1 - m.t0) / 1000);
+    return `<div class="l-quiz"><div class="l-end"><div class="stars">${[0, 1, 2].map(i => ico('star', i < (m.miss === 0 ? 3 : m.miss <= 3 ? 2 : 1) ? 'on' : '')).join('')}</div>
+      <h2 class="l-h">All matched in ${s} seconds</h2>
+      <p class="l-lead">${m.miss} wrong ${m.miss === 1 ? 'try' : 'tries'}. ${m.miss <= 3 ? 'You earned the Flavor Chemist badge!' : 'Win with 3 or fewer wrong tries to earn the Flavor Chemist badge.'}</p>
+      <div class="la-btns"><button type="button" class="l-btn primary big" data-act="match-again">Play again</button><button type="button" class="l-btn big" data-go="flavors">Read about the molecules</button></div></div></div>`;
+  }
+  return `<div class="l-quiz">
+    <div class="l-qhead"><span>Tap a molecule, then the smell it makes.</span><span class="score">${m.done.size} of ${m.keys.length} · ${m.miss} wrong</span></div>
+    <div class="l-match">
+      <div class="col"><h3>Molecule</h3>${m.keys.map(k => `<button type="button" class="l-mbtn ${m.done.has(k) ? 'done' : ''}" data-act="match-l" data-v="${k}" aria-pressed="${m.sel === k}" ${m.done.has(k) ? 'disabled' : ''}>${esc(MOLS[k].name)}</button>`).join('')}</div>
+      <div class="col"><h3>Smell or taste</h3>${m.right.map(k => `<button type="button" class="l-mbtn ${m.done.has(k) ? 'done' : ''} ${m.bad === k ? 'bad' : ''}" data-act="match-r" data-v="${k}" ${m.done.has(k) ? 'disabled' : ''}>${esc(MOLS[k].match)}</button>`).join('')}</div>
+    </div></div>`;
+}
+
+/* ---------- Microbes and molecules pages ---------- */
+function renderMicrobes() {
+  const m = MICROBES[L.microbe];
+  L.seenMicrobes.add(L.microbe); if (L.seenMicrobes.size >= 3) earn('microbes');
+  return `<div class="l-tabs">${Object.entries(MICROBES).map(([k, x]) => `<button type="button" class="l-tab" data-act="microbe" data-v="${k}" aria-pressed="${L.microbe === k}">${x.name}${L.seenMicrobes.has(k) ? ' ✓' : ''}</button>`).join('')}</div>
+    <div class="l-mic">
+      <div class="l-micart">${m.art(false)}<p>${esc(m.size)}</p></div>
+      <div class="l-micinfo">
+        <div><h2 style="color:${m.color}">${m.name}</h2><p class="kind">${m.kind}. ${esc(m.grow)}</p></div>
+        <div class="l-card"><h3>Eats → makes</h3><div class="l-flow"><p>${esc(m.eats)}</p><span class="arrow">→</span><ul>${m.makes.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></div>
+        <div class="l-two"><div class="l-card"><h3>Famous members</h3><dl class="l-dl">${m.stars.map(([n, w]) => `<dt><i>${esc(n)}</i></dt><dd>${esc(w)}</dd>`).join('')}</dl></div>
+          <div class="l-card"><h3>What it likes</h3><dl class="l-dl">${m.likes.map(([n, w]) => `<dt>${esc(n)}</dt><dd>${esc(w)}</dd>`).join('')}</dl></div></div>
+      </div></div>`;
+}
+function renderFlavors() {
+  const cat = MOLCATS.find(c => c[0] === L.molCat), keys = Object.keys(MOLS).filter(k => MOLS[k].cat === L.molCat);
+  if (!keys.includes(L.mol)) L.mol = keys[0];
+  const m = MOLS[L.mol]; L.seenMols.add(L.mol);
+  return `<div class="l-tabs">${MOLCATS.map(([k, w]) => `<button type="button" class="l-tab" data-act="molcat" data-v="${k}" aria-pressed="${L.molCat === k}">${w}</button>`).join('')}</div>
+    <div class="l-flav" style="--c:${cat[2]}">
+      <div style="display:grid;gap:.6em;align-content:start"><div class="l-mols">${keys.map(k => `<button type="button" class="l-molbtn ${L.seenMols.has(k) ? 'seen' : ''}" data-act="mol" data-v="${k}" aria-pressed="${L.mol === k}"><b>${esc(MOLS[k].name)}</b><span>${esc(MOLS[k].smell)}</span></button>`).join('')}</div>
+        <button type="button" class="l-btn" data-go="match">${ico('game')}Play Flavor Match</button></div>
+      <div class="l-moldet">
+        <div><h2>${esc(m.name)}</h2><div class="smell">${esc(m.smell)}</div></div>
+        <div class="l-molpic">${molSvg(m)}<span class="f">${m.formula} · corners are carbon atoms; hydrogens on carbon aren’t drawn</span></div>
+        <div class="l-two"><div class="l-card"><h3>How it’s made</h3><p>${esc(m.made)}</p></div>
+          <div class="l-card"><h3>More of it when…</h3><p>${esc(m.more)}</p><h3 style="margin-top:.6em">Where you find it</h3><p>${esc(m.found)}</p></div></div>
+      </div></div>`;
+}
+
+/* ---------- Start screen, tour and topic list ---------- */
+function spotlight() {
+  const live = state.tanks.map(t => viewFor(t.id)).filter(v => v?.run && !v.hist && v.r);
+  if (!live.length) return '';
+  const v = live[L.spotI % live.length], r = v.r;
+  const bits = [r.ph != null && `pH ${fmtPh(r.ph)}`, r.tempC != null && tUnit(r.tempC), `day ${dayOf(v.run)}`].filter(Boolean).join(' · ');
+  return `<span class="live">Live</span><b>${esc(v.tank.name)}: ${esc(v.run.experiment || v.run.name)}</b><span>${bits} · ${esc(phaseName(phaseOf(v)))}</span>`;
+}
+function renderAttract() {
+  return `<div class="l-attract">
+    <div class="la-text">
+      <p class="la-kicker">CAFE Lab · Fermentation Explorer</p>
+      <h2>What’s alive in these tanks?</h2>
+      <p class="la-sub">Yeast, bacteria and molds are turning sugar into flavor right now. Explore the chemistry and microbiology of fermentation.</p>
+      <div class="la-btns"><button type="button" class="l-btn primary big" data-go="tour">${ico('play')}Take the 1-minute tour</button><button type="button" class="l-btn big" data-go="hub">Explore on my own</button></div>
+      <div class="la-spot" id="laSpot" ${spotlight() ? '' : 'hidden'}>${spotlight()}</div>
+      <p class="la-tip" id="laTip"><b>Did you know?</b> ${esc(TIPS[L.tipI % TIPS.length])}</p>
+      <p class="la-course"><b>${esc(COURSE.title)}.</b></p>
+    </div>
+    <div class="la-art" data-go="tour">${artTank('att')}</div></div>`;
+}
+function renderTour() {
+  const s = TOUR[L.step], last = L.step === TOUR.length - 1;
+  return `<div class="l-tour">
+    <div class="lt-vis">${s.vis()}</div>
+    <div class="lt-text">
+      <p class="lt-step">Tour · ${L.step + 1} of ${TOUR.length}</p>
+      <h2>${s.t}</h2>${s.p.map(x => `<p>${esc(x)}</p>`).join('')}
+      ${s.eq ? `<div class="lt-eq">${s.eq}</div>` : ''}
+      <div class="lt-nav"><div class="lt-dots">${TOUR.map((_, i) => `<i class="${i === L.step ? 'on' : ''}"></i>`).join('')}</div>
+        ${L.step ? '<button type="button" class="l-btn big" data-act="tour-back">Back</button>' : '<button type="button" class="l-btn big" data-go="hub">Skip</button>'}
+        <button type="button" class="l-btn primary big" data-act="tour-next">${last ? 'Start exploring' : 'Next'}</button></div>
+    </div></div>`;
+}
+const TOPICS = [
+  { go: 'tanks', title: 'Inside our tanks', sub: 'What the live readings mean', icon: 'tank', c: 'var(--do)', live: true, badge: 'tanks' },
+  { go: 'microbes', title: 'Meet the microbes', sub: 'Yeast, bacteria and molds', icon: 'microbe', c: 'var(--amber)', badge: 'microbes' },
+  { go: 'flavors', title: 'Flavor molecules', sub: 'Fruity, sour, savory, and off', icon: 'molecule', c: 'var(--ph)' },
+  { go: 'lab', title: 'Fermentation lab', sub: 'Run your own virtual batch', icon: 'flask', c: 'var(--temp)', badge: 'lab' },
+  { go: 'safety', title: 'Safe and fresh', sub: 'pH, oxygen and sulfites', icon: 'shield', c: 'var(--ok)', badge: 'safety' },
+  { go: 'quiz', title: 'Fermentation quiz', sub: 'Five questions. Can you get them all?', icon: 'star', c: 'var(--cmp-b)', badge: 'quiz' },
+  { go: 'match', title: 'Flavor match', sub: 'Match each molecule to its smell', icon: 'game', c: 'var(--accent)', badge: 'flavor' },
+  { go: 'tour', title: 'Take the tour', sub: 'The 1-minute introduction', icon: 'play', c: 'var(--muted)', badge: 'tour' },
+];
+function renderHub() {
+  return `<div class="l-hubhead"><div><h2 class="l-h">Explore fermentation</h2><p class="l-lead">Pick any topic. Finish topics and games to collect all ${BADGES.length} badges.</p></div></div>
+    <div class="l-hub">${TOPICS.map(t => `<button type="button" class="l-tile" data-go="${t.go}" style="--c:${t.c}">
+      ${ico(t.icon)}<b>${t.title}</b><span>${t.sub}</span>${t.badge && L.badges.has(t.badge) ? `<span class="got">${ico('check')}</span>` : t.live ? '<span class="tag-live">Live</span>' : ''}</button>`).join('')}</div>
+    <div class="l-badgelist">${BADGES.map(b => `<div class="${L.badges.has(b.id) ? 'on' : ''}"><span class="bd">${ico(b.icon)}</span><b>${b.name}</b>${b.how}</div>`).join('')}</div>
+    ${promoHtml()}`;
+}
+function promoHtml() {
+  return `<div class="l-promo">${ico('cap')}<b>${esc(COURSE.title)}</b>${CONFIG.courseUrl ? '<div class="qr" id="lQr"></div>' : '<span></span>'}<span>${esc(COURSE.text)}${CONFIG.courseUrl ? ' Scan to learn more.' : ''}</span></div>`;
+}
+// The QR code library loads only when a course link is set.
+let qrLib = null;
+function drawQr() {
+  const box = $('lQr'); if (!box || !CONFIG.courseUrl) return;
+  qrLib ||= new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  qrLib.then(() => { const q = qrcode(0, 'M'); q.addData(CONFIG.courseUrl); q.make(); if ($('lQr')) $('lQr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }).catch(() => {});
+}
+
+/* ---------- Badges ---------- */
+function renderBadgeBar() {
+  $('lBadges').innerHTML = BADGES.map(b => `<span class="bd ${L.badges.has(b.id) ? 'on' : ''}" title="${esc(b.name)}">${ico(b.icon)}</span>`).join('')
+    + `<span class="cnt">${L.badges.size} of ${BADGES.length}</span>`;
+  $('lBadges').setAttribute('aria-label', `${L.badges.size} of ${BADGES.length} badges earned`);
+}
+let popT;
+function earn(id) {
+  if (L.badges.has(id)) return;
+  L.badges.add(id); renderBadgeBar();
+  const b = BADGES.find(x => x.id === id), all = L.badges.size === BADGES.length;
+  const pop = $('lPop');
+  pop.innerHTML = `<span class="bd">${ico(all ? 'cap' : b.icon)}</span><div><span>${all ? 'Every badge earned!' : 'Badge earned'}</span><b>${all ? 'Fermentation Expert' : b.name}</b></div>`;
+  pop.hidden = true; void pop.offsetWidth; pop.hidden = false;
+  clearTimeout(popT); popT = setTimeout(() => { pop.hidden = true; }, 3200);
+  if (all) confetti();
+}
+function confetti() {
+  const box = $('lConfetti'), colors = ['#f7b41f', '#0082a6', '#c2367a', '#1f8a4c', '#6d45c6', '#cf4a17'];
+  box.innerHTML = Array.from({ length: 70 }, (_, i) => `<i style="left:${Math.random() * 100}%;background:${colors[i % colors.length]};--d:${(2.5 + Math.random() * 2).toFixed(1)}s;--t:${(Math.random() * .8).toFixed(2)}s"></i>`).join('');
+  box.hidden = false; setTimeout(() => { box.hidden = true; box.innerHTML = ''; }, 5200);
+}
+
+/* ---------- Navigation ---------- */
+const VIEW_NAMES = { tanks: 'Inside our tanks', microbes: 'Meet the microbes', flavors: 'Flavor molecules', lab: 'Fermentation lab', safety: 'Safe and fresh', quiz: 'Fermentation quiz', match: 'Flavor match', hub: 'Pick a topic', tour: 'The tour' };
+function learnGo(view) {
+  if (view === 'tour') L.step = 0;
+  if (view === 'quiz') L.quiz = newQuiz();
+  if (view === 'match') L.match = newMatch();
+  if (view !== 'lab') cancelAnimationFrame(simAnim);
+  L.view = view;
+  learnRender();
+}
+function learnRender(keepScroll) {
+  const body = $('lBody'), top = body.scrollTop;
+  const html = { attract: renderAttract, tour: renderTour, hub: renderHub, tanks: renderTanksView, microbes: renderMicrobes, flavors: renderFlavors,
+    lab: renderLab, safety: renderSafety, quiz: renderQuiz, match: renderMatch }[L.view]();
+  const center = ['attract', 'tour'].includes(L.view) || (L.view === 'quiz' && L.quiz.i >= L.quiz.qs.length) || (L.view === 'match' && L.match.done.size === L.match.keys.length);
+  body.innerHTML = `<div class="l-view${keepScroll ? '' : ' anim'}${center ? ' center' : ''}">${html}</div>`;
+  body.scrollTop = keepScroll ? top : 0;
+  $('lBack').hidden = ['attract', 'hub'].includes(L.view);
+  $('lCrumb').textContent = VIEW_NAMES[L.view] || 'The chemistry and microbiology inside our tanks';
+  renderBadgeBar();
+  if (L.view === 'lab' && !L.sim.running) { const r = L.sim.result; requestAnimationFrame(() => { if ($('simChart')) simChart($('simChart'), r || simulate(L.sim), r ? r.days : 0); }); }
+  if (L.view === 'hub') drawQr();
+}
+function resetLearn() {
+  cancelAnimationFrame(simAnim);
+  Object.assign(L, { view: 'attract', step: 0, badges: new Set(), tank: null, seenTanks: new Set(), microbe: 'yeast', seenMicrobes: new Set(),
+    molCat: 'fruity', mol: 'isoamylAcetate', seenMols: new Set(), safety: 'ph', seenSafety: new Set(), so2pH: 3.4, sim: newSim(), quiz: null, match: null });
+  $('lPop').hidden = true;
+}
+function showLayer(l) {
+  layer = l;
+  $('learn').hidden = l !== 'learn';
+  document.querySelectorAll('[data-layer]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.layer === l)));
+  if (l === 'learn') learnRender();
+  else { cancelAnimationFrame(simAnim); L.sim.running = false; }
+}
+function onLearnClick(e) {
+  const lay = e.target.closest('[data-layer]'); if (lay) return showLayer(lay.dataset.layer);
+  if (!e.target.closest('#learn')) return;
+  const go = e.target.closest('[data-go]'); if (go) return learnGo(go.dataset.go);
+  const a = e.target.closest('[data-act]'); if (!a || a.disabled) return;
+  const v = a.dataset.v, act = a.dataset.act;
+  if (act === 'tour-next') { if (L.step < TOUR.length - 1) { L.step++; learnRender(); } else { earn('tour'); learnGo('hub'); } }
+  else if (act === 'tour-back') { L.step = Math.max(0, L.step - 1); learnRender(); }
+  else if (act === 'tank') { L.tank = Number(a.dataset.id); learnRender(true); }
+  else if (act === 'microbe') { L.microbe = v; learnRender(true); }
+  else if (act === 'molcat') { L.molCat = v; L.mol = null; learnRender(true); }
+  else if (act === 'mol') { L.mol = v; learnRender(true); }
+  else if (act === 'safety') { L.safety = v; learnRender(true); }
+  else if (act === 'mode') { L.sim.mode = v; L.sim.result = null; const c = CHALLENGES.find(x => x.id === L.sim.challenge); if (c && c.mode !== v) L.sim.challenge = null; learnRender(true); }
+  else if (act === 'pitch') { L.sim.pitch = v; L.sim.result = null; learnRender(true); }
+  else if (act === 'preacid') { L.sim.preacid = v === 'true'; L.sim.result = null; learnRender(true); }
+  else if (act === 'chal') { const c = CHALLENGES.find(x => x.id === v); L.sim.challenge = L.sim.challenge === v ? null : v; if (L.sim.challenge) L.sim.mode = c.mode; L.sim.result = null; learnRender(true); }
+  else if (act === 'run') runSim();
+  else if (act === 'quiz-pick') {
+    const z = L.quiz, q = z.qs[z.i]; if (z.picked != null) return;
+    z.picked = v; if (v === q.ans) { z.score++; z.streak++; } else z.streak = 0;
+    learnRender(true);
+  } else if (act === 'quiz-next') {
+    const z = L.quiz; z.i++; z.picked = null;
+    if (z.i >= z.qs.length && z.score >= 4) earn('quiz');
+    learnRender(true);
+  } else if (act === 'quiz-again') learnGo('quiz');
+  else if (act === 'match-l') { L.match.sel = v; L.match.bad = null; learnRender(true); }
+  else if (act === 'match-r') {
+    const m = L.match; if (!m.sel) { m.bad = null; return; }
+    if (m.sel === v) { m.done.add(v); m.sel = null; m.bad = null; if (m.done.size === m.keys.length) { m.t1 = Date.now(); if (m.miss <= 3) earn('flavor'); } }
+    else { m.miss++; m.bad = v; }
+    learnRender(true);
+  } else if (act === 'match-again') learnGo('match');
+}
+function onLearnInput(e) {
+  const k = e.target.dataset?.sl; if (!k) return;
+  const val = +e.target.value;
+  if (k === 'so2') {
+    L.so2pH = val; const f = molecularFrac(val);
+    $('out-so2').textContent = val.toFixed(2); $('so2f').textContent = (f * 100).toFixed(1) + '%'; $('so2n').textContent = Math.round(.8 / f) + ' mg/L';
+    const bars = document.querySelectorAll('.l-forms div'); bars[0].style.flex = Math.max(f, .06); bars[1].style.flex = 1 - f;
+    return;
+  }
+  if (k === 'temp') L.sim.temp[L.sim.mode] = val; else L.sim[k] = val;
+  L.sim.result = null;
+  $('out-' + k).textContent = SIM_FMT[k](val);
+  if (!L.sim.running) simChart($('simChart'), simulate(L.sim), 0);
+}
+
+function initLearn() {
+  document.addEventListener('click', onLearnClick);
+  $('learn').addEventListener('input', onLearnInput);
+  $('lBack').onclick = () => learnGo('hub');
+  // Any touch counts as activity for the idle timer.
+  for (const ev of ['pointerdown', 'keydown', 'wheel']) document.addEventListener(ev, () => { L.lastTouch = Date.now(); }, { capture: true, passive: true });
+  setInterval(() => {
+    if (layer === 'learn' && L.view === 'attract') {
+      L.tipI++; L.spotI++;
+      const tip = $('laTip'), spot = $('laSpot');
+      if (tip) tip.innerHTML = `<b>Did you know?</b> ${esc(TIPS[L.tipI % TIPS.length])}`;
+      if (spot) { const h = spotlight(); spot.hidden = !h; spot.innerHTML = h; }
+    }
+  }, 8000);
+  // Keep the live topic current.
+  setInterval(() => { if (layer === 'learn' && L.view === 'tanks') learnRender(true); }, 30000);
+  setInterval(checkIdle, 5000);
+  if (learnHome || location.hash === '#learn') showLayer('learn');
+  window.addEventListener('hashchange', () => { if (location.hash === '#learn') showLayer('learn'); });
+}
+function checkIdle() {
+  if (Date.now() - L.lastTouch < CONFIG.learnIdleSeconds * 1000) return;
+  // Never interrupt someone filling in a form on the kiosk.
+  if (['mEntry', 'mRun', 'mRecEdit', 'mEdit'].some(id => !$(id).hidden)) return;
+  if (layer === 'learn') {
+    if (L.view === 'attract' && !L.badges.size) return;
+    resetLearn();
+    if (learnHome) learnRender(); else showLayer('monitor');
+  } else if (learnHome) {
+    for (const id of ['mRecipe', 'mRecipes']) $(id).hidden = true;
+    if (!$('cmp').hidden) { $('cmp').hidden = true; }
+    if (state.open != null) { state.backTo = null; state.open = null; state.openRun = null; $('detail').hidden = true; }
+    resetLearn(); showLayer('learn');
+  }
+  L.lastTouch = Date.now();
+}
+
 start();
 </script>
 </body>
