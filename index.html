@@ -1,0 +1,2367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CAFE Fermentation Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: one landscape screen for a 32" kiosk. Header with the CAFE Lab logo, two rooms of three fermenter
+   panels plus a column for the two Sennos tanks, thank-you footer. Tapping a panel opens a scrolling detail page: purpose, charts, run info, entries.
+   Colors: logo blue as the accent, logo amber for alcohol/gravity, one hue per probe signal. */
+:root {
+  --bg: #e8eef1;
+  --panel: #ffffff;
+  --panel-2: #f1f5f7;
+  --line: #d2dce2;
+  --fg: #10191e;
+  --muted: #586771;
+  --accent: #0082a6;
+  --accent-ink: #ffffff;
+  --amber: #b77a00;
+  --ph: #6d45c6;
+  --temp: #b5600d;
+  --do: #0b827d;
+  --cool: #1d6fd1;
+  --heat: #cf4a17;
+  --ok: #1f8a4c;
+  --ok-bg: #dcf2e4;
+  --warn: #946f00;
+  --warn-bg: #fff2c4;
+  --alarm: #c42727;
+  --alarm-bg: #ffe0de;
+  --shade: rgba(10, 20, 26, .45);
+  --cmp-b: #c2367a;
+  --pres: #4f6b8a;
+  --cond: #6a7a12;
+  --font-display: "Barlow Semi Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+  --font-body: "Barlow", "Roboto", system-ui, sans-serif;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c1317; --panel: #141d22; --panel-2: #1a252b; --line: #29363e;
+    --fg: #e4edf1; --muted: #8e9da7; --accent: #2bb4dc; --accent-ink: #04161d; --amber: #f7b41f;
+    --ph: #b596ff; --temp: #f2a54e; --do: #45cdc6;
+    --cool: #63adff; --heat: #ff7c4a; --ok: #56c785; --ok-bg: #163222;
+    --warn: #f0cc4f; --warn-bg: #393012; --alarm: #ff6a64; --alarm-bg: #44191a; --shade: rgba(0, 0, 0, .6); --cmp-b: #ff70ae; --pres: #9db7d4; --cond: #c3d36a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c1317; --panel: #141d22; --panel-2: #1a252b; --line: #29363e;
+  --fg: #e4edf1; --muted: #8e9da7; --accent: #2bb4dc; --accent-ink: #04161d; --amber: #f7b41f;
+  --ph: #b596ff; --temp: #f2a54e; --do: #45cdc6;
+  --cool: #63adff; --heat: #ff7c4a; --ok: #56c785; --ok-bg: #163222;
+  --warn: #f0cc4f; --warn-bg: #393012; --alarm: #ff6a64; --alarm-bg: #44191a; --shade: rgba(0, 0, 0, .6); --cmp-b: #ff70ae; --pres: #9db7d4; --cond: #c3d36a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.4 var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(6px, 1.1vh, 14px);
+  padding-block: clamp(8px, 1.3vh, 16px);
+  padding-inline: clamp(16px, 1.5vw, 28px);
+}
+
+/* Header */
+.top { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.logo { height: clamp(44px, 7vh, 72px); width: auto; display: block; flex: none; }
+.brand h1 { margin: 0; font: 700 clamp(22px, min(2vw, 3.6vh), 34px)/1 var(--font-display); letter-spacing: .01em; text-wrap: balance; }
+.brand p { margin: 3px 0 0; color: var(--muted); font-size: clamp(13px, 1.8vh, 15px); }
+.summary { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.sum {
+  display: flex; align-items: baseline; gap: 6px;
+  padding: 6px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line);
+  font-size: 14px; color: var(--muted);
+}
+.sum b { font: 700 20px/1 var(--font-display); color: var(--fg); }
+.sum.warn b { color: var(--warn); }
+.sum.alarm b { color: var(--alarm); }
+.tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.brand > div { min-width: 0; }
+.clock { font: 600 clamp(22px, min(1.8vw, 3.2vh), 30px)/1 var(--font-display); font-variant-numeric: tabular-nums; min-width: 4.6em; text-align: right; }
+.clock small { display: block; font: 500 13px/1.3 var(--font-body); color: var(--muted); }
+.btn {
+  min-height: 48px; min-width: 48px; padding: 0 16px;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--panel);
+  font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+}
+.btn:active { background: var(--panel-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { color: var(--alarm); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+.seg button { min-height: 48px; min-width: 52px; padding: 0 14px; border: 0; background: transparent; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.source {
+  font: 600 12px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase;
+  padding: 8px 10px; border-radius: 8px; background: var(--warn-bg); color: var(--warn);
+}
+.source.live { background: var(--ok-bg); color: var(--ok); }
+.source.err { background: var(--alarm-bg); color: var(--alarm); }
+
+/* Rooms */
+.rooms { display: grid; grid-template-rows: 1fr 1fr; gap: clamp(6px, 1.1vh, 14px); min-height: 0; }
+.room { display: grid; grid-template-rows: auto 1fr; gap: 4px; min-height: 0; }
+.room h2 {
+  margin: 0; font: 600 12px/1.2 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  display: flex; gap: 10px; align-items: center;
+}
+.room h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1vw, 16px); min-height: 0; }
+/* The Sennos tanks get their own column on the right, one panel per room row, so every panel keeps the same size. */
+.rooms.with-side { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); column-gap: clamp(8px, 1vw, 16px); }
+.rooms.with-side > .room { grid-column: 1; }
+.rooms.with-side > .room.side { grid-column: 2; grid-row: 1 / span 2; }
+.room.side .grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); }
+.rooms.with-side .read .val { font-size: clamp(24px, min(2.3vw, 6.2vh), 72px); }
+
+/* Fermenter panel */
+.tank {
+  display: grid; grid-template-rows: auto auto 1fr auto auto; gap: clamp(4px, .8vh, 9px);
+  padding: clamp(8px, 1.2vh, 16px) clamp(12px, 1vw, 18px);
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  text-align: left; min-height: 0; min-width: 0;
+}
+.tank.warn { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn) inset; }
+.tank.alarm { border-color: var(--alarm); box-shadow: 0 0 0 2px var(--alarm) inset; }
+.t-head { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.t-name { font: 700 clamp(20px, min(1.6vw, 3vh), 30px)/1 var(--font-display); }
+.t-num { font-size: 13px; color: var(--muted); }
+.chip {
+  margin-left: auto; white-space: nowrap; align-self: center;
+  font: 600 13px/1 var(--font-body); padding: 6px 10px; border-radius: 999px;
+  background: var(--panel-2); color: var(--muted);
+}
+.chip.active { color: var(--ok); }
+.chip.crash { color: var(--cool); }
+.chip.pitched { color: var(--accent); }
+.chip.ended { background: transparent; box-shadow: 0 0 0 1px var(--line) inset; }
+/* A tank with nothing running shows its last finished run, marked by a dashed border. */
+.tank.hist { border-style: dashed; }
+.tank.hist .t-exp b { color: var(--fg); }
+.t-exp { min-width: 0; }
+.t-exp b { display: block; font: 600 clamp(17px, min(1.25vw, 2.4vh), 24px)/1.15 var(--font-display); color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-exp span { display: block; font-size: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.reads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 0; }
+.read {
+  display: grid; grid-template-rows: auto 1fr auto auto; gap: 3px;
+  background: var(--panel-2); border-radius: 10px; padding: clamp(6px, .9vh, 10px) 10px; min-width: 0; overflow: hidden;
+}
+.read .lbl { font: 600 12px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.read .val { align-self: center; font: 600 clamp(26px, min(3vw, 6.6vh), 80px)/1 var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.read .val small { font-size: .36em; font-weight: 500; color: var(--muted); margin-left: 2px; }
+.read.ph .val { color: var(--ph); }
+.read.temp .val { color: var(--temp); }
+.read.do .val { color: var(--do); }
+.read.do.cond .val { color: var(--cond); }
+.read.off .val { color: var(--muted); }
+.read .sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.read.flag { box-shadow: 0 0 0 2px var(--warn) inset; }
+.tank.alarm .read.flag { box-shadow: 0 0 0 2px var(--alarm) inset; }
+
+/* Meters: where the value sits on its scale, with the target band shaded */
+.meter { position: relative; height: 10px; border-radius: 5px; background: var(--line); margin-top: 4px; }
+.meter .band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: var(--ok); opacity: .35; }
+.meter .tick { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--muted); }
+.meter .mk { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--panel); }
+.ph .meter .mk { background: var(--ph); }
+.temp .meter .mk { background: var(--temp); }
+.do .meter .mk { background: var(--do); }
+
+.prog { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; font-size: 14px; }
+.prog .g { font: 600 18px/1 var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.prog .g span { color: var(--muted); font-weight: 500; }
+.bar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--amber); border-radius: 5px; }
+.prog .abv { font: 600 18px/1 var(--font-display); color: var(--amber); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.prog .abv small { font: 500 12px var(--font-body); color: var(--muted); }
+.prog .none { grid-column: 1 / -1; color: var(--muted); }
+.prog .note { grid-column: 1 / -1; color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.t-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); font-weight: 600; }
+.pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.pill.cool.on { color: var(--cool); border-color: var(--cool); }
+.pill.cool.on::before { background: var(--cool); }
+.pill.heat.on { color: var(--heat); border-color: var(--heat); }
+.pill.heat.on::before { background: var(--heat); }
+.pill.pres { color: var(--pres); border-color: var(--pres); font-variant-numeric: tabular-nums; }
+.pill.pres::before { background: var(--pres); }
+.pill.src { border-style: dashed; }
+.pill.src::before { display: none; }
+.alert { font-weight: 600; padding: 4px 9px; border-radius: 8px; background: var(--warn-bg); color: var(--warn); }
+.alert.alarm { background: var(--alarm-bg); color: var(--alarm); }
+.ago { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* Footer */
+.foot { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.foot .thanks { color: var(--fg); }
+.foot .thanks b { font-weight: 600; }
+.foot .upd { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* Detail page: scrolls as one page, every block has its own height so nothing overlaps */
+.detail {
+  position: fixed; inset: 0; z-index: 10; background: var(--bg);
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.d-head {
+  position: sticky; top: 0; z-index: 2; background: var(--bg);
+  display: flex; align-items: center; gap: 14px 18px; flex-wrap: wrap;
+  padding-block: calc(env(safe-area-inset-top, 0px) + 12px) 12px;
+  padding-inline: clamp(16px, 1.5vw, 28px);
+  border-bottom: 1px solid var(--line);
+}
+.d-title { min-width: 0; flex: 1 1 320px; }
+.d-title h2 { margin: 0; font: 700 clamp(26px, 2.3vw, 40px)/1.05 var(--font-display); }
+.d-title h2 span { color: var(--accent); }
+.d-title .meta { color: var(--muted); font-size: 15px; margin-top: 2px; }
+.d-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.d-wrap {
+  display: grid; gap: 16px;
+  padding-block: 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  padding-inline: clamp(16px, 1.5vw, 28px);
+}
+.purpose { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; }
+.purpose h3, .box h3, .sec-title { margin: 0 0 6px; font: 600 13px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.purpose p { margin: 0; font-size: clamp(16px, 1.15vw, 20px); line-height: 1.45; max-width: 75ch; }
+.d-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 26vw, 420px); gap: 16px; align-items: start; }
+.d-main { display: grid; gap: 12px; min-width: 0; }
+.d-main .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.d-main .row .sec-title { margin: 0; }
+.d-main .row .seg { margin-left: auto; }
+.chart {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 10px 14px 6px; display: grid; grid-template-rows: auto 1fr; gap: 4px;
+  height: clamp(200px, 27vh, 300px); min-width: 0;
+}
+.chart h3 { margin: 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font: 600 13px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.chart h3 b { font: 600 26px/1 var(--font-display); letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; }
+.chart h3 .key { margin-left: auto; letter-spacing: 0; text-transform: none; font-weight: 500; display: inline-flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.key i { display: inline-block; width: 11px; height: 11px; margin-right: 5px; vertical-align: -1px; }
+.key .k-est { border: 2px solid var(--amber); border-radius: 50%; }
+.key .k-meas { background: var(--amber); transform: rotate(45deg) scale(.85); }
+.key .k-sp { width: 18px; height: 0; border-top: 2px dashed var(--muted); }
+.key .k-gc { width: 0; height: 12px; border-left: 2px dotted var(--accent); }
+.chart.ph h3 b { color: var(--ph); }
+.chart.temp h3 b { color: var(--temp); }
+.chart.do h3 b { color: var(--do); }
+.chart.grav h3 b, .chart.abv h3 b { color: var(--amber); }
+.chart.pres h3 b { color: var(--pres); }
+.chart.cond h3 b { color: var(--cond); }
+.chart h3 .nt { text-transform: none; }
+.key .k-amb { width: 18px; height: 0; border-top: 2px solid var(--muted); }
+.key .k-line { width: 18px; height: 0; border-top: 3px solid var(--amber); }
+.key .k-dot { background: var(--amber); border-radius: 50%; }
+.chart svg { width: 100%; height: 100%; display: block; min-height: 0; overflow: visible; }
+.chart .grid-l { stroke: var(--line); stroke-width: 1; }
+.chart .ax { fill: var(--muted); font: 500 12px var(--font-body); font-variant-numeric: tabular-nums; }
+.chart .ln { fill: none; stroke: var(--c); stroke-width: 2.25; stroke-linejoin: round; }
+.chart .ln.dash { stroke-dasharray: 6 5; stroke-width: 1.75; }
+.chart .ar { fill: var(--c); opacity: .12; }
+.chart .dot { fill: var(--c); stroke: var(--panel); stroke-width: 1.5; }
+.chart .hollow { fill: var(--panel); stroke: var(--c); stroke-width: 2.25; }
+.chart .dia { fill: var(--c); stroke: var(--panel); stroke-width: 1.5; }
+.chart .sp { fill: none; stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.chart .gc { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 2 4; }
+.chart .gct { fill: var(--accent); font: 600 11px var(--font-body); }
+.chart .nodata { fill: var(--muted); font: 500 15px var(--font-body); }
+.s-ph { --c: var(--ph); } .s-temp { --c: var(--temp); } .s-do { --c: var(--do); } .s-amber { --c: var(--amber); } .s-pres { --c: var(--pres); } .s-cond { --c: var(--cond); } .s-amb { --c: var(--muted); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+
+.side { display: grid; gap: 12px; min-width: 0; }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; min-width: 0; }
+.box h3 { display: flex; align-items: center; gap: 8px; }
+.box h3 .btn + .btn { margin-left: 0; }
+.box h3 .btn { margin-left: auto; min-height: 36px; padding: 0 10px; font-size: 13px; letter-spacing: 0; text-transform: none; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; }
+.list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14.5px; }
+.list li:first-child { border-top: 0; }
+.list .when { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.list .what { font-weight: 600; }
+.list .what em { font-style: normal; font-weight: 500; color: var(--muted); }
+.list .note { grid-column: 1 / -1; color: var(--muted); font-size: 13.5px; overflow-wrap: anywhere; }
+.list .act { display: flex; gap: 6px; align-items: center; }
+.list .act .btn { min-height: 36px; padding: 0 10px; font-size: 13px; }
+.list .empty { display: block; color: var(--muted); }
+.tag { font: 600 11px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; border-radius: 6px; background: var(--panel-2); color: var(--muted); }
+.tag.hand { color: var(--amber); }
+.stat { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; font-size: 15px; }
+.stat b { font: 600 20px/1 var(--font-display); font-variant-numeric: tabular-nums; text-align: right; }
+.ctl { opacity: .6; }
+.ctl .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.ctl .row:first-of-type { border-top: 0; }
+.stepper { display: inline-flex; align-items: center; gap: 8px; }
+.stepper b { font: 600 24px/1 var(--font-display); min-width: 3.2em; text-align: center; font-variant-numeric: tabular-nums; }
+.toggle { width: 64px; height: 36px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); position: relative; }
+.toggle::after { content: ""; position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border-radius: 50%; background: var(--muted); transition: left .2s; }
+.toggle[aria-checked="true"]::after { left: 32px; background: var(--panel); }
+.toggle.cool[aria-checked="true"] { background: var(--cool); border-color: var(--cool); }
+.toggle.heat[aria-checked="true"] { background: var(--heat); border-color: var(--heat); }
+.ctl p { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+
+/* Modals */
+.modal { position: fixed; inset: 0; z-index: 30; background: var(--shade); display: grid; place-items: center; padding: 16px; overflow-y: auto; }
+.sheet {
+  width: min(640px, 100%); max-height: calc(100% - 16px); overflow-y: auto;
+  background: var(--panel); border-radius: 18px; border: 1px solid var(--line);
+  padding: 20px 22px; display: grid; gap: 14px;
+}
+.sheet.wide { width: min(880px, 100%); }
+.sheet header { display: flex; align-items: flex-start; gap: 12px; }
+.sheet h2 { margin: 0; font: 700 28px/1.1 var(--font-display); }
+.sheet header p { margin: 2px 0 0; color: var(--muted); }
+.sheet header .btn { margin-left: auto; }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 600; font-size: 15px; }
+.field .hint { color: var(--muted); font-size: 13px; }
+.field input, .field select, .field textarea {
+  min-height: 52px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); font-size: 18px; width: 100%;
+}
+.field textarea { min-height: 84px; resize: vertical; }
+.field .with-unit { display: flex; align-items: center; gap: 10px; }
+.field .with-unit span { color: var(--muted); font-weight: 600; }
+.field input.big { font: 600 30px/1 var(--font-display); font-variant-numeric: tabular-nums; max-width: 220px; }
+.fields-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.err { color: var(--alarm); font-weight: 600; min-height: 1.4em; margin: 0; }
+.sheet footer { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.sheet footer .where { color: var(--muted); font-size: 13px; margin-right: auto; flex: 1 1 200px; min-width: 0; }
+.r-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.r-sum div { background: var(--panel-2); border-radius: 10px; padding: 8px 12px; }
+.r-sum span { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.r-sum b { font: 600 22px/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+.r-tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+.r-tbl th { text-align: left; font: 600 12px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); }
+.r-tbl td { padding: 7px 8px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums; }
+.r-tbl td.n { text-align: right; white-space: nowrap; }
+.r-sec { display: grid; gap: 6px; }
+.r-sec h3 { margin: 0; font: 600 18px/1.2 var(--font-display); }
+.r-notes { margin: 0; color: var(--fg); line-height: 1.5; }
+/* View-only is the default: editing controls show only on a screen holding the editor key. */
+body.view-only .edit-only { display: none !important; }
+.logo { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.source.edit { background: var(--warn-bg); color: var(--warn); border: 0; cursor: pointer; font: inherit; }
+.sheet header .h-btns { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.sheet header .h-btns .btn { margin-left: 0; }
+.r-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.r-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.r-list li:first-child { border-top: 0; }
+.r-list .what { font-weight: 600; font-size: 16px; }
+.r-list .when { color: var(--muted); font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.r-list .act { display: flex; gap: 6px; }
+.fields-n { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+.rows { display: grid; gap: 8px; }
+.rows .rrow { display: grid; gap: 8px; align-items: center; }
+.rows .rrow input { min-width: 0; width: 100%; min-height: 46px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); font: inherit; font-size: 17px; }
+.rows .rrow .btn { min-height: 46px; padding: 0; width: 46px; justify-content: center; }
+.rows .rhead { font: 600 12px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+.r-edit-sec { display: grid; gap: 8px; }
+.r-edit-sec h3 { margin: 0; font: 600 18px/1.2 var(--font-display); display: flex; align-items: center; gap: 10px; }
+.r-edit-sec h3 .btn { margin-left: auto; min-height: 36px; font-size: 13px; padding: 0 10px; }
+.toast {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); z-index: 40;
+  background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: 10px; font-weight: 600; max-width: calc(100% - 32px);
+}
+
+/* Compare page */
+.s-a { --c: var(--accent); } .s-b { --c: var(--cmp-b); }
+.chart .spc { opacity: .55; }
+.cmp {
+  position: fixed; inset: 0; z-index: 12; background: var(--bg);
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+}
+.cmp .d-head { position: static; }
+.c-body { display: grid; grid-template-columns: clamp(300px, 24vw, 400px) minmax(0, 1fr); min-height: 0; }
+.c-list { border-right: 1px solid var(--line); display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; }
+.c-list .top2 { display: grid; gap: 8px; padding: 14px clamp(16px, 1.5vw, 28px) 10px; }
+.c-list .top2 p { margin: 0; color: var(--muted); font-size: 14px; }
+.search { width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--fg); font: inherit; font-size: 16px; }
+.c-list .seg { width: 100%; } .c-list .seg button { flex: 1; }
+.runs { list-style: none; margin: 0; padding: 4px clamp(16px, 1.5vw, 28px) 24px; overflow-y: auto; -webkit-overflow-scrolling: touch; display: grid; gap: 8px; align-content: start; }
+.run-item {
+  width: 100%; text-align: left; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 2px 12px; align-items: start;
+  padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel);
+}
+.run-item .slot {
+  grid-row: span 3; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  border: 2px dashed var(--line); font: 700 18px/1 var(--font-display); color: transparent;
+}
+.run-item[data-slot="a"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.run-item[data-slot="b"] { border-color: var(--cmp-b); box-shadow: 0 0 0 1px var(--cmp-b) inset; }
+.run-item[data-slot="a"] .slot { background: var(--accent); border: 0; color: var(--accent-ink); }
+.run-item[data-slot="b"] .slot { background: var(--cmp-b); border: 0; color: var(--bg); }
+.run-item b { font: 600 19px/1.15 var(--font-display); min-width: 0; overflow-wrap: anywhere; }
+.run-item .ri-meta { font-size: 13.5px; color: var(--muted); min-width: 0; }
+.run-item .ri-when { font-size: 13px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.run-item .ri-when .tag.cur { color: var(--ok); }
+.c-main { overflow-y: auto; -webkit-overflow-scrolling: touch; padding-block: 14px 28px; padding-inline: clamp(16px, 1.5vw, 28px); display: grid; gap: 12px; align-content: start; min-width: 0; }
+.slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.slotcard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 2px 12px; align-items: center; min-width: 0; }
+.slotcard .slot { grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 700 18px/1 var(--font-display); }
+.slotcard.a .slot { background: var(--accent); color: var(--accent-ink); }
+.slotcard.b .slot { background: var(--cmp-b); color: var(--bg); }
+.slotcard b { font: 600 20px/1.15 var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slotcard span.m { color: var(--muted); font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slotcard .sb { grid-row: span 2; display: flex; gap: 6px; }
+.slotcard .btn { min-height: 40px; padding: 0 12px; font-size: 14px; }
+.slotcard.empty { border-style: dashed; color: var(--muted); }
+.sensors { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sensors .sec-title { margin: 0 6px 0 0; }
+.chipbtn { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font-weight: 600; color: var(--muted); }
+.chipbtn[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.key .k-a { background: var(--accent); height: 4px; width: 18px; border-radius: 2px; vertical-align: 3px; }
+.key .k-b { background: var(--cmp-b); height: 4px; width: 18px; border-radius: 2px; vertical-align: 3px; }
+.cmp-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr)); gap: 12px; }
+.cmp-tbl-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 16px 10px; }
+.cmp-tbl { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+.cmp-tbl th, .cmp-tbl td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.cmp-tbl tr:last-child td { border-bottom: 0; }
+.cmp-tbl th:first-child, .cmp-tbl td:first-child { text-align: left; color: var(--muted); font-weight: 500; }
+.cmp-tbl thead th { font: 600 12px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.cmp-tbl thead th.a { color: var(--accent); } .cmp-tbl thead th.b { color: var(--cmp-b); }
+.cmp-tbl td.d { color: var(--muted); }
+.cmp-empty { background: var(--panel); border: 1px dashed var(--line); border-radius: var(--radius); padding: 28px; text-align: center; color: var(--muted); font-size: 17px; }
+
+/* Kiosk at 150% display scaling (about 1280 wide): keep the header on one row so the panels keep their height. */
+@media (min-width: 1101px) and (max-width: 1500px) {
+  .top { flex-wrap: nowrap; gap: 10px; }
+  .brand p { display: none; }
+  .brand h1 { font-size: 22px; }
+  .logo { height: 44px; }
+  .summary { gap: 6px; flex-wrap: nowrap; }
+  .sum { padding: 4px 9px; font-size: 13px; white-space: nowrap; }
+  .sum b { font-size: 17px; }
+  .tools { gap: 6px; flex-wrap: nowrap; }
+  .tools .btn { padding: 0 11px; min-height: 42px; }
+  .seg button { min-height: 42px; min-width: 42px; padding: 0 10px; }
+  .source { padding: 7px 8px; font-size: 11px; white-space: nowrap; }
+  .clock { min-width: 0; font-size: 22px; }
+}
+
+/* Narrow screens (phone preview). The kiosk itself is landscape. */
+@media (max-width: 1100px) {
+  .c-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 42%) minmax(0, 1fr); }
+  .c-list { border-right: 0; border-bottom: 1px solid var(--line); }
+  html, body { height: auto; }
+  .app { height: auto; }
+  .rooms { grid-template-rows: none; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rooms.with-side { grid-template-columns: minmax(0, 1fr); }
+  .rooms.with-side > .room.side { grid-column: 1; grid-row: auto; }
+  .room.side .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
+  .d-body { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .grid, .pair, .fields-2, .slots, .room.side .grid { grid-template-columns: minmax(0, 1fr); }
+  .summary { margin-left: 0; order: 3; width: 100%; }
+  .tools { margin-left: 0; width: 100%; }
+  .tools .clock { margin-left: auto; }
+  .d-main .row .seg { margin-left: 0; }
+  .chart { height: 220px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body class="view-only">
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <img class="logo" id="logo" src="assets/cafe-lab-logo.png" alt="The CAFE Lab">
+      <div>
+        <h1>CAFE Lab Fermentation</h1>
+        <p>Six Spike Fermenter Plus tanks · two Sennos M3 tanks</p>
+      </div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="tools">
+      <button type="button" class="btn" id="bRecipes">Recipes</button>
+      <button type="button" class="btn" id="bCompare">Compare runs</button>
+      <span class="source" id="source">Demo data</span>
+      <button type="button" class="source edit" id="editPill" hidden title="Editing settings">Editing on</button>
+      <div class="seg" role="group" aria-label="Temperature unit">
+        <button type="button" id="unitF" aria-pressed="true">°F</button>
+        <button type="button" id="unitC" aria-pressed="false">°C</button>
+      </div>
+      <button type="button" class="btn" id="fs" aria-label="Full screen" title="Full screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+      <div class="clock" id="clock"></div>
+    </div>
+  </header>
+
+  <main class="rooms" id="rooms"></main>
+
+  <footer class="foot">
+    <span class="thanks">Thank you to the <b>Innovation Center</b> for its ongoing support of the CAFE Lab.</span>
+    <span class="upd" id="updated"></span>
+  </footer>
+</div>
+
+<section class="detail" id="detail" hidden aria-modal="true" role="dialog" aria-labelledby="dName">
+  <div class="d-head">
+    <button type="button" class="btn" id="back">← All fermenters</button>
+    <div class="d-title">
+      <h2 id="dName"></h2>
+      <div class="meta" id="dMeta"></div>
+    </div>
+    <div class="d-actions">
+      <button type="button" class="btn primary edit-only" id="bStart" hidden>Start run</button>
+      <button type="button" class="btn danger edit-only" id="bStop" hidden>Stop run</button>
+      <button type="button" class="btn" id="bRecipe">Recipe</button>
+      <button type="button" class="btn" id="bCmpThis">Compare</button>
+      <button type="button" class="btn edit-only" data-add="gravity">+ Gravity</button>
+      <button type="button" class="btn edit-only" data-add="abv">+ ABV</button>
+      <button type="button" class="btn edit-only" data-add="gcms">+ GC-MS sample</button>
+    </div>
+  </div>
+  <div class="d-wrap">
+    <div class="purpose" id="dPurposeBox"><h3>Purpose</h3><p id="dPurpose"></p></div>
+    <div class="d-body">
+      <div class="d-main">
+        <div class="row">
+          <h3 class="sec-title">Probe readings</h3>
+          <div class="seg" role="group" aria-label="Chart range" id="ranges">
+            <button type="button" data-range="24h" aria-pressed="true">24 hours</button>
+            <button type="button" data-range="3d" aria-pressed="false">3 days</button>
+            <button type="button" data-range="run" aria-pressed="false">Whole run</button>
+          </div>
+        </div>
+        <div class="chart ph"><h3>pH <b id="cPh"></b><span class="key" id="kPh"></span></h3><svg id="chPh" role="img" aria-label="pH chart"></svg></div>
+        <div class="chart temp"><h3>Temperature <b id="cTemp"></b><span class="key" id="kTemp"></span></h3><svg id="chTemp" role="img" aria-label="Temperature chart"></svg></div>
+        <div class="chart do"><h3>Dissolved oxygen <b id="cDo"></b><span class="key" id="kDo"></span></h3><svg id="chDo" role="img" aria-label="Dissolved oxygen chart"></svg></div>
+        <div class="chart pres" id="chPresBox" hidden><h3>Pressure <b id="cPres"></b></h3><svg id="chPres" role="img" aria-label="Pressure chart"></svg></div>
+        <div class="chart cond" id="chCondBox" hidden><h3>Conductivity <b id="cCond"></b></h3><svg id="chCond" role="img" aria-label="Conductivity chart"></svg></div>
+        <div class="row"><h3 class="sec-title">Gravity and alcohol, whole run</h3></div>
+        <div class="pair">
+          <div class="chart grav"><h3>Gravity <b id="cGrav"></b><span class="key" id="kGrav"></span></h3><svg id="chGrav" role="img" aria-label="Specific gravity chart"></svg></div>
+          <div class="chart abv"><h3>ABV <b id="cAbv"></b><span class="key"><span><i class="k-est"></i>Estimated from gravity</span><span><i class="k-meas"></i>Alcolyzer</span></span></h3><svg id="chAbv" role="img" aria-label="Alcohol by volume chart"></svg></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="box"><h3 id="dRunTitle">Current run</h3><dl class="kv" id="dRun"></dl></div>
+        <div class="box"><h3>Fermentation progress</h3><div class="stat" id="dProg"></div></div>
+        <div class="box"><h3>GC-MS samples <button type="button" class="btn edit-only" data-add="gcms">+ Add</button></h3><ul class="list" id="dGc"></ul></div>
+        <div class="box"><h3>Hand measurements <button type="button" class="btn edit-only" data-add="gravity">+ Gravity</button><button type="button" class="btn edit-only" data-add="abv">+ ABV</button></h3><ul class="list" id="dHand"></ul></div>
+        <div class="box ctl" id="dCtl" aria-disabled="true">
+          <h3>Controls</h3>
+          <div class="row"><span>Temperature setpoint</span>
+            <span class="stepper"><button type="button" class="btn" disabled aria-label="Lower setpoint">−</button><b id="dSet">–</b><button type="button" class="btn" disabled aria-label="Raise setpoint">+</button></span></div>
+          <div class="row"><span>Glycol cooling</span><button type="button" class="toggle cool" id="dCool" role="switch" aria-checked="false" disabled aria-label="Glycol cooling"></button></div>
+          <div class="row"><span>Heating</span><button type="button" class="toggle heat" id="dHeat" role="switch" aria-checked="false" disabled aria-label="Heating"></button></div>
+          <p>Read only for now. These show the current state and will become adjustable in a later version.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="mEntry" hidden role="dialog" aria-modal="true" aria-labelledby="eTitle">
+  <form class="sheet" id="eForm" novalidate>
+    <header><div><h2 id="eTitle">Add gravity reading</h2><p id="eSub"></p></div></header>
+    <div class="field" id="fValue">
+      <label for="eValue" id="eValueLbl">Specific gravity</label>
+      <div class="with-unit"><input class="big" id="eValue" name="value" inputmode="decimal" autocomplete="off"><span id="eUnit">SG</span></div>
+      <span class="hint" id="eHint"></span>
+    </div>
+    <div class="fields-2" id="fGc">
+      <div class="field"><label for="eMethod">Method</label>
+        <select id="eMethod" name="method"><option>Headspace GC-MS</option><option>SPME GC-MS</option></select></div>
+      <div class="field"><label for="eSample">Sample ID</label><input id="eSample" name="sample" autocomplete="off" placeholder="e.g. KB03-D2-HS"></div>
+    </div>
+    <div class="field" id="fLink"><label for="eLink">Link to data file</label><input id="eLink" name="link" type="url" inputmode="url" autocomplete="off" placeholder="https://drive.google.com/…"><span class="hint">Optional. A Google Drive or instrument file link that opens the run's chromatogram or report.</span></div>
+    <div class="field"><label for="eWhen">Measured at</label><input id="eWhen" name="when" type="datetime-local"></div>
+    <div class="field"><label for="eNote">Note</label><textarea id="eNote" name="note" placeholder="Optional"></textarea></div>
+    <p class="err" id="eErr" role="alert"></p>
+    <footer><span class="where" id="eWhere"></span><button type="button" class="btn" id="eCancel">Cancel</button><button type="submit" class="btn primary" id="eSave">Save</button></footer>
+  </form>
+</div>
+
+<div class="modal" id="mRecipe" hidden role="dialog" aria-modal="true" aria-labelledby="rTitle">
+  <div class="sheet wide">
+    <header><div><h2 id="rTitle">Recipe</h2><p id="rSub"></p></div><div class="h-btns"><button type="button" class="btn edit-only" id="rEdit">Edit</button><button type="button" class="btn" id="rClose">Close</button></div></header>
+    <div id="rBody"></div>
+  </div>
+</div>
+
+<div class="modal" id="mRun" hidden role="dialog" aria-modal="true" aria-labelledby="sTitle">
+  <form class="sheet" id="sForm" novalidate>
+    <header><div><h2 id="sTitle">Start a run</h2><p id="sSub"></p></div><button type="button" class="btn" id="sCopy">Copy last run</button></header>
+    <div class="field"><label for="sExp">Experiment title</label><input id="sExp" autocomplete="off" maxlength="80" placeholder="e.g. Koji Beer"></div>
+    <div class="fields-2">
+      <div class="field"><label for="sName">Batch code</label><input id="sName" autocomplete="off" maxlength="40" placeholder="e.g. KB-04"></div>
+      <div class="field"><label for="sBrand">Brand or group</label><input id="sBrand" autocomplete="off" maxlength="60" placeholder="e.g. CAFE Research"></div>
+    </div>
+    <div class="field"><label for="sPurpose">Purpose</label><textarea id="sPurpose" maxlength="1000" placeholder="What this fermentation is testing"></textarea></div>
+    <div class="fields-2">
+      <div class="field"><label for="sYeast">Yeast</label><input id="sYeast" autocomplete="off" maxlength="60" placeholder="e.g. SafAle US-05"></div>
+      <div class="field"><label for="sRecipe">Recipe</label><select id="sRecipe"></select></div>
+    </div>
+    <div class="fields-2">
+      <div class="field"><label for="sOg">Original gravity</label><input id="sOg" inputmode="decimal" autocomplete="off" placeholder="e.g. 1.054"></div>
+      <div class="field"><label for="sFg">Target final gravity</label><input id="sFg" inputmode="decimal" autocomplete="off" placeholder="e.g. 1.011"></div>
+    </div>
+    <div class="field"><label for="sWhen">Pitched at</label><input id="sWhen" type="datetime-local"></div>
+    <p class="err" id="sErr" role="alert"></p>
+    <footer><span class="where" id="sWhere"></span><button type="button" class="btn" id="sCancel">Cancel</button><button type="submit" class="btn primary" id="sSave">Start run</button></footer>
+  </form>
+</div>
+
+<section class="cmp" id="cmp" hidden aria-modal="true" role="dialog" aria-labelledby="cTitle">
+  <div class="d-head">
+    <button type="button" class="btn" id="cBack">← Back</button>
+    <div class="d-title"><h2 id="cTitle">Compare fermentations</h2><div class="meta">Pick two from the list. Their readings are drawn on top of each other.</div></div>
+    <div class="seg" role="group" aria-label="Line up runs by" id="cAlign">
+      <button type="button" data-align="pitch" aria-pressed="true">Time since pitch</button>
+      <button type="button" data-align="date" aria-pressed="false">Calendar date</button>
+    </div>
+  </div>
+  <div class="c-body">
+    <div class="c-list">
+      <div class="top2">
+        <div class="seg" role="group" aria-label="Show" id="cFilter">
+          <button type="button" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" data-filter="current" aria-pressed="false">Current</button>
+          <button type="button" data-filter="past" aria-pressed="false">Finished</button>
+        </div>
+        <input type="search" class="search" id="cSearch" placeholder="Search experiment, tank, yeast, month" aria-label="Search fermentations" autocomplete="off">
+        <p id="cCount"></p>
+      </div>
+      <ul class="runs" id="cRuns"></ul>
+    </div>
+    <div class="c-main">
+      <div class="slots" id="cSlots"></div>
+      <div class="sensors" id="cSensors" role="group" aria-label="Sensors to overlay">
+        <h3 class="sec-title">Overlay</h3>
+        <button type="button" class="chipbtn" data-sensor="ph" aria-pressed="true">pH</button>
+        <button type="button" class="chipbtn" data-sensor="temp" aria-pressed="true">Temperature</button>
+        <button type="button" class="chipbtn" data-sensor="do" aria-pressed="true">Dissolved oxygen</button>
+        <button type="button" class="chipbtn" data-sensor="grav" aria-pressed="true">Gravity</button>
+        <button type="button" class="chipbtn" data-sensor="abv" aria-pressed="false">ABV</button>
+        <button type="button" class="chipbtn" data-sensor="pres" aria-pressed="true">Pressure</button>
+        <button type="button" class="chipbtn" data-sensor="cond" aria-pressed="true">Conductivity</button>
+      </div>
+      <div class="cmp-charts" id="cCharts"></div>
+      <div class="cmp-tbl-wrap" id="cTblWrap"><table class="cmp-tbl" id="cTbl"></table></div>
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="mRecipes" hidden role="dialog" aria-modal="true" aria-labelledby="lTitle">
+  <div class="sheet wide">
+    <header><div><h2 id="lTitle">Recipes</h2><p id="lSub"></p></div><div class="h-btns"><button type="button" class="btn primary edit-only" id="lNew">+ New recipe</button><button type="button" class="btn" id="lClose">Close</button></div></header>
+    <ul class="r-list" id="lList"></ul>
+  </div>
+</div>
+
+<div class="modal" id="mRecEdit" hidden role="dialog" aria-modal="true" aria-labelledby="xTitle">
+  <form class="sheet wide" id="xForm" novalidate>
+    <header><div><h2 id="xTitle">New recipe</h2><p id="xSub">Ingredients and steps for one batch. Leave out anything that doesn't apply.</p></div></header>
+    <div class="fields-2">
+      <div class="field"><label for="xName">Title</label><input id="xName" autocomplete="off" maxlength="120" placeholder="e.g. Koji Beer KB-04"></div>
+      <div class="field"><label for="xStyle">Style</label><input id="xStyle" autocomplete="off" maxlength="120" placeholder="e.g. Experimental pale ale"></div>
+    </div>
+    <div class="fields-n">
+      <div class="field"><label for="xBatch">Batch (gal)</label><input id="xBatch" inputmode="decimal" autocomplete="off" placeholder="10"></div>
+      <div class="field"><label for="xOg">OG</label><input id="xOg" inputmode="decimal" autocomplete="off" placeholder="1.054"></div>
+      <div class="field"><label for="xFg">FG</label><input id="xFg" inputmode="decimal" autocomplete="off" placeholder="1.011"></div>
+      <div class="field"><label for="xIbu">IBU</label><input id="xIbu" inputmode="decimal" autocomplete="off" placeholder="18"></div>
+      <div class="field"><label for="xSrm">SRM</label><input id="xSrm" inputmode="decimal" autocomplete="off" placeholder="4"></div>
+    </div>
+    <div class="r-edit-sec"><h3>Grain bill <button type="button" class="btn" data-addrow="grains">+ Add grain</button></h3><div class="rows" id="xGrains"></div></div>
+    <div class="r-edit-sec"><h3>Mash <button type="button" class="btn" data-addrow="mash">+ Add step</button></h3><div class="rows" id="xMash"></div></div>
+    <div class="r-edit-sec"><h3>Hops <button type="button" class="btn" data-addrow="hops">+ Add hop</button></h3><div class="rows" id="xHops"></div></div>
+    <div class="r-edit-sec"><h3>Yeast <button type="button" class="btn" data-addrow="yeast">+ Add yeast</button></h3><div class="rows" id="xYeast"></div></div>
+    <div class="field"><label for="xNotes">Notes</label><textarea id="xNotes" maxlength="2000" placeholder="Optional"></textarea></div>
+    <p class="err" id="xErr" role="alert"></p>
+    <footer><span class="where" id="xWhere"></span><button type="button" class="btn" id="xCancel">Cancel</button><button type="submit" class="btn primary" id="xSave">Save recipe</button></footer>
+  </form>
+</div>
+
+<div class="modal" id="mEdit" hidden role="dialog" aria-modal="true" aria-labelledby="kTitle">
+  <form class="sheet" id="kForm" novalidate>
+    <header><div><h2 id="kTitle">Editing on this screen</h2><p id="kSub"></p></div></header>
+    <div class="field" id="kField"><label for="kKey">Editor key</label><input id="kKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <span class="hint" id="kHint">The key saved as EDIT_KEY in the Google Sheet's Apps Script. This screen remembers it.</span></div>
+    <p class="err" id="kErr" role="alert"></p>
+    <footer><span class="where"></span><button type="button" class="btn" id="kCancel">Cancel</button><button type="button" class="btn danger" id="kOff">Turn editing off</button><button type="submit" class="btn primary" id="kOn">Turn editing on</button></footer>
+  </form>
+</div>
+
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+/* ============================================================
+   Settings. Change these when the real data is ready.
+   ============================================================ */
+const CONFIG = {
+  source: 'demo',        // 'demo' = made-up data, 'sheet' = Google Sheet through its Apps Script link (see DATA_FORMAT.md)
+  scriptUrl: '',         // the Sheet's Apps Script web app URL (ends in /exec)
+  pollSeconds: 15,       // how often to refresh live values
+  staleMinutes: 45,      // flag a tank when its newest reading is older than this (Ignition sends every 20 min)
+  tempWarnC: 1.0,        // warn when temperature is this far from setpoint (°C)
+  tempAlarmC: 2.5,       // alarm when this far (°C)
+};
+
+const H = 3600e3, MIN = 60e3, DAY = 24 * H;
+
+/* ============================================================
+   Data layer. Any source provides:
+     tanks()        -> [{id, name, room}]
+     runs()         -> [{runId, tankId, experiment, purpose, name, brand, yeast, recipeId, og, targetFg, start, end}]
+     recipes()      -> {recipeId: {title, style, batchGal, og, fg, ibu, srm, grains:[[item, lb]], hops:[[item, oz, use]],
+                                   yeast:[[strain, pitch]], mash:[[step, tempF, minutes]], notes}}
+     latest()       -> {readings: {tankId: {ts, ph, tempC, doMgL, sg, pressurePsi, condUs, tempAmbC}}, status: {tankId: {setpointC, heater, chiller, mode}}}
+     history(tankId, from, to) -> [{ts, ph, tempC, doMgL, sg, pressurePsi, condUs, tempAmbC, setpointC}]
+   sg (live specific gravity), pressurePsi, condUs (conductivity, µS/cm) and tempAmbC (room temperature) come
+   only from the Sennos tanks. Any reading a device doesn't measure is null: the old BrewIQ units report all of
+   them, the newer M3 units fewer.
+     measurements() -> [{id, runId, tankId, type: 'gravity'|'abv'|'gcms', value, ts, method, sample, link, note}]
+   Hand entries made on this screen go to an entry store (see Stores below) and are merged with these.
+   Times are milliseconds since 1970 (UTC). Temperatures are stored in °C.
+   ============================================================ */
+
+/* ---------- Made-up data ---------- */
+function hashNoise(n) {
+  n = (n ^ 61) ^ (n >>> 16); n = n + (n << 3); n = n ^ (n >>> 4);
+  n = Math.imul(n, 0x27d4eb2d); n = n ^ (n >>> 15);
+  return (n >>> 0) / 4294967295 * 2 - 1;
+}
+function smoothNoise(seed, t, stepMs) {
+  const k = t / stepMs, i = Math.floor(k), f = k - i;
+  const a = hashNoise(seed * 7919 + i), b = hashNoise(seed * 7919 + i + 1);
+  return a + (b - a) * (f * f * (3 - 2 * f));
+}
+
+function DemoSource() {
+  const hour0 = Math.floor(Date.now() / H) * H;
+  // Tank ids and names match the Ignition `tanks` table.
+  const T = [
+    { id: 1, name: 'Ethyl', room: 'A', run: {
+      experiment: 'Koji Beer', name: 'KB-03', brand: 'CAFE Research', yeast: 'SafAle US-05', recipeId: 'koji-03',
+      purpose: 'This fermentation is exploring the effect of koji on unmalted grain. Koji (Aspergillus oryzae grown on rice) supplies the enzymes that malting normally provides, so we are comparing extract, attenuation and aroma against an all-malt control brewed last month.',
+      hoursAgo: 62, setC: 19.5, ph0: 5.28, phEnd: 4.38, tau: 22, doTau: 2.5, og: 1.054, fg: 1.011, g50: 40, gs: 12,
+      gcms: [[2, 'Headspace GC-MS', 'Baseline before pitch'], [26, 'SPME GC-MS', ''], [50, 'Headspace GC-MS', 'Ethyl acetate rising faster than in the all-malt control']] } },
+    { id: 2, name: 'Ester', room: 'A', run: {
+      experiment: 'Cold Lager Ester Trial', name: 'LT-11', brand: 'CAFE Research', yeast: 'SafLager W-34/70', recipeId: 'helles-11',
+      purpose: 'Measuring how a cold 52 °F fermentation changes ester production in W-34/70 compared with a 61 °F warm lager run. Daily headspace samples track isoamyl acetate and ethyl hexanoate.',
+      hoursAgo: 150, setC: 11, ph0: 5.32, phEnd: 4.45, tau: 45, doTau: 4, og: 1.048, fg: 1.009, g50: 90, gs: 25,
+      abv: [[124, 4.1], [146, 4.6]],
+      gcms: [[22, 'Headspace GC-MS', ''], [46, 'Headspace GC-MS', ''], [94, 'Headspace GC-MS', 'Isoamyl acetate 40% below the warm run'], [142, 'SPME GC-MS', 'Full volatile profile for the paper']] } },
+    { id: 3, name: 'Aryl', room: 'A', run: {
+      experiment: 'Saison Phenolics', name: 'SP-02', brand: 'Student Brew 4', yeast: 'Belle Saison', recipeId: 'saison-02',
+      purpose: 'Following 4-vinylguaiacol formation by a phenolic saison yeast after a ferulic acid rest in the mash, while the temperature ramps from 65 °F to 73 °F.',
+      hoursAgo: 5, setC: 23, startC: 18.5, ramp: 0.7, ph0: 5.35, phEnd: 4.2, tau: 18, doTau: 2, og: 1.060, fg: 1.004, g50: 30, gs: 10,
+      gcms: [[1, 'Headspace GC-MS', 'Day 0 baseline']] } },
+    { id: 4, name: 'Amine', room: 'B', run: {
+      experiment: 'Dry-Hop Biotransformation', name: 'DH-07', brand: 'CAFE Research', yeast: 'SafAle US-05', recipeId: 'pale-07',
+      purpose: 'Testing whether dry hopping during active fermentation converts geraniol into β-citronellol. SPME samples are taken before and after the day 2 dry hop and again after cold crash.',
+      hoursAgo: 264, setC: 19, crashAtH: 240, crashC: 1, ph0: 5.25, phEnd: 4.3, tau: 24, doTau: 2.5, og: 1.052, fg: 1.011, g50: 36, gs: 12,
+      abv: [[218, 5.3], [250, 5.4]],
+      gcms: [[40, 'SPME GC-MS', 'Before dry hop'], [72, 'SPME GC-MS', 'After dry hop: geraniol down, citronellol up'], [254, 'Headspace GC-MS', 'After crash']] } },
+    { id: 5, name: 'Anna Lynn', room: 'B', run: null },
+    { id: 6, name: 'Ben Zene', room: 'B', run: {
+      experiment: 'Fusel Alcohol Baseline', name: 'FA-01', brand: 'Student Brew 3', yeast: 'Irish Ale', recipeId: 'red-01',
+      purpose: 'Measuring higher alcohols produced by an Irish ale strain held at 64 °F, as the baseline for a later warm run.',
+      hoursAgo: 30, setC: 18, ph0: 5.3, phEnd: 4.4, tau: 20, doTau: 2.5, exotherm: 2.0, og: 1.056, fg: 1.013, g50: 30, gs: 10,
+      gcms: [[20, 'Headspace GC-MS', '']] } },
+    // Sennos M3 tanks: gravity and pressure come from the device, so no daily hand gravity.
+    // `has` lists what each one's sensor modules measure (made up; set by the real modules).
+    { id: 7, name: 'Frank', room: 'Sennos', run: {
+      experiment: 'Kettle Sour Pilot', name: 'KS-01', brand: 'CAFE Research', yeast: 'Philly Sour', recipeId: 'sour-01',
+      purpose: 'Tracking how fast Philly Sour drops pH and gravity together in a single-yeast sour, using the Sennos for continuous gravity instead of daily samples.',
+      hoursAgo: 40, setC: 20, ph0: 5.1, phEnd: 3.4, tau: 30, doTau: 2, og: 1.048, fg: 1.008, g50: 34, gs: 11,
+      sennos: true, has: ['ph', 'temp', 'sg', 'pressure'], psi: 1.6, cond0: 1700 } },
+    { id: 8, name: 'Beans', room: 'Sennos', run: {
+      experiment: 'Cider Yeast Screen', name: 'CY-04', brand: 'Student Brew 5', yeast: 'SafCider AC-4', recipeId: 'cider-04',
+      purpose: 'Comparing fermentation speed of a cider yeast on fresh-pressed apple juice at 60 °F.',
+      hoursAgo: 96, setC: 15.5, ph0: 3.7, phEnd: 3.5, tau: 40, doTau: 3, og: 1.052, fg: 0.998, g50: 70, gs: 20,
+      sennos: true, has: ['temp', 'sg', 'pressure'], psi: 0.6, cond0: 1300 } },
+  ];
+  for (const t of T) if (t.run) t.run.pitch = hour0 - t.run.hoursAgo * H;
+
+  const RECIPES = {
+    'koji-03': { title: 'Koji Beer KB-03', style: 'Experimental pale ale', batchGal: 10, og: 1.054, fg: 1.011, ibu: 18, srm: 4,
+      grains: [['Unmalted two-row barley, milled', 11], ['Koji rice (A. oryzae)', 4], ['Pilsner malt', 3], ['Rice hulls', 1]],
+      hops: [['Hallertau Mittelfrüh', 1.5, '60 min'], ['Hallertau Mittelfrüh', 1, '10 min']],
+      yeast: [['SafAle US-05', '2 packs, rehydrated']],
+      mash: [['Koji saccharification rest', 131, 90], ['Conversion rest', 149, 45], ['Mash out', 168, 10]],
+      notes: 'Koji rice made in house, 48 h incubation. Mash pH target 5.4. No enzymes added beyond what the pilsner malt supplies.' },
+    'helles-11': { title: 'Munich Helles LT-11', style: 'Munich Helles', batchGal: 10, og: 1.048, fg: 1.009, ibu: 19, srm: 4,
+      grains: [['Pilsner malt', 17], ['Vienna malt', 2], ['Acidulated malt', 0.5]],
+      hops: [['Hallertau Mittelfrüh', 2, '60 min'], ['Tettnanger', 1, '15 min']],
+      yeast: [['SafLager W-34/70', '4 packs']],
+      mash: [['Saccharification', 150, 60], ['Mash out', 168, 10]], notes: 'Split batch: this half at 52 °F, the other half at 61 °F in tank 2 of last term.' },
+    'saison-02': { title: 'Farmhouse Saison SP-02', style: 'Saison', batchGal: 10, og: 1.060, fg: 1.004, ibu: 27, srm: 5,
+      grains: [['Pilsner malt', 16], ['Wheat malt', 3], ['Munich malt', 1]],
+      hops: [['Saaz', 2, '60 min'], ['Styrian Goldings', 2, '5 min']],
+      yeast: [['Belle Saison', '2 packs']],
+      mash: [['Ferulic acid rest', 113, 15], ['Saccharification', 148, 60], ['Mash out', 168, 10]], notes: 'Temperature ramps 1.3 °F per hour after pitch to 73 °F.' },
+    'pale-07': { title: 'West Coast Pale DH-07', style: 'American pale ale', batchGal: 10, og: 1.052, fg: 1.011, ibu: 38, srm: 6,
+      grains: [['Two-row pale malt', 18], ['Crystal 15', 1], ['Carapils', 0.5]],
+      hops: [['Magnum', 0.75, '60 min'], ['Cascade', 2, 'Whirlpool'], ['Citra', 4, 'Dry hop, day 2']],
+      yeast: [['SafAle US-05', '2 packs']],
+      mash: [['Saccharification', 152, 60], ['Mash out', 168, 10]], notes: 'Dry hop added through the top port at 1.030.' },
+    'red-01': { title: 'Irish Red FA-01', style: 'Irish red ale', batchGal: 10, og: 1.056, fg: 1.013, ibu: 24, srm: 15,
+      grains: [['Maris Otter', 17], ['Crystal 40', 1.5], ['Roasted barley', 0.4]],
+      hops: [['East Kent Goldings', 2, '60 min'], ['Fuggle', 1, '15 min']],
+      yeast: [['Irish Ale', '1 L starter']],
+      mash: [['Saccharification', 154, 60], ['Mash out', 168, 10]], notes: '' },
+    'ctrl-01': { title: 'All-Malt Control KB-C1', style: 'Experimental pale ale (control)', batchGal: 10, og: 1.052, fg: 1.010, ibu: 18, srm: 4,
+      grains: [['Two-row pale malt', 15], ['Pilsner malt', 3]],
+      hops: [['Hallertau Mittelfrüh', 1.5, '60 min'], ['Hallertau Mittelfrüh', 1, '10 min']],
+      yeast: [['SafAle US-05', '2 packs, rehydrated']],
+      mash: [['Conversion rest', 149, 60], ['Mash out', 168, 10]], notes: 'Same hops, yeast and schedule as the koji batches, malted grain only.' },
+    'kveik-01': { title: 'Kveik Trial KV-01', style: 'Farmhouse ale', batchGal: 10, og: 1.058, fg: 1.009, ibu: 22, srm: 5,
+      grains: [['Pilsner malt', 17], ['Oats', 2]],
+      hops: [['Columbus', 0.5, '60 min'], ['Citra', 2, 'Whirlpool']],
+      yeast: [['Voss kveik', '1 pack, no starter']],
+      mash: [['Saccharification', 150, 60], ['Mash out', 168, 10]], notes: 'Pitched at 90 °F and held there.' },
+    'sour-01': { title: 'Kettle Sour KS-01', style: 'Sour ale', batchGal: 10, og: 1.048, fg: 1.008, ibu: 6, srm: 3,
+      grains: [['Pilsner malt', 10], ['Wheat malt', 7], ['Acidulated malt', 0.5]],
+      hops: [['Saaz', 0.5, '60 min']],
+      yeast: [['Philly Sour', '2 packs']],
+      mash: [['Saccharification', 152, 60], ['Mash out', 168, 10]], notes: 'Gravity is read by the Sennos M3 every few minutes.' },
+    'cider-04': { title: 'Apple Cider CY-04', style: 'Cider', batchGal: 10, og: 1.052, fg: 0.998, ibu: 0, srm: 2,
+      grains: [], hops: [],
+      yeast: [['SafCider AC-4', '1 pack']],
+      mash: [], notes: 'Fresh-pressed juice, no added sugar. Yeast nutrient at pitch and at the 1/3 sugar break.' },
+  };
+
+  // Finished fermentations, so the history list and run comparison have something to show.
+  const PAST = [
+    { runId: 91, tankId: 1, experiment: 'All-Malt Control', name: 'KB-C1', brand: 'CAFE Research', yeast: 'SafAle US-05', recipeId: 'ctrl-01',
+      purpose: 'The all-malt control for the koji series: same hops, yeast and schedule as the koji batches, brewed with malted grain only.',
+      hoursAgo: 34 * 24, durH: 14 * 24, setC: 19.5, ph0: 5.30, phEnd: 4.30, tau: 18, doTau: 2.2, og: 1.052, fg: 1.010, g50: 32, gs: 10,
+      abv: [[300, 5.4]], gcms: [[2, 'Headspace GC-MS', 'Baseline'], [50, 'Headspace GC-MS', ''], [290, 'SPME GC-MS', 'Final profile']] },
+    { runId: 92, tankId: 3, experiment: 'Koji Beer', name: 'KB-02', brand: 'CAFE Research', yeast: 'SafAle US-05', recipeId: 'koji-03',
+      purpose: 'Second koji batch: longer koji rest (90 min) to see whether extract from unmalted barley improves over KB-01.',
+      hoursAgo: 52 * 24, durH: 15 * 24, setC: 19.5, ph0: 5.26, phEnd: 4.42, tau: 26, doTau: 2.8, og: 1.050, fg: 1.013, g50: 48, gs: 15,
+      abv: [[330, 4.8]], gcms: [[2, 'Headspace GC-MS', 'Baseline'], [74, 'SPME GC-MS', '']] },
+    { runId: 93, tankId: 2, experiment: 'Warm Lager Ester Trial', name: 'LT-10', brand: 'CAFE Research', yeast: 'SafLager W-34/70', recipeId: 'helles-11',
+      purpose: 'The warm half of the lager ester trial: W-34/70 at 61 °F, to compare with the cold 52 °F run.',
+      hoursAgo: 30 * 24, durH: 16 * 24, setC: 16, ph0: 5.32, phEnd: 4.40, tau: 28, doTau: 3, og: 1.048, fg: 1.010, g50: 55, gs: 16,
+      abv: [[360, 4.9]], gcms: [[22, 'Headspace GC-MS', ''], [46, 'Headspace GC-MS', ''], [94, 'Headspace GC-MS', 'Isoamyl acetate high'], [350, 'SPME GC-MS', '']] },
+    { runId: 94, tankId: 4, experiment: 'Dry-Hop Biotransformation', name: 'DH-06', brand: 'CAFE Research', yeast: 'SafAle US-05', recipeId: 'pale-07',
+      purpose: 'Dry hop added after fermentation finished, as the comparison for the active-fermentation dry hop in DH-07.',
+      hoursAgo: 44 * 24, durH: 13 * 24, setC: 19, ph0: 5.24, phEnd: 4.32, tau: 22, doTau: 2.4, og: 1.051, fg: 1.011, g50: 34, gs: 11,
+      abv: [[290, 5.2]], gcms: [[40, 'SPME GC-MS', ''], [200, 'SPME GC-MS', 'After dry hop']] },
+    { runId: 95, tankId: 5, experiment: 'Kveik Temperature Tolerance', name: 'KV-01', brand: 'Student Brew 2', yeast: 'Voss kveik', recipeId: 'kveik-01',
+      purpose: 'How fast a Norwegian kveik strain finishes at 90 °F, and how clean it stays.',
+      hoursAgo: 20 * 24, durH: 6 * 24, setC: 32, ph0: 5.34, phEnd: 4.25, tau: 8, doTau: 1.2, og: 1.058, fg: 1.009, g50: 14, gs: 5,
+      abv: [[120, 6.3]], gcms: [[30, 'Headspace GC-MS', '']] },
+    { runId: 96, tankId: 6, experiment: 'Irish Red', name: 'IR-04', brand: 'Student Brew 1', yeast: 'Irish Ale', recipeId: 'red-01',
+      purpose: 'House Irish red for the open house.',
+      hoursAgo: 48 * 24, durH: 12 * 24, setC: 18, ph0: 5.30, phEnd: 4.42, tau: 20, doTau: 2.5, og: 1.055, fg: 1.013, g50: 30, gs: 10 },
+    // Older Frank and Beans runs, logged by the BrewIQ units, which measured everything.
+    { runId: 97, tankId: 7, experiment: 'Hazy IPA Pilot', name: 'HZ-02', brand: 'CAFE Research', yeast: 'London Ale III', recipeId: 'pale-07',
+      purpose: 'Logged by the BrewIQ before the M3 upgrade: gravity, pH, DO, conductivity, pressure and temperature.',
+      hoursAgo: 26 * 24, durH: 10 * 24, setC: 19.5, ph0: 5.25, phEnd: 4.35, tau: 22, doTau: 2.5, og: 1.060, fg: 1.014, g50: 40, gs: 12,
+      sennos: true, has: ['ph', 'temp', 'do', 'sg', 'pressure', 'cond', 'amb'], psi: 1.2, cond0: 1750 },
+    { runId: 98, tankId: 8, experiment: 'Cider Yeast Screen', name: 'CY-03', brand: 'Student Brew 5', yeast: 'SafCider AB-1', recipeId: 'cider-04',
+      purpose: 'The previous cider yeast in the screen, logged by the BrewIQ.',
+      hoursAgo: 40 * 24, durH: 12 * 24, setC: 15.5, ph0: 3.7, phEnd: 3.45, tau: 40, doTau: 3, og: 1.052, fg: 0.999, g50: 80, gs: 22,
+      sennos: true, has: ['ph', 'temp', 'do', 'sg', 'pressure', 'cond', 'amb'], psi: 0.5, cond0: 1350 },
+  ];
+  for (const p of PAST) { p.pitch = hour0 - p.hoursAgo * H; p.end = p.pitch + p.durH * H; p.crashAtH = p.durH - 48; p.crashC = 1; }
+  const RUNS = [
+    ...T.filter(t => t.run).map(t => Object.assign(t.run, { runId: 100 + t.id, tankId: t.id, end: null })),
+    ...PAST,
+  ];
+  const runAt = (tankId, ts) => RUNS.find(r => r.tankId === tankId && ts >= r.pitch && (r.end == null || ts <= r.end));
+
+  function setpointAt(r, h) {
+    if (r.crashAtH != null && h >= r.crashAtH) return r.crashC;
+    if (r.ramp) return Math.min(r.setC, r.startC + r.ramp * h);
+    return r.setC;
+  }
+  function sample(r, ts) {
+    if (!r || ts < r.pitch || (r.end != null && ts > r.end)) return null;
+    const id = r.runId;
+    const h = (ts - r.pitch) / H;
+    const sp = setpointAt(r, h);
+    let base = sp, cooling = false, heating = false;
+    if (r.crashAtH != null && h >= r.crashAtH) {
+      base = r.crashC + (r.setC - r.crashC) * Math.exp(-(h - r.crashAtH) / 6);
+      cooling = true;
+    }
+    if (r.ramp && sp < r.setC) { base = sp - 0.35; heating = true; }
+    if (r.exotherm) base += r.exotherm * Math.exp(-Math.pow((h - 32) / 14, 2));
+    const cyc = Math.sin(2 * Math.PI * ts / (38 * MIN) + id);
+    const tempC = base + 0.18 * cyc + 0.05 * smoothNoise(id * 3 + 1, ts, 4 * MIN);
+    const chiller = cooling || tempC - sp > 0.6 || (sp < 20 && Math.cos(2 * Math.PI * ts / (38 * MIN) + id) < 0);
+    const ph = r.phEnd + (r.ph0 - r.phEnd) * Math.exp(-h / r.tau) + 0.012 * smoothNoise(id * 3 + 2, ts, 6 * MIN);
+    const doMgL = Math.max(0.02, 0.05 + 8.4 * Math.exp(-h / r.doTau) + 0.025 * smoothNoise(id * 3 + 3, ts, 5 * MIN));
+    const out = { ts, ph, tempC, doMgL, sg: null, pressurePsi: null, condUs: null, tempAmbC: null, setpointC: sp, heater: heating, chiller: chiller && !heating,
+             mode: cooling ? 'crash' : h < 12 ? 'pitched' : 'active' };
+    if (r.sennos) {
+      out.sg = gravityAt(r, h) + 0.0004 * smoothNoise(id * 3 + 4, ts, 20 * MIN);
+      out.pressurePsi = Math.max(0, r.psi * (1 - Math.exp(-h / 8)) + 0.05 * smoothNoise(id * 3 + 5, ts, 15 * MIN));
+      out.condUs = r.cond0 * (0.82 + 0.18 * (gravityAt(r, h) - r.fg) / (r.og - r.fg)) + 6 * smoothNoise(id * 3 + 6, ts, 25 * MIN);
+      out.tempAmbC = 21 + 1.2 * Math.sin(2 * Math.PI * (ts / DAY - 0.3)) + 0.2 * smoothNoise(id * 3 + 7, ts, 30 * MIN);
+      for (const [k, f] of [['ph', 'ph'], ['temp', 'tempC'], ['do', 'doMgL'], ['sg', 'sg'], ['pressure', 'pressurePsi'], ['cond', 'condUs'], ['amb', 'tempAmbC']]) if (!r.has.includes(k)) out[f] = null;
+      Object.assign(out, { setpointC: null, heater: false, chiller: false });
+    }
+    return out;
+  }
+  const gravityAt = (r, h) => r.fg + (r.og - r.fg) / (1 + Math.exp((h - r.g50) / r.gs));
+  function series(r, from, to) {
+    const out = [];
+    const start = Math.max(from, r.pitch), stop = Math.min(to, r.end ?? to);
+    if (stop <= start) return out;
+    const step = Math.max(MIN, Math.ceil((stop - start) / 600 / MIN) * MIN);
+    for (let ts = Math.ceil(start / step) * step; ts <= stop; ts += step) { const s = sample(r, ts); if (s) out.push(s); }
+    return out;
+  }
+
+  const tanks = T.map(({ run, ...t }) => t);
+  const runs = RUNS.map(r => ({
+    runId: r.runId, tankId: r.tankId, experiment: r.experiment, purpose: r.purpose, name: r.name,
+    brand: r.brand, yeast: r.yeast, recipeId: r.recipeId, og: r.og, targetFg: RECIPES[r.recipeId].fg,
+    start: r.pitch, end: r.end,
+  }));
+  const meas = [];
+  for (const r of RUNS) {
+    const { runId, tankId } = r, stop = Math.min(Date.now(), r.end ?? Infinity);
+    meas.push({ id: `demo-g-${runId}-0`, runId, tankId, type: 'gravity', value: r.og, ts: r.pitch - 20 * MIN, note: 'Original gravity, wort before pitch' });
+    // a reading around 10 am each day after pitch
+    for (let d = new Date(r.pitch); !r.sennos; ) {
+      d.setDate(d.getDate() + (d.getHours() >= 10 ? 1 : 0)); d.setHours(10, 0, 0, 0);
+      if (d.getTime() > stop) break;
+      const h = (d.getTime() - r.pitch) / H;
+      const v = Math.round((gravityAt(r, h) + 0.0006 * hashNoise(runId * 31 + Math.round(h))) * 1000) / 1000;
+      meas.push({ id: `demo-g-${runId}-${Math.round(h)}`, runId, tankId, type: 'gravity', value: v, ts: d.getTime(), note: '' });
+    }
+    for (const [h, v] of r.abv || []) meas.push({ id: `demo-a-${runId}-${h}`, runId, tankId, type: 'abv', value: v, ts: r.pitch + h * H, note: 'Anton Paar Alcolyzer' });
+    (r.gcms || []).forEach(([h, method, note], i) => meas.push({
+      id: `demo-gc-${runId}-${i}`, runId, tankId, type: 'gcms', method, ts: r.pitch + h * H, note,
+      sample: `${r.name.replace('-', '')}-D${Math.floor(h / 24)}-${method.startsWith('SPME') ? 'SP' : 'HS'}`, link: '',
+    }));
+  }
+  return {
+    label: 'Demo data', live: false,
+    async tanks() { return tanks; },
+    async runs() { return runs; },
+    async recipes() { return RECIPES; },
+    async measurements() { return meas.filter(m => m.ts <= Date.now()); },
+    async latest() {
+      const now = Date.now(), readings = {}, status = {};
+      for (const t of T) {
+        const s = t.run ? sample(t.run, now - 4000 - t.id * 1700) : null;
+        if (s) {
+          readings[t.id] = { ts: s.ts, ph: s.ph, tempC: s.tempC, doMgL: s.doMgL, sg: s.sg, pressurePsi: s.pressurePsi, condUs: s.condUs, tempAmbC: s.tempAmbC };
+          status[t.id] = { setpointC: s.setpointC, heater: s.heater, chiller: s.chiller, mode: s.mode };
+        } else {
+          status[t.id] = { setpointC: null, heater: false, chiller: false, mode: 'empty' };
+        }
+      }
+      return { readings, status };
+    },
+    async history(tankId, from, to) {
+      const r = runAt(tankId, to) || runAt(tankId, from);
+      return r ? series(r, from, to) : [];
+    },
+    async runHistory(run) {
+      const r = RUNS.find(x => x.runId === run.runId);
+      return r ? series(r, r.pitch, Math.min(Date.now(), r.end ?? Infinity)) : [];
+    },
+  };
+}
+
+/* ---------- Google Sheet, through its Apps Script web app ----------
+   One GET returns every tab as JSON (see apps-script/Code.gs). Needs the page served from a normal
+   web host (GitHub Pages, a lab server); the Claude preview cannot reach outside data. */
+function SheetSource(scriptUrl) {
+  const num = v => (v === '' || v == null || isNaN(+v)) ? null : +v;
+  const time = v => { if (v == null || v === '') return null; const d = typeof v === 'number' ? v : Date.parse(v); return isNaN(d) ? null : d; };
+  const bool = v => v === true || /^(1|true|on|yes)$/i.test(String(v ?? ''));
+  let data = null, at = 0, pending = null;
+  async function all(force) {
+    if (!force && data && Date.now() - at < CONFIG.pollSeconds * 900) return data;
+    if (!pending) pending = fetch(`${scriptUrl}?action=all&days=21`, { cache: 'no-store' })
+      .then(async res => {
+        if (!res.ok) throw new Error(`The Sheet link answered with HTTP ${res.status}. Check the Apps Script deployment allows "Anyone".`);
+        const j = await res.json();
+        if (j.error) throw new Error(j.error);
+        data = j; at = Date.now(); return j;
+      })
+      .finally(() => { pending = null; });
+    return pending;
+  }
+  const readings = j => (j.readings || []).map(r => ({ tankId: num(r.tank_id), ts: time(r.timestamp), ph: num(r.ph), tempC: num(r.temp_c), doMgL: num(r.do_mgl),
+    sg: num(r.sg), pressurePsi: num(r.pressure_psi), condUs: num(r.conductivity_us), tempAmbC: num(r.temp_amb_c) }))
+    .filter(r => r.tankId != null && r.ts != null).sort((a, b) => a.ts - b.ts);
+  return {
+    label: 'Live · Google Sheet', live: true, refreshNow: () => all(true),
+    async tanks() { return ((await all()).tanks || []).map(r => ({ id: num(r.tank_id), name: String(r.tank_name), room: String(r.room || 'A') })); },
+    async runs() {
+      return ((await all()).runs || []).map(r => ({
+        runId: num(r.run_id), tankId: num(r.tank_id), experiment: r.experiment || '', purpose: r.purpose || '', name: r.name || '',
+        brand: r.brand_name || '', yeast: r.yeast || '', recipeId: r.recipe_id ? String(r.recipe_id) : '', og: num(r.og), targetFg: num(r.target_fg),
+        start: time(r.start_date), end: time(r.end_date),
+      }));
+    },
+    async recipes() {
+      const out = {};
+      for (const r of (await all()).recipes || []) {
+        const id = String(r.recipe_id), rec = out[id] ||= { title: '', style: '', grains: [], hops: [], yeast: [], mash: [], notes: '' };
+        const sec = String(r.section || '').toLowerCase();
+        if (sec === 'info') { const k = String(r.item).toLowerCase(); rec[{ 'batch size': 'batchGal', 'batch_gal': 'batchGal' }[k] || k] = isNaN(+r.amount) ? r.amount : +r.amount; }
+        else if (sec === 'grain') rec.grains.push([r.item, num(r.amount)]);
+        else if (sec === 'hop') rec.hops.push([r.item, num(r.amount), r.detail || '']);
+        else if (sec === 'yeast') rec.yeast.push([r.item, r.detail || r.amount || '']);
+        else if (sec === 'mash') rec.mash.push([r.item, num(r.amount), num(r.detail)]);
+        else if (sec === 'note') rec.notes += (rec.notes ? ' ' : '') + r.item;
+      }
+      return out;
+    },
+    async measurements() {
+      const j = await all();
+      const rows = [...(j.manual || []).map(r => ({ ...r, _manual: true })), ...(j.gcms || []).map(r => ({ ...r, type: 'gcms' }))];
+      return rows.map((r, i) => ({
+        id: String(r.id || `sheet-${i}`), runId: num(r.run_id), tankId: num(r.tank_id), type: String(r.type || 'gcms').toLowerCase(),
+        value: num(r.value), ts: time(r.timestamp), method: r.method || '', sample: r.sample_id || '', link: r.link || '', note: r.note || '',
+        fromSheet: true, fromManual: !!r._manual && !!r.id,
+      })).filter(m => m.ts != null);
+    },
+    async latest() {
+      const j = await all(), latest = {}, status = {};
+      for (const r of readings(j)) latest[r.tankId] = r;
+      for (const s of j.status || []) status[num(s.tank_id)] = { setpointC: num(s.setpoint_c), heater: bool(s.heater_on), chiller: bool(s.chiller_on), mode: s.mode || 'active' };
+      for (const t of j.tanks || []) if (!status[num(t.tank_id)] && !latest[num(t.tank_id)]) status[num(t.tank_id)] = { mode: 'empty' };
+      return { readings: latest, status };
+    },
+    async runHistory(run) {
+      const res = await fetch(`${scriptUrl}?action=readings&tank_id=${encodeURIComponent(run.tankId)}&from=${run.start}&to=${run.end ?? Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`The Sheet link answered with HTTP ${res.status}.`);
+      return readings(await res.json());
+    },
+    async history(tankId, from, to) {
+      const j = await all();
+      const sp = num(((j.status || []).find(s => num(s.tank_id) === tankId) || {}).setpoint_c);
+      return readings(j).filter(r => r.tankId === tankId && r.ts >= from && r.ts <= to).map(r => ({ ...r, setpointC: sp }));
+    },
+  };
+}
+
+const source = CONFIG.source === 'sheet' && CONFIG.scriptUrl ? SheetSource(CONFIG.scriptUrl) : DemoSource();
+
+/* ============================================================
+   Stores for hand entries (gravity, ABV, GC-MS samples), runs started or stopped in the app, and recipes.
+     - Claude preview: the artifact's shared database.
+     - Google Sheet: appended to the Sheet's `manual` tab through the Apps Script link.
+     - Otherwise: this browser only, until one of the above is set up.
+   ============================================================ */
+function LocalStore() {
+  const read = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; } };
+  const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+  const push = (k, x) => { const all = read(k); all.push(x); if (!write(k, all)) throw new Error('This browser blocked saving.'); return all; };
+  let cb = () => {}, rcb = () => {}, xcb = () => {};
+  const recs = () => { try { return JSON.parse(localStorage.getItem('cafe.recipes') || '{}') || {}; } catch { return {}; } };
+  return {
+    where: 'Saved on this screen only. Other devices will not see it until a shared store is set up.',
+    entries: read('cafe.entries'), runs: read('cafe.runs'), recipes: recs(), canWrite: true,
+    onChange(f) { cb = f; },
+    onRuns(f) { rcb = f; },
+    onRecipes(f) { xcb = f; },
+    async saveRecipe(id, rec) {
+      const all = { ...recs(), [id]: rec };
+      try { localStorage.setItem('cafe.recipes', JSON.stringify(all)); } catch { throw new Error('This browser blocked saving.'); }
+      this.recipes = all; xcb();
+    },
+    async add(e) { this.entries = push('cafe.entries', { ...e, id: 'loc-' + Date.now().toString(36) }); cb(); },
+    async remove(id) { const all = read('cafe.entries').filter(x => x.id !== id); write('cafe.entries', all); this.entries = all; cb(); },
+    async startRun(run) { this.runs = push('cafe.runs', run); rcb(); },
+    async stopRun(run, end) { this.runs = push('cafe.runs', { stopOf: run.runId, end }); rcb(); },
+  };
+}
+function DbStore(db) {
+  const col = db.collection('entries'), rcol = db.collection('runs'), xcol = db.collection('recipes');
+  let cb = () => {}, rcb = () => {}, xcb = () => {};
+  // Runs started here are saved whole; stopping a run saves a {stopOf, end} record, so nothing is ever edited in place.
+  const store = {
+    where: 'Saved to the shared lab record.', entries: [], runs: [], recipes: {}, canWrite: true,
+    onChange(f) { cb = f; },
+    onRuns(f) { rcb = f; },
+    onRecipes(f) { xcb = f; },
+    // Each save adds a whole copy of the recipe; the newest copy of each recipe wins.
+    async saveRecipe(id, rec) { await xcol.add({ recipeId: id, rec, savedAt: Date.now() }); },
+    async add(e) { await col.add({ ...e, createdAt: Date.now() }); },
+    async remove(id) { await col.doc(id).delete(); },
+    async startRun(run) { await rcol.add({ ...run, createdAt: Date.now() }); },
+    async stopRun(run, end) { await rcol.add({ stopOf: run.runId, end, createdAt: Date.now() }); },
+  };
+  col.onSnapshot(snap => {
+    store.entries = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    cb();
+  }, () => { store.canWrite = false; cb(); });
+  rcol.onSnapshot(snap => { store.runs = snap.docs.map(d => d.data()); rcb(); }, () => {});
+  xcol.onSnapshot(snap => {
+    const out = {};
+    snap.docs.map(d => d.data()).sort((a, b) => a.savedAt - b.savedAt).forEach(x => { if (x.recipeId && x.rec) out[x.recipeId] = x.rec; });
+    store.recipes = out; xcb();
+  }, () => {});
+  return store;
+}
+function ScriptStore(scriptUrl) {
+  let cb = () => {};
+  async function post(body) {
+    // text/plain avoids a CORS preflight, which Apps Script does not answer.
+    // Every change carries the editor key; the Apps Script refuses changes without the right one.
+    const res = await fetch(scriptUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ key: editKey, ...body }) });
+    const j = await res.json().catch(() => ({}));
+    if (j.badKey && body.action !== 'checkKey') { setEditKey(null); throw new Error('The editor key has changed. Turn editing on again with the new key'); }
+    if (!res.ok || j.error) throw new Error(j.error || `The Sheet link answered with HTTP ${res.status}.`);
+    return j;
+  }
+  return {
+    where: 'Saved to the Google Sheet.', entries: [], runs: [], recipes: {}, canWrite: true, viaSource: true,
+    onChange(f) { cb = f; },
+    onRuns() {},
+    onRecipes() {},
+    async checkKey(key) { await post({ action: 'checkKey', key }); },
+    async saveRecipe(id, rec) { await post({ action: 'saveRecipe', recipe_id: id, rows: recipeRows(rec) }); await source.refreshNow?.(); },
+    async add(e) { await post({ action: 'add', entry: { ...e, id: 'k' + Date.now().toString(36) } }); await source.refreshNow?.(); cb(); },
+    async remove(id) { await post({ action: 'delete', id }); await source.refreshNow?.(); cb(); },
+    // Runs go straight into the Sheet's runs tab.
+    async startRun(r) {
+      await post({ action: 'startRun', run: { run_id: r.runId, tank_id: r.tankId, experiment: r.experiment, purpose: r.purpose, name: r.name,
+        brand_name: r.brand, yeast: r.yeast, recipe_id: r.recipeId, og: r.og, target_fg: r.targetFg, start_date: new Date(r.start).toISOString() } });
+      await source.refreshNow?.();
+    },
+    async stopRun(r, end) { await post({ action: 'stopRun', run_id: r.runId, end_date: new Date(end).toISOString() }); await source.refreshNow?.(); },
+  };
+}
+// A recipe as rows of the Sheet's recipes tab (the reverse of SheetSource.recipes()).
+function recipeRows(rec) {
+  const rows = [], has = v => v !== '' && v != null;
+  const info = (item, amount, unit = '') => { if (has(amount)) rows.push({ section: 'info', item, amount, unit, detail: '' }); };
+  info('title', rec.title); info('style', rec.style); info('batch size', rec.batchGal, 'gal');
+  info('og', rec.og); info('fg', rec.fg); info('ibu', rec.ibu); info('srm', rec.srm);
+  for (const [item, lb] of rec.grains || []) rows.push({ section: 'grain', item, amount: lb ?? '', unit: 'lb', detail: '' });
+  for (const [item, f, min] of rec.mash || []) rows.push({ section: 'mash', item, amount: f ?? '', unit: 'F', detail: min ?? '' });
+  for (const [item, oz, use] of rec.hops || []) rows.push({ section: 'hop', item, amount: oz ?? '', unit: 'oz', detail: use || '' });
+  for (const [item, pitch] of rec.yeast || []) rows.push({ section: 'yeast', item, amount: '', unit: '', detail: pitch || '' });
+  if (rec.notes) rows.push({ section: 'note', item: rec.notes, amount: '', unit: '', detail: '' });
+  return rows;
+}
+
+/* ---------- Editor key ----------
+   The app is view-only unless this screen holds the editor key (typed once, kept in this browser).
+   With the Google Sheet, the Apps Script checks the key on every change, so a screen without it cannot
+   change anything even if someone finds a way to send a change. In the demo and the preview any key works. */
+let editKey = null;
+try { editKey = localStorage.getItem('cafe.editKey') || null; } catch { /* storage unavailable: view-only */ }
+function setEditKey(k) {
+  editKey = k || null;
+  try { k ? localStorage.setItem('cafe.editKey', k) : localStorage.removeItem('cafe.editKey'); } catch { /* kept for this visit only */ }
+  applyEditing();
+}
+
+async function pickStore() {
+  if (CONFIG.source === 'sheet' && CONFIG.scriptUrl) return ScriptStore(CONFIG.scriptUrl);
+  if (window.claude && typeof window.claude.use === 'function') {
+    try { const db = await window.claude.use('db'); if (db) return DbStore(db); } catch { /* fall through */ }
+  }
+  return LocalStore();
+}
+
+/* ============================================================
+   Brewing math
+   ============================================================ */
+// ABV from original and current gravity (the "alternate" formula; better than 131.25 × ΔSG above 6%).
+const abvFromGravity = (og, sg) => (76.08 * (og - sg) / (1.775 - og)) * (sg / 0.794);
+const fmtSG = v => v == null ? '–' : v.toFixed(3);
+
+/* ============================================================
+   Display
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const safeUrl = u => /^https?:\/\//i.test(String(u || '')) ? String(u) : '';
+const store_ = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } },
+};
+let unit = store_.get('cafe.unit') === 'C' ? 'C' : 'F';
+const toUnit = c => unit === 'F' ? c * 9 / 5 + 32 : c;
+const dUnit = c => unit === 'F' ? c * 9 / 5 : c;
+const fmtT = c => c == null ? '–' : toUnit(c).toFixed(1);
+const fmtPh = v => v == null ? '–' : v.toFixed(2);
+const fmtDo = v => v == null ? '–' : v < 1 ? v.toFixed(2) : v.toFixed(1);
+const fmtPsi = v => v == null ? '–' : v.toFixed(1);
+const fmtCond = v => v == null ? '–' : Math.round(v).toLocaleString();
+const ROOM_NAME = { A: 'Room A', B: 'Room B', Sennos: 'Sennos' };
+const isSennos = t => /^sennos/i.test(String(t?.room || ''));
+const fmtWhen = ms => new Date(ms).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+const state = {
+  tanks: [], runs: [], recipes: {}, srcRecipes: {}, srcMeas: [], latest: { readings: {}, status: {} },
+  hist24: {}, pitchReading: {}, open: null, range: '24h', lastOk: null, error: null, store: null,
+  srcRuns: [],      // runs from the data source; state.runs adds the ones started or stopped in the app
+  runPts: {},       // runId -> {pts, at, end}: a whole run's readings, for finished runs and Sennos gravity
+  openRun: null,    // the detail page shows this run instead of the tank's current one (opened from Compare)
+  backTo: null,
+};
+
+function runFor(tankId) {
+  return state.runs.filter(r => r.tankId === tankId && !r.end).sort((a, b) => b.start - a.start)[0] || null;
+}
+function lastRunFor(tankId) {
+  return state.runs.filter(r => r.tankId === tankId && r.end).sort((a, b) => b.end - a.end)[0] || null;
+}
+// What a panel or the detail page shows. A live view has the tank's newest readings; a finished run's view
+// (hist) has that run's own readings, its last one standing in for "current".
+function liveView(t, run) {
+  return { tank: t, run, hist: false, r: state.latest.readings[t.id], s: state.latest.status[t.id] || {},
+    p0: run ? state.pitchReading[run.runId] : null, h24: state.hist24[t.id] || [],
+    pts: run && isSennos(t) ? state.runPts[run.runId]?.pts : undefined };
+}
+function histView(t, run) {
+  const pts = (state.runPts[run.runId]?.pts || []).filter(p => p.ts >= run.start && p.ts <= run.end);
+  const last = pts[pts.length - 1] || null;
+  return { tank: t, run, hist: true, r: last, s: { mode: 'ended' }, p0: pts[0] || null,
+    h24: last ? pts.filter(p => p.ts >= last.ts - 24 * H) : [], pts };
+}
+// A tank with nothing running shows its last finished run.
+function viewFor(tankId) {
+  const t = state.tanks.find(x => x.id === tankId); if (!t) return null;
+  const cur = runFor(tankId); if (cur) return liveView(t, cur);
+  const last = lastRunFor(tankId), r = state.latest.readings[tankId];
+  // A Sennos that is sending readings is mid-fermentation even before its run reaches the runs tab.
+  const fresh = isSennos(t) && r && Date.now() - r.ts < CONFIG.staleMinutes * MIN;
+  return last && !fresh ? histView(t, last) : liveView(t, null);
+}
+function detailView() {
+  const run = state.openRun != null ? runById(state.openRun) : null;
+  if (!run) return viewFor(state.open);
+  const t = state.tanks.find(x => x.id === run.tankId);
+  return run.end ? histView(t, run) : liveView(t, run);
+}
+// Loads a run's readings once (a running one again after 5 minutes). Returns true if it fetched new ones.
+async function loadRunPts(run) {
+  const c = state.runPts[run.runId];
+  if (c && c.end === run.end && (run.end || Date.now() - c.at < 5 * MIN)) return false;
+  try { state.runPts[run.runId] = { pts: await source.runHistory(run), at: Date.now(), end: run.end }; return true; }
+  catch { if (!c) state.runPts[run.runId] = { pts: [], at: Date.now(), end: undefined }; return false; }
+}
+function measFor(run, type) {
+  if (!run) return [];
+  const entered = state.store && !state.store.viaSource ? state.store.entries : [];
+  return [...state.srcMeas, ...entered]
+    .filter(m => (m.runId === run.runId || (m.runId == null && m.tankId === run.tankId && m.ts >= run.start)) && (!type || m.type === type))
+    .sort((a, b) => a.ts - b.ts);
+}
+// Live gravity from a Sennos density sensor. With `pts` (a run's readings) it uses those; otherwise, for a
+// current run, the reading nearest pitch and the newest reading.
+function autoGravity(run, pts) {
+  if (!run) return [];
+  if (pts) return pts.filter(p => p.sg != null).map(p => ({ ts: p.ts, value: p.sg, auto: true }));
+  if (run.end) return [];
+  const out = [], p0 = state.pitchReading[run.runId], r = state.latest.readings[run.tankId];
+  if (p0?.sg != null) out.push({ ts: p0.ts, value: p0.sg, auto: true });
+  if (r?.sg != null && r.ts > (p0?.ts ?? 0)) out.push({ ts: r.ts, value: r.sg, auto: true });
+  return out;
+}
+function gravityInfo(run, pts) {
+  const g = run ? [...measFor(run, 'gravity'), ...autoGravity(run, pts)].sort((a, b) => a.ts - b.ts) : [];
+  if (!run || !g.length) return null;
+  const og = run.og ?? g[0].value, cur = g[g.length - 1];
+  const fg = run.targetFg ?? null;
+  const att = og > 1 ? (og - cur.value) / (og - 1) * 100 : null;
+  const prog = fg != null && og > fg ? Math.max(0, Math.min(1, (og - cur.value) / (og - fg))) : null;
+  const abvEst = abvFromGravity(og, cur.value);
+  const a = measFor(run, 'abv');
+  return { og, fg, cur, att, prog, abvEst, abvMeas: a.length ? a[a.length - 1] : null, count: g.length };
+}
+function ago(ts) {
+  const s = Math.max(0, Math.round((Date.now() - ts) / 1000));
+  if (s < 60) return `${s} s ago`;
+  const m = Math.round(s / 60);
+  return m < 60 ? `${m} min ago` : m < 48 * 60 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} days ago`;
+}
+function dayOf(run) { return run ? Math.floor(((run.end ?? Date.now()) - run.start) / DAY) + 1 : null; }
+
+function assess(v) {
+  const { r, s, run } = v;
+  const out = { level: 'ok', msg: '', tempFlag: false };
+  if (v.hist || (s.mode === 'empty' && !r && !run)) return out;
+  // A run started in the last few minutes gets time for its first reading before it alarms.
+  if ((!r || Date.now() - r.ts > CONFIG.staleMinutes * MIN) && run && Date.now() - run.start < CONFIG.staleMinutes * MIN) return { ...out, msg: 'Waiting for the first reading' };
+  if (!r) return { level: 'alarm', msg: 'No data from this tank', tempFlag: false };
+  if (Date.now() - r.ts > CONFIG.staleMinutes * MIN) return { level: 'alarm', msg: `No new data for ${ago(r.ts).replace(' ago', '')}`, tempFlag: false };
+  if (s.setpointC != null && r.tempC != null && s.mode !== 'crash') {
+    const dev = r.tempC - s.setpointC, a = Math.abs(dev);
+    const txt = `${dev > 0 ? 'Above' : 'Below'} setpoint by ${dUnit(a).toFixed(1)}°${unit}`;
+    if (a >= CONFIG.tempAlarmC) return { level: 'alarm', msg: txt, tempFlag: true };
+    if (a >= CONFIG.tempWarnC) return { level: 'warn', msg: txt, tempFlag: true };
+  }
+  return out;
+}
+
+function chipFor(v) {
+  const { s, run } = v, d = dayOf(run);
+  if (v.hist) return [`Ended ${fmtDay(run.end)}`, 'ended'];
+  switch (s.mode) {
+    case 'empty': return run ? [`Fermenting · day ${d}`, 'active'] : ['Empty', ''];
+    case 'crash': return [`Cold crash · day ${d}`, 'crash'];
+    case 'pitched': return ['Just pitched', 'pitched'];
+    default: return [run ? `Fermenting · day ${d}` : 'Running', 'active'];
+  }
+}
+
+function buildRooms() {
+  const rooms = $('rooms'); rooms.innerHTML = '';
+  const byRoom = {};
+  for (const t of state.tanks) (byRoom[t.room] ||= []).push(t);
+  const side = r => isSennos({ room: r }) ? 1 : 0;
+  const keys = Object.keys(byRoom).sort((a, b) => side(a) - side(b) || a.localeCompare(b));
+  rooms.classList.toggle('with-side', keys.some(side) && keys.length > 1);
+  for (const room of keys) {
+    const sec = document.createElement('section');
+    sec.className = 'room' + (side(room) ? ' side' : '');
+    sec.innerHTML = `<h2>${esc(ROOM_NAME[room] || 'Room ' + room)}</h2><div class="grid"></div>`;
+    for (const t of byRoom[room]) sec.lastChild.appendChild(buildTank(t));
+    rooms.appendChild(sec);
+  }
+}
+
+function readTile(kind, label) {
+  return `<div class="read ${kind}"><div class="lbl">${label}</div><div class="val" data-k="${kind}"></div>
+    <div class="meter" data-k="${kind}-m"><div class="band"></div><div class="tick"></div><div class="mk"></div></div>
+    <div class="sub" data-k="${kind}-sub"></div></div>`;
+}
+
+function buildTank(t) {
+  const el = document.createElement('button');
+  el.type = 'button'; el.className = 'tank'; el.dataset.id = t.id;
+  el.setAttribute('aria-label', `${t.name}, open details`);
+  el.innerHTML = `
+    <div class="t-head"><span class="t-name">${esc(t.name)}</span><span class="t-num">Tank ${esc(t.id)}</span><span class="chip" data-k="chip"></span></div>
+    <div class="t-exp" data-k="exp"></div>
+    <div class="reads">${readTile('ph', 'pH')}${readTile('temp', 'Temp')}${readTile('do', 'DO')}</div>
+    <div class="prog" data-k="prog"></div>
+    <div class="t-foot">${isSennos(t)
+      ? '<span class="pill pres" data-k="pres" hidden></span><span class="pill src">Sennos</span>'
+      : '<span class="pill cool" data-k="cool">Glycol</span><span class="pill heat" data-k="heat">Heat</span>'}<span class="alert" data-k="alert" hidden></span><span class="ago" data-k="ago"></span></div>`;
+  el.addEventListener('click', () => openDetail(t.id));
+  return el;
+}
+
+function setMeter(m, { lo, hi, value, band, tick }) {
+  const pct = v => Math.max(0, Math.min(100, (v - lo) / (hi - lo) * 100));
+  const b = m.querySelector('.band'), k = m.querySelector('.tick'), mk = m.querySelector('.mk');
+  m.hidden = value == null;
+  if (value == null) return;
+  b.hidden = !band; if (band) { b.style.left = pct(band[0]) + '%'; b.style.width = (pct(band[1]) - pct(band[0])) + '%'; }
+  k.hidden = tick == null; if (tick != null) k.style.left = pct(tick) + '%';
+  mk.style.left = pct(value) + '%';
+}
+function range24(view, key) {
+  const v = (view.h24 || []).map(p => p[key]).filter(x => x != null);
+  return v.length ? [Math.min(...v), Math.max(...v)] : null;
+}
+
+function renderTanks() {
+  let warn = 0, alarm = 0, active = 0;
+  for (const t of state.tanks) {
+    const el = document.querySelector(`.tank[data-id="${t.id}"]`); if (!el) continue;
+    const q = k => el.querySelector(`[data-k="${k}"]`);
+    const v = viewFor(t.id); if (!v) continue;
+    const { r, s, run } = v, a = assess(v), [chipTxt, chipCls] = chipFor(v);
+    const empty = !run && s.mode === 'empty' && !r;
+    if (!empty && !v.hist) active++;
+    if (a.level === 'warn') warn++; if (a.level === 'alarm') alarm++;
+    el.classList.toggle('hist', v.hist);
+    el.classList.toggle('warn', a.level === 'warn');
+    el.classList.toggle('alarm', a.level === 'alarm');
+    const chip = q('chip'); chip.textContent = chipTxt; chip.className = 'chip ' + chipCls;
+    q('exp').innerHTML = run
+      ? `<b>${esc(run.experiment || run.name)}</b><span>${esc([v.hist ? 'Last run' : '', run.name, run.yeast].filter(Boolean).join(' · '))}</span>`
+      : `<b style="color:var(--muted)">No experiment running</b><span>${isSennos(t) ? 'Runs start in the Sennos app' : 'Open the tank to start a run'}</span>`;
+    // A reading this tank's sensors never report in 24 h (for example DO on a Sennos without that module) says so.
+    const missing = (k, key) => r && r[key] == null && !range24(v, key);
+    for (const [k, key] of [['ph', 'ph'], ['temp', 'tempC'], ['do', 'doMgL']]) el.querySelector('.read.' + k).classList.toggle('off', !r || r[key] == null);
+
+    // pH: where it sits between 3.0 and 5.8, with the pitch value marked
+    const p0 = v.p0;
+    q('ph').textContent = fmtPh(r?.ph);
+    setMeter(q('ph-m'), { lo: 3.0, hi: 5.8, value: r?.ph, tick: p0?.ph });
+    q('ph-sub').textContent = missing('ph', 'ph') ? 'No sensor' : r?.ph != null && p0?.ph != null ? `Pitch ${fmtPh(p0.ph)} · ${(r.ph - p0.ph >= 0 ? '+' : '−') + Math.abs(r.ph - p0.ph).toFixed(2)}` : '';
+
+    // Temperature: distance from setpoint, green band = within the warning limit
+    q('temp').innerHTML = r?.tempC != null ? `${fmtT(r.tempC)}<small>°${unit}</small>` : '–';
+    const span = CONFIG.tempWarnC * 2.5;
+    const dev = r?.tempC != null && s.setpointC != null ? r.tempC - s.setpointC : null;
+    setMeter(q('temp-m'), { lo: -span, hi: span, value: dev, band: [-CONFIG.tempWarnC, CONFIG.tempWarnC], tick: 0 });
+    const tr = range24(v, 'tempC');
+    q('temp-sub').textContent = missing('temp', 'tempC') ? 'No sensor' : dev != null ? `Set ${fmtT(s.setpointC)}° · ${dev >= 0 ? '+' : '−'}${dUnit(Math.abs(dev)).toFixed(1)}°`
+      : r?.tempC != null && tr ? `24 h ${fmtT(tr[0])}–${fmtT(tr[1])}°` : '';
+    el.querySelector('.read.temp').classList.toggle('flag', a.tempFlag);
+
+    // DO: 0 to 1 mg/L scale, green band = below 0.3 mg/L. A Sennos with a conductivity sensor and no DO shows conductivity here.
+    const dr = range24(v, 'doMgL'), cr = range24(v, 'condUs');
+    const useCond = isSennos(t) && r?.doMgL == null && !dr && (r?.condUs != null || !!cr);
+    const doTile = el.querySelector('.read.do');
+    doTile.classList.toggle('cond', useCond);
+    doTile.querySelector('.lbl').textContent = useCond ? 'Conductivity' : 'DO';
+    if (useCond) {
+      doTile.classList.toggle('off', r?.condUs == null);
+      q('do').innerHTML = r?.condUs != null ? `${fmtCond(r.condUs)}<small>µS/cm</small>` : '–';
+      setMeter(q('do-m'), { value: null });
+      q('do-sub').textContent = cr ? `24 h ${fmtCond(cr[0])}–${fmtCond(cr[1])}` : '';
+    } else {
+      q('do').innerHTML = r?.doMgL != null ? `${fmtDo(r.doMgL)}<small>mg/L</small>` : '–';
+      setMeter(q('do-m'), { lo: 0, hi: 1, value: r?.doMgL != null ? Math.min(r.doMgL, 1) : null, band: [0, 0.3] });
+      q('do-sub').textContent = missing('do', 'doMgL') ? 'No sensor' : r?.doMgL != null && dr ? `24 h ${fmtDo(dr[0])}–${fmtDo(dr[1])}` : '';
+    }
+
+    // Fermentation progress from hand-entered gravity
+    const gi = gravityInfo(run, v.hist ? v.pts : undefined), gc = measFor(run, 'gcms').length;
+    q('prog').innerHTML = !run ? '' : gi
+      ? `<span class="g">${fmtSG(gi.og)} <span>→</span> ${fmtSG(gi.cur.value)}</span>
+         <span class="bar" title="Progress toward target final gravity"><i style="width:${((gi.prog ?? 0) * 100).toFixed(0)}%"></i></span>
+         <span class="abv">${gi.abvMeas ? gi.abvMeas.value.toFixed(1) + '%' : '~' + gi.abvEst.toFixed(1) + '%'} <small>${gi.abvMeas ? 'Alcolyzer' : 'est. ABV'}</small></span>
+         <span class="note">${gi.att != null ? Math.round(gi.att) + '% apparent attenuation' : ''}${gi.fg ? ` · target ${fmtSG(gi.fg)}` : ''} · ${gi.cur.auto ? 'Sennos gravity' : 'gravity'} ${ago(gi.cur.ts)}${gc ? ` · ${gc} GC-MS sample${gc === 1 ? '' : 's'}` : ''}</span>`
+      : `<span class="none">${v.hist ? 'No gravity readings in this run.' : isSennos(t) ? 'No gravity from the Sennos yet.' : 'No gravity readings yet. Open the tank to add one.'}</span>`;
+    q('cool')?.classList.toggle('on', !!s.chiller);
+    q('heat')?.classList.toggle('on', !!s.heater);
+    const pr = q('pres'); if (pr) { pr.hidden = r?.pressurePsi == null; pr.textContent = `${fmtPsi(r?.pressurePsi)} psi`; }
+    const al = q('alert'); al.hidden = !a.msg; al.textContent = a.msg; al.className = 'alert' + (a.level === 'alarm' ? ' alarm' : '');
+    q('ago').textContent = empty || v.hist ? '' : r ? ago(r.ts) : '';
+  }
+  $('summary').innerHTML =
+    `<span class="sum"><b>${active}</b>of ${state.tanks.length} in use</span>` +
+    `<span class="sum warn"><b>${warn}</b>warning${warn === 1 ? '' : 's'}</span>` +
+    `<span class="sum alarm"><b>${alarm}</b>alarm${alarm === 1 ? '' : 's'}</span>`;
+  const src = $('source');
+  src.textContent = state.error ? 'Data error' : source.label;
+  src.className = 'source' + (state.error ? ' err' : source.live ? ' live' : '');
+  src.title = state.error || (source.live ? '' : 'Made-up values for layout testing. Not real readings.');
+  $('updated').textContent = state.error ? state.error : state.lastOk ? `Updated ${new Date(state.lastOk).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' })}` : 'Loading…';
+  if (state.open != null) renderDetailInfo();
+}
+
+/* ---------- Charts ---------- */
+// series: [{pts: [{ts, v}], kind: 'line'|'area'|'dots'|'hollow'|'diamond'|'dash', cls}]
+function drawChart(svg, { from, to, series, markers = [], floor = null, minSpan = 0, dec = null, elapsed = false, empty = 'No readings in this range' }) {
+  const box = svg.getBoundingClientRect();
+  const W = Math.max(200, box.width), Hh = Math.max(100, box.height);
+  svg.setAttribute('viewBox', `0 0 ${W} ${Hh}`);
+  const all = series.flatMap(s => s.pts.map(p => p.v)).filter(v => v != null);
+  if (!series.some(s => s.main && s.pts.some(p => p.v != null))) { svg.innerHTML = `<text class="nodata" x="${W / 2}" y="${Hh / 2}" text-anchor="middle">${esc(empty)}</text>`; return; }
+  const L = 54, R = 16, T = 12, B = 24;
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if (hi - lo < minSpan) { const m = (hi + lo) / 2; lo = m - minSpan / 2; hi = m + minSpan / 2; }
+  const pad = (hi - lo) * 0.08 || 0.5; lo -= pad; hi += pad;
+  if (floor != null) lo = Math.max(lo, floor);
+  const rawStep = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= rawStep);
+  lo = Math.floor(lo / step + 1e-9) * step; hi = Math.ceil(hi / step - 1e-9) * step;
+  const x = ts => L + (ts - from) / (to - from) * (W - L - R);
+  const y = v => T + (hi - v) / (hi - lo) * (Hh - T - B);
+  const d = dec ?? (step < 0.01 ? 3 : step < 0.1 ? 2 : (step < 1 || !Number.isInteger(step)) ? 1 : 0);
+  let g = '';
+  for (let v = lo; v <= hi + step / 2; v += step) {
+    g += `<line class="grid-l" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"></line><text class="ax" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(d)}</text>`;
+  }
+  const spanH = (to - from) / H;
+  const tickH = elapsed ? (spanH <= 48 ? 6 : spanH <= 260 ? 24 : spanH <= 520 ? 48 : 120)
+    : spanH <= 30 ? 4 : spanH <= 80 ? 12 : spanH <= 200 ? 24 : spanH <= 500 ? 48 : 120;
+  const first = Math.ceil(from / (tickH * H)) * tickH * H;
+  for (let ts = first; ts <= to; ts += tickH * H) {
+    const dt = new Date(ts);
+    const lbl = elapsed ? (tickH < 24 ? `${Math.round(ts / H)} h` : `Day ${Math.round(ts / DAY)}`)
+      : tickH >= 24 || dt.getHours() === 0 ? dt.toLocaleDateString([], { month: 'short', day: 'numeric' }) : dt.toLocaleTimeString([], { hour: 'numeric' });
+    g += `<text class="ax" x="${x(ts)}" y="${Hh - 6}" text-anchor="middle">${lbl}</text>`;
+  }
+  for (const m of markers) {
+    if (m < from || m > to) continue;
+    g += `<line class="gc" x1="${x(m)}" x2="${x(m)}" y1="${T}" y2="${Hh - B}"></line><text class="gct" x="${x(m) + 3}" y="${T + 9}">GC</text>`;
+  }
+  for (const s of series) {
+    const pts = s.pts.filter(p => p.v != null && p.ts >= from - H && p.ts <= to + H);
+    if (!pts.length) continue;
+    const path = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.ts).toFixed(1)},${y(p.v).toFixed(1)}`).join('');
+    if (s.kind === 'area') {
+      g += `<path class="ar ${s.cls}" d="${path}L${x(pts[pts.length - 1].ts).toFixed(1)},${y(lo)}L${x(pts[0].ts).toFixed(1)},${y(lo)}Z"></path>`;
+      g += `<path class="ln ${s.cls}" d="${path}"></path>`;
+      const lp = pts[pts.length - 1];
+      g += `<circle class="dot ${s.cls}" cx="${x(lp.ts)}" cy="${y(lp.v)}" r="5"></circle>`;
+    } else if (s.kind === 'line') {
+      g += `<path class="ln ${s.cls}" d="${path}"></path>`;
+      const lp = pts[pts.length - 1];
+      g += `<circle class="dot ${s.cls}" cx="${x(lp.ts)}" cy="${y(lp.v)}" r="5"></circle>`;
+    } else if (s.kind === 'spc') {
+      g += `<path class="ln dash spc ${s.cls}" d="${path}"></path>`;
+    } else if (s.kind === 'sp') {
+      g += `<path class="sp" d="${path}"></path>`;
+    } else if (s.kind === 'hline') {
+      g += `<line class="sp" x1="${L}" x2="${W - R}" y1="${y(pts[0].v)}" y2="${y(pts[0].v)}"></line>`;
+    } else {
+      if (s.connect) g += `<path class="ln ${s.cls}${s.kind === 'hollow' ? ' dash' : ''}" d="${path}"></path>`;
+      for (const p of pts) {
+        const cx = x(p.ts), cy = y(p.v);
+        if (s.kind === 'diamond') g += `<path class="dia ${s.cls}" d="M${cx},${cy - 8}L${cx + 8},${cy}L${cx},${cy + 8}L${cx - 8},${cy}Z"><title>${esc(p.label || '')}</title></path>`;
+        else g += `<circle class="${s.kind === 'hollow' ? 'hollow' : 'dot'} ${s.cls}" cx="${cx}" cy="${cy}" r="${s.kind === 'hollow' ? 5 : 5.5}"><title>${esc(p.label || '')}</title></circle>`;
+      }
+    }
+  }
+  svg.innerHTML = g;
+}
+
+/* ---------- Detail ---------- */
+// A finished run's ranges end where the run ended.
+function rangeBounds(v) {
+  const run = v?.run, end = v?.hist ? run.end : Date.now();
+  if (state.range === '3d') return [end - 72 * H, end];
+  if (state.range === 'run') return [run ? run.start : end - 72 * H, end];
+  return [end - 24 * H, end];
+}
+
+function renderDetailInfo() {
+  const v = detailView(); if (!v) return;
+  const t = v.tank, { r, s, run } = v, cur = runFor(t.id);
+  $('dName').innerHTML = `${esc(t.name)}${run ? ` · <span>${esc(run.experiment || run.name)}</span>` : ''}`;
+  $('dMeta').textContent = `Tank ${t.id} · ${ROOM_NAME[t.room] || 'Room ' + t.room} · ${v.hist ? `Finished run, ${runDates(run)}` : chipFor(v)[0]}`;
+  $('dPurposeBox').hidden = !run?.purpose;
+  $('dPurpose').textContent = run?.purpose || '';
+  // Sennos runs start and stop in the Sennos app, so those tanks get neither button.
+  $('bStart').hidden = isSennos(t) || !!cur;
+  $('bStop').hidden = isSennos(t) || !cur || run?.runId !== cur.runId;
+  $('bStart').disabled = $('bStop').disabled = !canEdit();
+  $('bRecipe').disabled = !run?.recipeId || !state.recipes[run.recipeId];
+  $('bCmpThis').disabled = !run;
+  document.querySelectorAll('#detail [data-add]').forEach(b => { b.disabled = !run || !canEdit(); });
+  $('cPh').textContent = fmtPh(r?.ph);
+  $('cTemp').textContent = r?.tempC != null ? `${fmtT(r.tempC)} °${unit}` : '–';
+  $('cDo').textContent = r?.doMgL != null ? `${fmtDo(r.doMgL)} mg/L` : '–';
+  $('cPres').textContent = r?.pressurePsi != null ? `${fmtPsi(r.pressurePsi)} psi` : '–';
+  $('cCond').textContent = r?.condUs != null ? `${fmtCond(r.condUs)} µS/cm` : '–';
+  $('dCtl').hidden = isSennos(t);
+  $('kGrav').innerHTML = (isSennos(t) ? '<span><i class="k-line"></i>Sennos</span><span><i class="k-dot"></i>Hand reading</span>' : '') + '<span><i class="k-sp"></i>Target FG</span>';
+  const gcKey = measFor(run, 'gcms').length ? '<span><i class="k-gc"></i>GC-MS sample</span>' : '';
+  $('kPh').innerHTML = gcKey; $('kDo').innerHTML = gcKey;
+  $('kTemp').innerHTML = (s.setpointC != null ? `<span><i class="k-sp"></i>Setpoint ${fmtT(s.setpointC)} °${unit}</span>` : '')
+    + (isSennos(t) && r?.tempAmbC != null ? `<span><i class="k-amb"></i>Room ${fmtT(r.tempAmbC)} °${unit}</span>` : '') + gcKey;
+  $('dSet').textContent = s.setpointC != null ? `${fmtT(s.setpointC)}°${unit}` : '–';
+  $('dCool').setAttribute('aria-checked', String(!!s.chiller));
+  $('dHeat').setAttribute('aria-checked', String(!!s.heater));
+  const gi = gravityInfo(run, v.pts);
+  $('cGrav').textContent = gi ? fmtSG(gi.cur.value) : '';
+  $('cAbv').textContent = gi ? (gi.abvMeas ? `${gi.abvMeas.value.toFixed(1)}%` : `~${gi.abvEst.toFixed(1)}%`) : '';
+
+  $('dRun').innerHTML = run ? `
+    <dt>Experiment</dt><dd>${esc(run.experiment || '–')}</dd>
+    <dt>Batch</dt><dd>${esc(run.name || '–')}</dd>
+    <dt>Brand</dt><dd>${esc(run.brand || '–')}</dd>
+    <dt>Yeast</dt><dd>${esc(run.yeast || '–')}</dd>
+    <dt>Pitched</dt><dd>${fmtWhen(run.start)}</dd>${v.hist ? `
+    <dt>Ended</dt><dd>${fmtWhen(run.end)}</dd>
+    <dt>Length</dt><dd>${((run.end - run.start) / DAY).toFixed(1)} days</dd>
+    <dt>Final reading</dt><dd>${r ? fmtWhen(r.ts) : '–'}</dd>` : `
+    <dt>Day</dt><dd>${dayOf(run)}</dd>
+    <dt>Last reading</dt><dd>${r ? ago(r.ts) : '–'}</dd>`}` : `<dt>Status</dt><dd>Empty</dd>`;
+  $('dRunTitle').textContent = v.hist ? 'Finished run' : 'Current run';
+
+  // Progress and steadiness
+  const h = v.h24;
+  let inBand = null;
+  if (h.length && s.setpointC != null) inBand = h.filter(p => Math.abs(p.tempC - (p.setpointC ?? s.setpointC)) < CONFIG.tempWarnC).length / h.length * 100;
+  const p0 = v.p0;
+  const rows = [];
+  if (gi) {
+    rows.push(['Original gravity', fmtSG(gi.og)], [gi.cur.auto ? 'Current gravity, Sennos' : 'Current gravity', fmtSG(gi.cur.value)]);
+    if (gi.fg) rows.push(['Target final gravity', fmtSG(gi.fg)]);
+    if (gi.att != null) rows.push(['Apparent attenuation', Math.round(gi.att) + '%']);
+    rows.push(['ABV, estimated from gravity', gi.abvEst.toFixed(1) + '%']);
+    if (gi.abvMeas) rows.push(['ABV, Alcolyzer', gi.abvMeas.value.toFixed(1) + '%']);
+  }
+  if (inBand != null) rows.push([`Temp within ±${dUnit(CONFIG.tempWarnC).toFixed(1)}° of set, 24 h`, inBand.toFixed(0) + '%']);
+  if (r?.ph != null && p0?.ph != null) rows.push(['pH change since pitch', (r.ph - p0.ph >= 0 ? '+' : '−') + Math.abs(r.ph - p0.ph).toFixed(2)]);
+  $('dProg').innerHTML = rows.length ? rows.map(([k, v]) => `<span>${esc(k)}</span><b>${esc(v)}</b>`).join('') : '<span>No measurements yet.</span>';
+
+  renderLists(run);
+}
+
+function entryLi(m, deletable) {
+  const link = safeUrl(m.link);
+  const what = m.type === 'gcms' ? `${esc(m.method || 'GC-MS')}${m.sample ? ` <em>${esc(m.sample)}</em>` : ''}`
+    : m.type === 'gravity' ? `${fmtSG(m.value)} <em>SG</em>` : `${Number(m.value).toFixed(1)}% <em>ABV, Alcolyzer</em>`;
+  return `<li><div><div class="what">${what}</div><div class="when">${fmtWhen(m.ts)}</div></div>
+    <div class="act">
+      ${link ? `<a class="btn" href="${esc(link)}" target="_blank" rel="noopener">Open data</a>` : m.type === 'gcms' ? '<span class="tag">No file linked</span>' : ''}
+      ${deletable ? `<button type="button" class="btn danger" data-del="${esc(m.id)}">Delete</button>` : ''}</div>
+    ${m.note ? `<div class="note">${esc(m.note)}</div>` : ''}</li>`;
+}
+function canDelete(m) {
+  const st = state.store; if (!st || !canEdit()) return false;
+  if (st.viaSource) return !!m.fromManual;
+  return st.entries.some(e => e.id === m.id);
+}
+function renderLists(run) {
+  const gc = measFor(run, 'gcms').slice().reverse();
+  $('dGc').innerHTML = gc.length ? gc.map(m => entryLi(m, canDelete(m))).join('') : '<li class="empty">No GC-MS samples linked to this run yet.</li>';
+  const hand = measFor(run).filter(m => m.type === 'gravity' || m.type === 'abv').reverse();
+  $('dHand').innerHTML = hand.length ? hand.slice(0, 14).map(m => entryLi(m, canDelete(m))).join('') : '<li class="empty">No gravity or ABV measurements yet.</li>';
+}
+
+let detailPts = [];
+async function loadDetail() {
+  const id = state.open, key = state.openRun; if (id == null) return;
+  let v = detailView(); if (!v) return;
+  // A finished run's charts come from its own readings; a Sennos run also needs them for its gravity line.
+  if (v.run && (v.hist || isSennos(v.tank))) { await loadRunPts(v.run); v = detailView(); }
+  const [from, to] = rangeBounds(v);
+  if (v.hist) detailPts = v.pts.filter(p => p.ts >= from && p.ts <= to);
+  else try { detailPts = await source.history(id, from, to); } catch (e) { detailPts = []; state.error = e.message; }
+  if (state.open !== id || state.openRun !== key) return;
+  renderDetailInfo();
+  drawDetail(from, to);
+}
+function drawDetail(from, to) {
+  if (state.open == null) return;
+  const v = detailView(); if (!v) return;
+  if (from == null) [from, to] = rangeBounds(v);
+  const run = v.run;
+  const markers = measFor(run, 'gcms').map(m => m.ts);
+  const P = k => detailPts.map(p => ({ ts: p.ts, v: p[k] }));
+  // A Sennos tank shows a chart only for the sensors its device reports (an M3 has fewer than the old BrewIQ).
+  const sennos = isSennos(v.tank);
+  const runAll = v.pts || [];
+  const has = k => detailPts.some(p => p[k] != null) || runAll.some(p => p[k] != null);
+  const show = (svg, on) => { svg.parentElement.hidden = !on; return on; };
+  if (show($('chPh'), !sennos || has('ph'))) drawChart($('chPh'), { from, to, markers, minSpan: 0.3, series: [{ pts: P('ph'), kind: 'area', cls: 's-ph', main: true }] });
+  drawChart($('chTemp'), { from, to, markers, minSpan: unit === 'F' ? 3 : 1.6, series: [
+    { pts: detailPts.map(p => ({ ts: p.ts, v: p.setpointC == null ? null : toUnit(p.setpointC) })), kind: 'sp' },
+    { pts: detailPts.map(p => ({ ts: p.ts, v: p.tempAmbC == null ? null : toUnit(p.tempAmbC) })), kind: 'spc', cls: 's-amb' },
+    { pts: detailPts.map(p => ({ ts: p.ts, v: p.tempC == null ? null : toUnit(p.tempC) })), kind: 'area', cls: 's-temp', main: true }] });
+  if (show($('chDo'), !sennos || has('doMgL'))) drawChart($('chDo'), { from, to, markers, floor: 0, minSpan: 0.5, series: [{ pts: P('doMgL'), kind: 'area', cls: 's-do', main: true }] });
+  if (show($('chPres'), sennos && has('pressurePsi'))) drawChart($('chPres'), { from, to, floor: 0, minSpan: 1, dec: 1, series: [{ pts: P('pressurePsi'), kind: 'area', cls: 's-pres', main: true }] });
+  if (show($('chCond'), sennos && has('condUs'))) drawChart($('chCond'), { from, to, minSpan: 50, dec: 0, series: [{ pts: P('condUs'), kind: 'area', cls: 's-cond', main: true }] });
+
+  // Gravity and ABV always cover the whole run
+  const rf = run ? run.start - 2 * H : Date.now() - 72 * H, rt = (v.hist ? run.end : Date.now()) + 2 * H;
+  const live = run && v.pts ? autoGravity(run, v.pts) : [];
+  const g = measFor(run, 'gravity'), gi = gravityInfo(run, live.length ? v.pts : undefined);
+  const noGrav = v.hist ? 'No gravity readings in this run.' : live.length || !sennos ? 'No gravity readings yet. Tap + Gravity to add one.' : 'No gravity from the Sennos yet.';
+  drawChart($('chGrav'), { from: rf, to: rt, dec: 3, minSpan: 0.02, empty: noGrav, series: [
+    ...(gi?.fg ? [{ pts: [{ ts: rf, v: gi.fg }], kind: 'hline' }] : []),
+    { pts: live.map(m => ({ ts: m.ts, v: m.value })), kind: 'line', cls: 's-amber', main: true },
+    { pts: g.map(m => ({ ts: m.ts, v: m.value, label: `${fmtSG(m.value)} · ${fmtWhen(m.ts)}` })), kind: 'dots', connect: !live.length, cls: 's-amber', main: true }] });
+  const estFrom = list => gi ? list.filter(m => m.ts > list[0].ts || m.value < gi.og).map(m => ({ ts: m.ts, v: abvFromGravity(gi.og, m.value), label: `Estimated ${abvFromGravity(gi.og, m.value).toFixed(1)}% from SG ${fmtSG(m.value)}` })) : [];
+  const meas = measFor(run, 'abv').map(m => ({ ts: m.ts, v: m.value, label: `Alcolyzer ${Number(m.value).toFixed(1)}%` }));
+  drawChart($('chAbv'), { from: rf, to: rt, floor: 0, minSpan: 2, dec: 1, empty: 'Add gravity readings to estimate ABV.', series: [
+    // live Sennos gravity gives a continuous estimate: a dashed line instead of hollow points
+    { pts: estFrom(live), kind: 'spc', cls: 's-amber', main: true },
+    { pts: estFrom(g), kind: 'hollow', connect: !live.length, cls: 's-amber', main: true },
+    { pts: meas, kind: 'diamond', cls: 's-amber', main: true }] });
+}
+function openDetail(id, runId = null) {
+  state.open = id; state.openRun = runId;
+  // A finished run opens on the whole run; a running one on the last 24 hours.
+  state.range = detailView()?.hist ? 'run' : '24h';
+  $('ranges').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.range === state.range)));
+  $('back').textContent = state.backTo === 'cmp' ? '← Back to compare' : '← All fermenters';
+  $('detail').hidden = false;
+  $('detail').scrollTop = 0;
+  renderDetailInfo();
+  loadDetail();
+  $('back').focus();
+}
+function closeDetail() {
+  const id = state.open; state.open = null; state.openRun = null; $('detail').hidden = true;
+  if (state.backTo === 'cmp') { state.backTo = null; $('cmp').hidden = false; renderCompare(); $('cBack').focus(); return; }
+  document.querySelector(`.tank[data-id="${id}"]`)?.focus();
+}
+
+/* ---------- Editing on or off ---------- */
+const canEdit = () => !!editKey && !!state.store?.canWrite;
+function applyEditing() {
+  document.body.classList.toggle('view-only', !editKey);
+  $('editPill').hidden = !editKey;
+  if (state.open != null) renderDetailInfo();
+  if (!$('mRecipes').hidden) renderRecipeList();
+}
+function openKey() {
+  const on = !!editKey;
+  $('kForm').reset();
+  $('kSub').textContent = on ? 'This screen can start and stop runs, enter measurements and write recipes.'
+    : 'This screen is view-only. Enter the editor key to start and stop runs, enter measurements and write recipes here.';
+  $('kField').hidden = on; $('kOn').hidden = on; $('kOff').hidden = !on;
+  $('kHint').textContent = source.live ? 'The key saved as EDIT_KEY in the Google Sheet\'s Apps Script. This screen remembers it.'
+    : 'Demo data: any key works here.';
+  $('kErr').textContent = ''; $('kOn').disabled = false;
+  $('mEdit').hidden = false;
+  (on ? $('kOff') : $('kKey')).focus();
+}
+async function saveKey(ev) {
+  ev.preventDefault();
+  const k = $('kKey').value.trim();
+  if (!k) { $('kErr').textContent = 'Enter the editor key.'; $('kKey').focus(); return; }
+  $('kOn').disabled = true; $('kErr').textContent = '';
+  try {
+    if (state.store?.checkKey) await state.store.checkKey(k);
+    setEditKey(k);
+    $('mEdit').hidden = true;
+    toast('Editing is on for this screen');
+  } catch (e) {
+    $('kOn').disabled = false;
+    $('kErr').textContent = /wrong editor key/i.test(e?.message || '') ? 'That key is not right. Check EDIT_KEY in the Apps Script\'s Script properties.' : `Could not check the key: ${e?.message || 'no answer'}.`;
+  }
+}
+function turnOffEditing() { setEditKey(null); $('mEdit').hidden = true; toast('This screen is view-only now'); }
+// The way in is hidden from passers-by: hold the logo for 3 seconds (or open the app's address with #edit at the end).
+function holdLogo() {
+  const logo = $('logo'); let t = null;
+  const stop = () => { clearTimeout(t); t = null; };
+  logo.addEventListener('pointerdown', () => { stop(); t = setTimeout(() => { t = null; openKey(); }, 3000); });
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) logo.addEventListener(ev, stop);
+  logo.addEventListener('contextmenu', e => e.preventDefault());
+  logo.draggable = false;
+}
+
+/* ---------- Recipes ---------- */
+function mergeRecipes() {
+  const mine = state.store && !state.store.viaSource ? state.store.recipes || {} : {};
+  state.recipes = { ...state.srcRecipes, ...mine };
+  if (!$('mRecipes').hidden) renderRecipeList();
+  if (state.open != null) renderDetailInfo();
+}
+async function reloadRecipes() {
+  try { state.srcRecipes = await source.recipes(); } catch { /* keep previous */ }
+  mergeRecipes();
+}
+const recipeTitle = (id, r) => r?.title || id;
+function renderRecipeList() {
+  const list = Object.entries(state.recipes).sort((a, b) => String(recipeTitle(...a)).localeCompare(String(recipeTitle(...b))));
+  const used = id => state.runs.filter(r => r.recipeId === id).length;
+  $('lSub').textContent = `${list.length} recipe${list.length === 1 ? '' : 's'}`;
+  $('lList').innerHTML = list.length ? list.map(([id, r]) => {
+    const bits = [r.style, r.og ? `OG ${fmtSG(+r.og)}` : '', r.fg ? `FG ${fmtSG(+r.fg)}` : '', used(id) ? `used in ${used(id)} run${used(id) === 1 ? '' : 's'}` : ''].filter(Boolean);
+    return `<li><div><div class="what">${esc(recipeTitle(id, r))}</div><div class="when">${esc(bits.join(' · '))}</div></div>
+      <div class="act"><button type="button" class="btn" data-view="${esc(id)}">View</button><button type="button" class="btn edit-only" data-edit="${esc(id)}">Edit</button></div></li>`;
+  }).join('') : '<li><div class="when">No recipes yet.</div></li>';
+}
+function openRecipes() {
+  renderRecipeList();
+  $('mRecipes').hidden = false;
+  $('lClose').focus();
+}
+let recipeOpen = null;
+function openRecipe(id) {
+  if (typeof id !== 'string') { const run = detailView()?.run; id = run?.recipeId; }
+  const rec = id && state.recipes[id];
+  if (!rec) return;
+  recipeOpen = id;
+  $('rTitle').textContent = rec.title || id;
+  $('rSub').textContent = [rec.style, rec.batchGal ? `${rec.batchGal} gal batch` : ''].filter(Boolean).join(' · ');
+  const totalLb = (rec.grains || []).reduce((a, g) => a + (g[1] || 0), 0);
+  const sum = [['OG', rec.og ? fmtSG(+rec.og) : '–'], ['FG', rec.fg ? fmtSG(+rec.fg) : '–'], ['IBU', rec.ibu ?? '–'], ['SRM', rec.srm ?? '–'],
+    ['ABV', rec.og && rec.fg ? abvFromGravity(+rec.og, +rec.fg).toFixed(1) + '%' : '–']];
+  const tbl = (head, rows) => rows.length ? `<table class="r-tbl"><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>` : '<p class="r-notes">None listed.</p>';
+  const mashT = f => f == null ? '–' : unit === 'F' ? `${f} °F` : `${((f - 32) * 5 / 9).toFixed(0)} °C`;
+  $('rBody').innerHTML = `<div style="display:grid;gap:18px">
+    <div class="r-sum">${sum.map(([k, v]) => `<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
+    <div class="r-sec"><h3>Grain bill</h3>${tbl(['Ingredient', 'Weight', 'Share'], (rec.grains || []).map(g => `<tr><td>${esc(g[0])}</td><td class="n">${g[1] ?? '–'} lb</td><td class="n">${totalLb ? Math.round(g[1] / totalLb * 100) + '%' : ''}</td></tr>`))}</div>
+    <div class="r-sec"><h3>Mash</h3>${tbl(['Step', 'Temperature', 'Time'], (rec.mash || []).map(m => `<tr><td>${esc(m[0])}</td><td class="n">${mashT(m[1])}</td><td class="n">${m[2] ?? '–'} min</td></tr>`))}</div>
+    <div class="r-sec"><h3>Hops</h3>${tbl(['Variety', 'Amount', 'Use'], (rec.hops || []).map(h => `<tr><td>${esc(h[0])}</td><td class="n">${h[1] ?? '–'} oz</td><td>${esc(h[2])}</td></tr>`))}</div>
+    <div class="r-sec"><h3>Yeast</h3>${tbl(['Strain', 'Pitch'], (rec.yeast || []).map(y => `<tr><td>${esc(y[0])}</td><td>${esc(y[1])}</td></tr>`))}</div>
+    ${rec.notes ? `<div class="r-sec"><h3>Notes</h3><p class="r-notes">${esc(rec.notes)}</p></div>` : ''}</div>`;
+  $('mRecipe').hidden = false;
+  $('rClose').focus();
+}
+const ROWS = {
+  grains: { box: 'xGrains', cols: [['Ingredient', 'text', '1fr'], ['lb', 'decimal', '90px']] },
+  mash: { box: 'xMash', cols: [['Step', 'text', '1fr'], ['°F', 'decimal', '80px'], ['Minutes', 'decimal', '90px']] },
+  hops: { box: 'xHops', cols: [['Variety', 'text', '1fr'], ['oz', 'decimal', '80px'], ['Use', 'text', '1fr']] },
+  yeast: { box: 'xYeast', cols: [['Strain', 'text', '1fr'], ['Pitch', 'text', '1fr']] },
+};
+const rowGrid = kind => ROWS[kind].cols.map(c => `minmax(0, ${c[2]})`).join(' ') + ' 46px';
+function addRecipeRow(kind, vals = []) {
+  const box = $(ROWS[kind].box);
+  if (!box.children.length) box.insertAdjacentHTML('beforeend', `<div class="rrow rhead" style="grid-template-columns:${rowGrid(kind)}">${ROWS[kind].cols.map(c => `<span>${c[0]}</span>`).join('')}<span></span></div>`);
+  const n = box.children.length;
+  box.insertAdjacentHTML('beforeend', `<div class="rrow" style="grid-template-columns:${rowGrid(kind)}">${ROWS[kind].cols.map((c, i) =>
+    `<input id="x-${kind}-${n}-${i}" aria-label="${c[0]}" autocomplete="off" maxlength="120"${c[1] === 'decimal' ? ' inputmode="decimal"' : ''} value="${esc(vals[i] ?? '')}">`).join('')}
+    <button type="button" class="btn" data-delrow aria-label="Remove row">✕</button></div>`);
+  return box.lastElementChild;
+}
+let recipeEditing = null;
+function openRecipeEditor(id = null) {
+  const rec = id ? state.recipes[id] : null;
+  recipeEditing = id;
+  $('xForm').reset();
+  $('xTitle').textContent = rec ? `Edit ${rec.title || id}` : 'New recipe';
+  $('xName').value = rec?.title ?? ''; $('xStyle').value = rec?.style ?? ''; $('xBatch').value = rec?.batchGal ?? '';
+  $('xOg').value = rec?.og ?? ''; $('xFg').value = rec?.fg ?? ''; $('xIbu').value = rec?.ibu ?? ''; $('xSrm').value = rec?.srm ?? '';
+  $('xNotes').value = rec?.notes ?? '';
+  for (const kind of Object.keys(ROWS)) {
+    $(ROWS[kind].box).innerHTML = '';
+    const have = rec?.[kind] || [];
+    (have.length ? have : [[]]).forEach(v => addRecipeRow(kind, v));
+  }
+  $('xErr').textContent = ''; $('xWhere').textContent = state.store?.where || ''; $('xSave').disabled = false;
+  $('mRecipe').hidden = true; $('mRecipes').hidden = true;
+  $('mRecEdit').hidden = false;
+  $('xName').focus();
+}
+function readRows(kind) {
+  return [...$(ROWS[kind].box).querySelectorAll('.rrow:not(.rhead)')].map(r => [...r.querySelectorAll('input')].map(i => i.value.trim()))
+    .filter(v => v[0]);
+}
+const slug = t => String(t).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'recipe';
+async function saveRecipeForm(ev) {
+  ev.preventDefault();
+  const err = m => { $('xErr').textContent = m; };
+  const title = $('xName').value.trim();
+  if (!title) { $('xName').focus(); return err('Give the recipe a title.'); }
+  const n = (v, lo, hi) => { v = String(v).trim().replace(',', '.'); if (!v) return ''; const x = +v; return isFinite(x) && x >= lo && x <= hi ? x : NaN; };
+  const og = n($('xOg').value, 0.98, 1.2), fg = n($('xFg').value, 0.98, 1.2);
+  if (Number.isNaN(og) || Number.isNaN(fg)) return err('OG and FG must be between 0.980 and 1.200, for example 1.054.');
+  const batch = n($('xBatch').value, 0, 10000), ibu = n($('xIbu').value, 0, 200), srm = n($('xSrm').value, 0, 100);
+  if ([batch, ibu, srm].some(Number.isNaN)) return err('Batch size, IBU and SRM must be numbers.');
+  const num = (v, label) => { if (!v) return null; const x = +String(v).replace(',', '.'); if (!isFinite(x) || x < 0) throw new Error(`${label} must be a number.`); return x; };
+  let rec;
+  try {
+    rec = { title: title.slice(0, 120), style: $('xStyle').value.trim().slice(0, 120), batchGal: batch, og, fg, ibu, srm,
+      grains: readRows('grains').map(([i, lb]) => [i.slice(0, 120), num(lb, `${i}'s weight`)]),
+      mash: readRows('mash').map(([i, f, m]) => [i.slice(0, 120), num(f, `${i}'s temperature`), num(m, `${i}'s time`)]),
+      hops: readRows('hops').map(([i, oz, use]) => [i.slice(0, 120), num(oz, `${i}'s amount`), use.slice(0, 120)]),
+      yeast: readRows('yeast').map(([i, p]) => [i.slice(0, 120), p.slice(0, 120)]),
+      notes: $('xNotes').value.trim().slice(0, 2000) };
+  } catch (e) { return err(e.message); }
+  let id = recipeEditing;
+  if (!id) { id = `${slug(title)}-${Date.now().toString(36).slice(-4)}`; }
+  $('xSave').disabled = true; err('');
+  try {
+    await state.store.saveRecipe(id, rec);
+    if (state.store.viaSource) await reloadRecipes(); else mergeRecipes();
+    $('mRecEdit').hidden = true;
+    toast(`${rec.title} saved`);
+    openRecipe(id);
+  } catch (e) {
+    $('xSave').disabled = false;
+    err(`Not saved: ${e?.message || 'the store did not answer'}. Try again.`);
+  }
+}
+
+/* ---------- Hand entry ---------- */
+const ENTRY = {
+  gravity: { title: 'Add gravity reading', label: 'Specific gravity', unit: 'SG', hint: 'Hydrometer or refractometer reading, for example 1.012.', min: 0.98, max: 1.2 },
+  abv: { title: 'Add ABV measurement', label: 'Alcohol by volume', unit: '% ABV', hint: 'From the Anton Paar Alcolyzer, for example 5.2.', min: 0, max: 20 },
+  gcms: { title: 'Link a GC-MS sample', label: '', unit: '', hint: '' },
+};
+let entryType = 'gravity';
+function localInputValue(ms) { const d = new Date(ms); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
+function openEntry(type) {
+  const run = detailView()?.run; if (!run) return;
+  entryType = type;
+  const c = ENTRY[type], t = state.tanks.find(x => x.id === state.open);
+  $('eTitle').textContent = c.title;
+  $('eSub').textContent = `${t.name} · ${run.experiment || run.name}`;
+  $('fValue').hidden = type === 'gcms';
+  $('fGc').hidden = $('fLink').hidden = type !== 'gcms';
+  $('eValueLbl').textContent = c.label; $('eUnit').textContent = c.unit; $('eHint').textContent = c.hint;
+  $('eForm').reset();
+  $('eWhen').value = localInputValue(Date.now());
+  $('eErr').textContent = '';
+  $('eWhere').textContent = state.store?.where || '';
+  $('eSave').disabled = false;
+  $('mEntry').hidden = false;
+  (type === 'gcms' ? $('eMethod') : $('eValue')).focus();
+}
+async function saveEntry(ev) {
+  ev.preventDefault();
+  const run = detailView()?.run, c = ENTRY[entryType];
+  if (!run) return;
+  const when = Date.parse($('eWhen').value);
+  const e = { runId: run.runId, tankId: run.tankId, type: entryType, ts: isNaN(when) ? Date.now() : when, note: $('eNote').value.trim().slice(0, 500) };
+  if (entryType === 'gcms') {
+    e.method = $('eMethod').value; e.sample = $('eSample').value.trim().slice(0, 80);
+    const link = $('eLink').value.trim();
+    if (link && !safeUrl(link)) { $('eErr').textContent = 'The link must start with https:// or http://.'; return; }
+    e.link = link.slice(0, 500);
+  } else {
+    const v = parseFloat($('eValue').value.replace(',', '.'));
+    if (isNaN(v) || v < c.min || v > c.max) { $('eErr').textContent = `Enter a ${c.label.toLowerCase()} between ${c.min} and ${c.max}.`; $('eValue').focus(); return; }
+    e.value = v;
+  }
+  if (e.ts > Date.now() + 5 * MIN) { $('eErr').textContent = 'The time is in the future. Check the date.'; return; }
+  $('eSave').disabled = true; $('eErr').textContent = '';
+  try {
+    await state.store.add(e);
+    $('mEntry').hidden = true;
+    toast(entryType === 'gravity' ? `Gravity ${fmtSG(e.value)} saved` : entryType === 'abv' ? `ABV ${e.value.toFixed(1)}% saved` : 'GC-MS sample saved');
+    await reloadMeasurements();
+  } catch (err) {
+    $('eSave').disabled = false;
+    $('eErr').textContent = `Not saved: ${err?.message || 'the store did not answer'}. Try again.`;
+  }
+}
+let confirmDel = null;
+async function onDelete(btn) {
+  const id = btn.dataset.del;
+  if (confirmDel !== id) { confirmDel = id; btn.textContent = 'Tap again to delete'; setTimeout(() => { if (confirmDel === id) { confirmDel = null; renderDetailInfo(); } }, 4000); return; }
+  confirmDel = null;
+  try { await state.store.remove(id); toast('Deleted'); await reloadMeasurements(); }
+  catch (err) { toast(`Not deleted: ${err?.message || 'the store did not answer'}`); }
+}
+/* ---------- Start and stop runs (not on the Sennos tanks, whose runs start in the Sennos app) ---------- */
+function openStart() {
+  const t = state.tanks.find(x => x.id === state.open);
+  if (!t || isSennos(t) || runFor(t.id)) return;
+  $('sForm').reset();
+  $('sSub').textContent = `${t.name} · Tank ${t.id}`;
+  $('sRecipe').innerHTML = '<option value="">None</option>' + Object.entries(state.recipes)
+    .sort((a, b) => String(a[1].title || a[0]).localeCompare(String(b[1].title || b[0])))
+    .map(([id, r]) => `<option value="${esc(id)}">${esc(r.title || id)}</option>`).join('');
+  $('sWhen').value = localInputValue(Date.now());
+  $('sCopy').hidden = !lastRunFor(t.id);
+  $('sErr').textContent = '';
+  $('sWhere').textContent = state.store?.where || '';
+  $('sSave').disabled = false;
+  $('mRun').hidden = false;
+  $('sExp').focus();
+}
+function copyLastRun() {
+  const last = lastRunFor(state.open); if (!last) return;
+  $('sExp').value = last.experiment || ''; $('sBrand').value = last.brand || ''; $('sPurpose').value = last.purpose || '';
+  $('sYeast').value = last.yeast || ''; $('sRecipe').value = state.recipes[last.recipeId] ? last.recipeId : '';
+  $('sOg').value = last.og ?? ''; $('sFg').value = last.targetFg ?? '';
+  $('sName').focus();
+}
+function recipeChosen() {
+  const rec = state.recipes[$('sRecipe').value]; if (!rec) return;
+  if (!$('sOg').value && rec.og) $('sOg').value = (+rec.og).toFixed(3);
+  if (!$('sFg').value && rec.fg) $('sFg').value = (+rec.fg).toFixed(3);
+}
+async function saveStart(ev) {
+  ev.preventDefault();
+  const t = state.tanks.find(x => x.id === state.open), err = m => { $('sErr').textContent = m; };
+  if (!t || runFor(t.id)) return err('This tank already has a run going.');
+  const exp = $('sExp').value.trim();
+  if (!exp) { $('sExp').focus(); return err('Give the run an experiment title.'); }
+  const grav = id => { const v = $(id).value.trim().replace(',', '.'); if (!v) return null; const n = +v; return n >= 0.98 && n <= 1.2 ? n : NaN; };
+  const og = grav('sOg'), fg = grav('sFg');
+  if (Number.isNaN(og) || Number.isNaN(fg)) return err('Gravity must be between 0.980 and 1.200, for example 1.054.');
+  const when = Date.parse($('sWhen').value), start = isNaN(when) ? Date.now() : when;
+  if (start > Date.now() + 5 * MIN) return err('The pitch time is in the future. Check the date.');
+  const prev = lastRunFor(t.id);
+  if (prev && start < prev.end) return err(`The last run on this tank ended ${fmtWhen(prev.end)}. Pick a pitch time after that.`);
+  const val = id => $(id).value.trim();
+  const run = { runId: Math.floor(Date.now() / 1000), tankId: t.id, experiment: exp.slice(0, 80), name: val('sName').slice(0, 40),
+    brand: val('sBrand').slice(0, 60), purpose: val('sPurpose').slice(0, 1000), yeast: val('sYeast').slice(0, 60),
+    recipeId: $('sRecipe').value, og, targetFg: fg, start, end: null };
+  $('sSave').disabled = true; err('');
+  try {
+    await state.store.startRun(run);
+    $('mRun').hidden = true;
+    toast(`${run.experiment} started on ${t.name}`);
+    state.openRun = null;
+    await reloadRuns();
+  } catch (e) {
+    $('sSave').disabled = false;
+    err(`Not started: ${e?.message || 'the store did not answer'}. Try again.`);
+  }
+}
+let confirmStop = null;
+async function onStop() {
+  const t = state.tanks.find(x => x.id === state.open), run = t && runFor(t.id), b = $('bStop');
+  if (!run || isSennos(t)) return;
+  if (confirmStop !== run.runId) {
+    confirmStop = run.runId; b.textContent = 'Tap again to stop';
+    setTimeout(() => { if (confirmStop === run.runId) { confirmStop = null; b.textContent = 'Stop run'; } }, 4000);
+    return;
+  }
+  confirmStop = null; b.textContent = 'Stop run'; b.disabled = true;
+  try {
+    await state.store.stopRun(run, Date.now());
+    toast(`${run.experiment || run.name} stopped`);
+    state.openRun = null;
+    await reloadRuns();
+  } catch (e) { toast(`Not stopped: ${e?.message || 'the store did not answer'}`); }
+  b.disabled = false;
+}
+
+let toastT;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+
+/* ---------- Compare two fermentations ---------- */
+const cmp = { a: null, b: null, align: 'pitch', filter: 'all', q: '', sensors: new Set(['ph', 'temp', 'do', 'grav', 'pres', 'cond']), hist: {}, from: null };
+try {
+  const v = JSON.parse(store_.get('cafe.cmp') || 'null');
+  if (v) { if (v.align === 'date') cmp.align = 'date'; if (Array.isArray(v.sensors)) cmp.sensors = new Set(v.sensors); }
+} catch { /* ignore a damaged preference */ }
+const saveCmpPrefs = () => store_.set('cafe.cmp', JSON.stringify({ align: cmp.align, sensors: [...cmp.sensors] }));
+const runById = id => state.runs.find(r => r.runId === id);
+const tankName = id => state.tanks.find(t => t.id === id)?.name || `Tank ${id}`;
+const runEnd = r => r.end ?? Date.now();
+const fmtDay = ms => new Date(ms).toLocaleDateString([], { month: 'short', day: 'numeric', year: new Date(ms).getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
+const runDates = r => `${fmtDay(r.start)} – ${r.end ? fmtDay(r.end) : 'now'}`;
+
+// The obvious partner for a run: another batch of the same experiment, else the same recipe.
+function pairFor(run) {
+  if (!run) return null;
+  const others = state.runs.filter(r => r.runId !== run.runId).sort((a, b) => b.start - a.start);
+  return others.find(r => r.experiment && r.experiment === run.experiment) || others.find(r => r.recipeId && r.recipeId === run.recipeId) || null;
+}
+function openCompare(runId, from) {
+  cmp.from = from || null;
+  if (runId != null) {
+    cmp.a = runId;
+    const p = pairFor(runById(runId));
+    cmp.b = p ? p.runId : cmp.b !== runId ? cmp.b : null;
+  } else if (cmp.a == null && cmp.b == null) {
+    const first = state.runs.filter(r => !r.end).sort((x, y) => x.tankId - y.tankId)[0];
+    if (first) { cmp.a = first.runId; cmp.b = pairFor(first)?.runId ?? null; }
+  }
+  $('cmp').hidden = false;
+  renderCompare();
+  $('cBack').focus();
+}
+// Opens any run, current or finished, on its tank's detail page; Back returns here.
+function openRunDetail(id) {
+  const r = runById(id); if (!r) return;
+  $('cmp').hidden = true; state.backTo = 'cmp';
+  const cur = runFor(r.tankId);
+  openDetail(r.tankId, cur && cur.runId === r.runId ? null : r.runId);
+}
+function closeCompare() {
+  $('cmp').hidden = true;
+  (cmp.from || $('bCompare')).focus();
+}
+function pickRun(id) {
+  if (cmp.a === id) cmp.a = null;
+  else if (cmp.b === id) cmp.b = null;
+  else if (cmp.a == null) cmp.a = id;
+  else cmp.b = id;
+  renderCompare();
+}
+// Every word typed has to appear somewhere in the run: experiment, batch, tank, yeast, brand, purpose, recipe or dates.
+const runText = r => [r.experiment, r.name, tankName(r.tankId), r.yeast, r.brand, r.purpose, r.recipeId, runDates(r),
+  new Date(r.start).toLocaleDateString([], { month: 'long', year: 'numeric' }), r.end ? 'finished' : 'current'].join(' ').toLowerCase();
+function renderRunList() {
+  const now = Date.now(), words = cmp.q.toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = state.runs.filter(r => cmp.filter === 'all' || (cmp.filter === 'current' ? !r.end : !!r.end));
+  const list = shown.filter(r => !words.length || words.every(w => runText(r).includes(w))).sort((a, b) => b.start - a.start);
+  $('cCount').textContent = words.length
+    ? `${list.length} of ${shown.length} fermentations match. Tap one to pick it.`
+    : `${list.length} fermentation${list.length === 1 ? '' : 's'}. Tap one to pick it, tap again to remove it.`;
+  $('cRuns').innerHTML = list.map(r => {
+    const slot = cmp.a === r.runId ? 'a' : cmp.b === r.runId ? 'b' : '';
+    const status = r.end ? `<span class="tag">Finished · ${Math.round((r.end - r.start) / DAY)} days</span>` : `<span class="tag cur">Current · day ${Math.floor((now - r.start) / DAY) + 1}</span>`;
+    return `<li><button type="button" class="run-item" data-run="${esc(r.runId)}" data-slot="${slot}" aria-pressed="${!!slot}">
+      <span class="slot" aria-hidden="true">${slot.toUpperCase()}</span>
+      <b>${esc(r.experiment || r.name)}</b>
+      <span class="ri-meta">${esc([r.name, tankName(r.tankId), r.yeast].filter(Boolean).join(' · '))}</span>
+      <span class="ri-when">${runDates(r)} ${status}</span></button></li>`;
+  }).join('') || `<li class="cmp-empty">${words.length ? 'Nothing matches that search.' : 'No fermentations to show.'}</li>`;
+}
+function renderCompare() {
+  renderRunList();
+  // chosen pair
+  $('cSlots').innerHTML = ['a', 'b'].map(k => {
+    const r = runById(cmp[k]);
+    return r ? `<div class="slotcard ${k}"><span class="slot">${k.toUpperCase()}</span><b>${esc(r.experiment || r.name)}</b>
+        <span class="sb"><button type="button" class="btn" data-open="${esc(r.runId)}">Open</button><button type="button" class="btn" data-clear="${k}">Remove</button></span>
+        <span class="m">${esc([r.name, tankName(r.tankId), runDates(r)].join(' · '))}</span></div>`
+      : `<div class="slotcard ${k} empty"><span class="slot">${k.toUpperCase()}</span><b>Pick a fermentation</b><span></span><span class="m">Tap one in the list</span></div>`;
+  }).join('');
+  $('cAlign').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.align === cmp.align)));
+  $('cFilter').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === cmp.filter)));
+  $('cSensors').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(cmp.sensors.has(b.dataset.sensor))));
+  drawCompare();
+  loadCompareHistory();
+}
+async function loadCompareHistory() {
+  const want = [cmp.a, cmp.b].filter(id => id != null).map(runById).filter(Boolean)
+    .filter(r => !cmp.hist[r.runId] || cmp.hist[r.runId].end !== r.end || (!r.end && Date.now() - cmp.hist[r.runId].at > 5 * MIN));
+  if (!want.length) return;
+  await Promise.all(want.map(async r => {
+    try { cmp.hist[r.runId] = { pts: await source.runHistory(r), at: Date.now(), end: r.end }; }
+    catch (e) { cmp.hist[r.runId] = { pts: [], at: Date.now(), end: r.end, error: e.message }; }
+  }));
+  if (!$('cmp').hidden) drawCompare();
+}
+
+function runStats(run, pts) {
+  const gi = gravityInfo(run, pts), g = [...measFor(run, 'gravity'), ...autoGravity(run, pts)].sort((a, b) => a.ts - b.ts);
+  const temps = pts.map(p => p.tempC).filter(v => v != null), phs = pts.filter(p => p.ph != null);
+  const lowDo = pts.find(p => p.doMgL != null && p.doMgL < 0.5);
+  const fgHit = gi?.fg != null ? g.find(m => m.value <= gi.fg + 0.002) : null;
+  return {
+    len: (runEnd(run) - run.start) / DAY,
+    og: gi?.og ?? null, sg: gi?.cur.value ?? null, att: gi?.att ?? null, abvEst: gi?.abvEst ?? null, abvMeas: gi?.abvMeas?.value ?? null,
+    daysToFg: fgHit ? (fgHit.ts - run.start) / DAY : null,
+    tAvg: temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : null, tMax: temps.length ? Math.max(...temps) : null,
+    phEnd: phs.length ? phs[phs.length - 1].ph : null, phDrop: phs.length > 1 ? phs[0].ph - phs[phs.length - 1].ph : null,
+    doH: lowDo ? (lowDo.ts - run.start) / H : null,
+    gc: measFor(run, 'gcms').length,
+  };
+}
+
+function drawCompare() {
+  const sel = [['a', cmp.a], ['b', cmp.b]].filter(([, id]) => id != null)
+    .map(([k, id]) => ({ k, run: runById(id), pts: cmp.hist[id]?.pts || [] })).filter(x => x.run);
+  const charts = $('cCharts');
+  $('cTblWrap').hidden = !sel.length;
+  if (!sel.length) { charts.innerHTML = '<div class="cmp-empty">Pick two fermentations from the list to overlay their readings.</div>'; return; }
+  const byPitch = cmp.align === 'pitch';
+  const tx = (s, ts) => byPitch ? ts - s.run.start : ts;
+  const from = byPitch ? -2 * H : Math.min(...sel.map(s => s.run.start)) - 2 * H;
+  const to = byPitch ? Math.max(DAY, ...sel.map(s => runEnd(s.run) - s.run.start)) + 2 * H : Math.max(...sel.map(s => runEnd(s.run))) + 2 * H;
+  // Pressure and conductivity come only from the Sennos tanks; their charts appear when a picked run has them.
+  const KEY = { pres: 'pressurePsi', cond: 'condUs' };
+  const order = ['ph', 'temp', 'do', 'grav', 'abv', 'pres', 'cond'].filter(k => cmp.sensors.has(k)
+    && (!KEY[k] || sel.some(s => (cmp.hist[s.run.runId]?.pts || []).some(p => p[KEY[k]] != null))));
+  const TITLE = { ph: 'pH', temp: `Temperature, °${unit}`, do: 'Dissolved oxygen, mg/L', grav: 'Gravity', abv: 'ABV, %', pres: 'Pressure, psi', cond: 'Conductivity, µS/cm' };
+  const who = sel.map(s => `<span><i class="k-${s.k}"></i>${s.k.toUpperCase()} ${esc(s.run.name || s.run.experiment)}</span>`).join('');
+  const extra = { temp: '<span><i class="k-sp"></i>Setpoint</span>', abv: '<span><i class="k-est"></i>From gravity</span><span><i class="k-meas"></i>Alcolyzer</span>' };
+  charts.innerHTML = order.length ? order.map(k => `<div class="chart"><h3>${TITLE[k].replace('µS/cm', '<span class="nt">µS/cm</span>')}<span class="key">${who}${extra[k] || ''}</span></h3><svg id="cc-${k}" role="img" aria-label="${TITLE[k]} overlay"></svg></div>`).join('')
+    : '<div class="cmp-empty">Choose at least one sensor to overlay.</div>';
+  const loaded = sel.every(s => cmp.hist[s.run.runId]);
+  const common = { from, to, elapsed: byPitch, empty: loaded ? 'Neither run has this reading' : 'Loading readings…' };
+  const line = (key, map = v => v) => sel.map(s => ({ pts: s.pts.map(p => ({ ts: tx(s, p.ts), v: p[key] == null ? null : map(p[key]) })), kind: 'line', cls: 's-' + s.k, main: true }));
+  for (const k of order) {
+    const svg = $('cc-' + k);
+    if (k === 'ph') drawChart(svg, { ...common, minSpan: 0.3, series: line('ph') });
+    if (k === 'temp') drawChart(svg, { ...common, minSpan: unit === 'F' ? 3 : 1.6, series: [
+      ...sel.map(s => ({ pts: s.pts.map(p => ({ ts: tx(s, p.ts), v: p.setpointC == null ? null : toUnit(p.setpointC) })), kind: 'spc', cls: 's-' + s.k })),
+      ...line('tempC', toUnit)] });
+    if (k === 'do') drawChart(svg, { ...common, floor: 0, minSpan: 0.5, series: line('doMgL') });
+    if (k === 'pres') drawChart(svg, { ...common, floor: 0, minSpan: 1, dec: 1, series: line('pressurePsi') });
+    if (k === 'cond') drawChart(svg, { ...common, minSpan: 50, dec: 0, series: line('condUs') });
+    if (k === 'grav') drawChart(svg, { ...common, dec: 3, minSpan: 0.02, empty: 'No gravity readings for these runs.', series: [
+      ...line('sg'),
+      ...sel.map(s => ({
+        pts: measFor(s.run, 'gravity').map(m => ({ ts: tx(s, m.ts), v: m.value, label: `${s.k.toUpperCase()} ${fmtSG(m.value)} · ${fmtWhen(m.ts)}` })), kind: 'dots', connect: !s.pts.some(p => p.sg != null), cls: 's-' + s.k, main: true }))] });
+    if (k === 'abv') drawChart(svg, { ...common, floor: 0, minSpan: 2, dec: 1, empty: 'No gravity or ABV readings for these runs.', series: sel.flatMap(s => {
+      const gi = gravityInfo(s.run, s.pts), g = measFor(s.run, 'gravity'), live = autoGravity(s.run, s.pts);
+      return [
+        { pts: gi ? live.filter(m => m.value < gi.og).map(m => ({ ts: tx(s, m.ts), v: abvFromGravity(gi.og, m.value) })) : [], kind: 'spc', cls: 's-' + s.k, main: true },
+        { pts: gi ? g.filter(m => m.value < gi.og).map(m => ({ ts: tx(s, m.ts), v: abvFromGravity(gi.og, m.value), label: `${s.k.toUpperCase()} estimated ${abvFromGravity(gi.og, m.value).toFixed(1)}%` })) : [], kind: 'hollow', connect: true, cls: 's-' + s.k, main: true },
+        { pts: measFor(s.run, 'abv').map(m => ({ ts: tx(s, m.ts), v: m.value, label: `${s.k.toUpperCase()} Alcolyzer ${Number(m.value).toFixed(1)}%` })), kind: 'diamond', cls: 's-' + s.k, main: true },
+      ];
+    }) });
+  }
+  // side-by-side numbers
+  const st = sel.map(s => ({ k: s.k, run: s.run, v: runStats(s.run, s.pts) }));
+  const ROWS = [
+    ['Length', x => x.len, v => `${v.toFixed(1)} days`, 1],
+    ['Original gravity', x => x.og, fmtSG, 3],
+    ['Final or latest gravity', x => x.sg, fmtSG, 3],
+    ['Apparent attenuation', x => x.att, v => `${Math.round(v)}%`, 0],
+    ['ABV from gravity', x => x.abvEst, v => `${v.toFixed(1)}%`, 1],
+    ['ABV, Alcolyzer', x => x.abvMeas, v => `${v.toFixed(1)}%`, 1],
+    ['Days to reach target FG', x => x.daysToFg, v => v.toFixed(1), 1],
+    ['Average temperature', x => x.tAvg == null ? null : toUnit(x.tAvg), v => `${v.toFixed(1)} °${unit}`, 1],
+    ['Peak temperature', x => x.tMax == null ? null : toUnit(x.tMax), v => `${v.toFixed(1)} °${unit}`, 1],
+    ['Final or latest pH', x => x.phEnd, v => v.toFixed(2), 2],
+    ['pH drop since pitch', x => x.phDrop, v => v.toFixed(2), 2],
+    ['Hours until DO below 0.5 mg/L', x => x.doH, v => `${Math.round(v)} h`, 0],
+    ['GC-MS samples', x => x.gc, v => String(v), 0],
+  ];
+  const two = st.length === 2;
+  $('cTbl').innerHTML = `<thead><tr><th>Measure</th>${st.map(x => `<th class="${x.k}">${x.k.toUpperCase()} · ${esc(x.run.name || x.run.experiment)}</th>`).join('')}${two ? '<th>B − A</th>' : ''}</tr></thead><tbody>` +
+    ROWS.map(([label, get, fmt, dec]) => {
+      const vals = st.map(x => get(x.v));
+      const diff = two && vals[0] != null && vals[1] != null ? vals[1] - vals[0] : null;
+      return `<tr><td>${label}</td>${vals.map(v => `<td>${v == null ? '–' : esc(fmt(v))}</td>`).join('')}${two ? `<td class="d">${diff == null ? '–' : (diff > 0 ? '+' : diff < 0 ? '−' : '') + Math.abs(diff).toFixed(dec)}</td>` : ''}</tr>`;
+    }).join('') + '</tbody>';
+}
+
+/* ---------- Refresh loop ---------- */
+async function reloadMeasurements() {
+  try { state.srcMeas = await source.measurements(); } catch { /* keep previous */ }
+  renderTanks();
+  if (state.open != null) drawDetail();
+}
+async function refresh() {
+  try {
+    state.latest = await source.latest();
+    state.lastOk = Date.now(); state.error = null;
+  } catch (e) { state.error = e.message || 'Could not reach the data source'; }
+  renderTanks();
+}
+async function refreshHistory() {
+  const now = Date.now();
+  await Promise.all(state.tanks.map(async t => {
+    try {
+      const run = runFor(t.id), last = !run && lastRunFor(t.id);
+      if (last) await loadRunPts(last);   // an idle tank shows its last run
+      state.hist24[t.id] = await source.history(t.id, now - 24 * H, now);
+      if (run && !state.pitchReading[run.runId]) state.pitchReading[run.runId] = (await source.history(t.id, run.start, run.start + 2 * H))[0];
+    } catch { /* keep previous */ }
+  }));
+  renderTanks();
+}
+// state.runs = the source's runs, plus runs started in the app and end times from runs stopped in it
+// (with the Google Sheet both are already in the source).
+function mergeRuns() {
+  const recs = state.store && !state.store.viaSource ? state.store.runs || [] : [];
+  const stops = new Map(recs.filter(x => x.stopOf != null).map(x => [x.stopOf, x.end]));
+  const ids = new Set(state.srcRuns.map(r => r.runId));
+  const added = recs.filter(x => x.stopOf == null && x.tankId != null && !ids.has(x.runId));
+  state.runs = [...state.srcRuns, ...added].map(r => !r.end && stops.has(r.runId) ? { ...r, end: stops.get(r.runId) } : r);
+  renderTanks();
+  refreshHistory();
+  if (state.open != null) loadDetail();
+  if (!$('cmp').hidden) renderCompare();
+}
+async function reloadRuns() {
+  try { state.srcRuns = await source.runs(); } catch { /* keep previous */ }
+  mergeRuns();
+}
+
+function tickClock() {
+  const d = new Date();
+  $('clock').innerHTML = `${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}<small>${d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}</small>`;
+}
+
+function setUnit(u) {
+  unit = u; store_.set('cafe.unit', u);
+  $('unitF').setAttribute('aria-pressed', String(u === 'F'));
+  $('unitC').setAttribute('aria-pressed', String(u === 'C'));
+  renderTanks();
+  if (state.open != null) drawDetail();
+  if (!$('cmp').hidden) drawCompare();
+}
+
+async function start() {
+  $('unitF').onclick = () => setUnit('F');
+  $('unitC').onclick = () => setUnit('C');
+  setUnit(unit);
+  $('fs').onclick = () => {
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    else document.documentElement.requestFullscreen?.().catch(() => {});
+  };
+  $('back').onclick = closeDetail;
+  $('bRecipe').onclick = () => openRecipe();
+  $('bRecipes').onclick = openRecipes;
+  $('lClose').onclick = () => { $('mRecipes').hidden = true; $('bRecipes').focus(); };
+  $('lNew').onclick = () => openRecipeEditor();
+  $('lList').addEventListener('click', e => {
+    const v = e.target.closest('[data-view]'); if (v) { $('mRecipes').hidden = true; return openRecipe(v.dataset.view); }
+    const ed = e.target.closest('[data-edit]'); if (ed && editKey) return openRecipeEditor(ed.dataset.edit);
+  });
+  $('rEdit').onclick = () => { if (editKey && recipeOpen) openRecipeEditor(recipeOpen); };
+  $('xForm').addEventListener('submit', saveRecipeForm);
+  $('xCancel').onclick = () => { $('mRecEdit').hidden = true; };
+  $('xForm').addEventListener('click', e => {
+    const a = e.target.closest('[data-addrow]'); if (a) { addRecipeRow(a.dataset.addrow).querySelector('input').focus(); return; }
+    const d = e.target.closest('[data-delrow]'); if (d) { const box = d.closest('.rows'); d.closest('.rrow').remove(); if (box.children.length === 1) box.innerHTML = ''; }
+  });
+  $('editPill').onclick = openKey;
+  $('kForm').addEventListener('submit', saveKey);
+  $('kOff').onclick = turnOffEditing;
+  $('kCancel').onclick = () => { $('mEdit').hidden = true; };
+  holdLogo();
+  $('bCompare').onclick = () => openCompare();
+  $('bCmpThis').onclick = () => { const r = detailView()?.run; openCompare(r ? r.runId : null, $('bCmpThis')); };
+  $('bStart').onclick = openStart;
+  $('bStop').onclick = onStop;
+  $('sCopy').onclick = copyLastRun;
+  $('sRecipe').addEventListener('change', recipeChosen);
+  $('sCancel').onclick = () => { $('mRun').hidden = true; };
+  $('sForm').addEventListener('submit', saveStart);
+  $('cSearch').addEventListener('input', e => { cmp.q = e.target.value; renderRunList(); });
+  $('cBack').onclick = closeCompare;
+  $('cRuns').addEventListener('click', e => { const b = e.target.closest('[data-run]'); if (b) pickRun(Number(b.dataset.run)); });
+  $('cSlots').addEventListener('click', e => {
+    const o = e.target.closest('[data-open]'); if (o) return openRunDetail(Number(o.dataset.open));
+    const b = e.target.closest('[data-clear]'); if (b) { cmp[b.dataset.clear] = null; renderCompare(); }
+  });
+  $('cAlign').addEventListener('click', e => { const b = e.target.closest('[data-align]'); if (b) { cmp.align = b.dataset.align; saveCmpPrefs(); renderCompare(); } });
+  $('cFilter').addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (b) { cmp.filter = b.dataset.filter; renderCompare(); } });
+  $('cSensors').addEventListener('click', e => {
+    const b = e.target.closest('[data-sensor]'); if (!b) return;
+    const k = b.dataset.sensor; cmp.sensors.has(k) ? cmp.sensors.delete(k) : cmp.sensors.add(k);
+    saveCmpPrefs(); renderCompare();
+  });
+  $('rClose').onclick = () => { $('mRecipe').hidden = true; $('bRecipe').focus(); };
+  $('eCancel').onclick = () => { $('mEntry').hidden = true; };
+  $('eForm').addEventListener('submit', saveEntry);
+  $('detail').addEventListener('click', e => {
+    const add = e.target.closest('[data-add]'); if (add && !add.disabled) return openEntry(add.dataset.add);
+    const del = e.target.closest('[data-del]'); if (del) return onDelete(del);
+  });
+  for (const m of ['mEntry', 'mRecipe', 'mRun', 'mRecipes', 'mEdit']) $(m).addEventListener('click', e => { if (e.target === $(m)) $(m).hidden = true; });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!$('mEdit').hidden) $('mEdit').hidden = true;
+    else if (!$('mRecEdit').hidden) $('mRecEdit').hidden = true;
+    else if (!$('mEntry').hidden) $('mEntry').hidden = true;
+    else if (!$('mRun').hidden) $('mRun').hidden = true;
+    else if (!$('mRecipe').hidden) $('mRecipe').hidden = true;
+    else if (!$('mRecipes').hidden) $('mRecipes').hidden = true;
+    else if (!$('cmp').hidden) closeCompare();
+    else if (state.open != null) closeDetail();
+  });
+  $('ranges').addEventListener('click', e => {
+    const b = e.target.closest('button[data-range]'); if (!b) return;
+    state.range = b.dataset.range;
+    $('ranges').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    loadDetail();
+  });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { drawDetail(); if (!$('cmp').hidden) drawCompare(); }, 150); });
+
+  // Keep the kiosk screen awake while the dashboard is showing.
+  const wake = () => navigator.wakeLock?.request('screen').catch(() => {});
+  wake(); document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && wake());
+
+  tickClock(); setInterval(tickClock, 1000);
+  try {
+    [state.tanks, state.srcRuns, state.srcRecipes, state.srcMeas] = await Promise.all([source.tanks(), source.runs(), source.recipes(), source.measurements()]);
+  } catch (e) { state.error = e.message; }
+  state.runs = state.srcRuns;
+  state.recipes = { ...state.srcRecipes };
+  state.tanks.sort((a, b) => a.id - b.id);
+  buildRooms();
+  await refresh();
+  refreshHistory();
+  pickStore().then(st => {
+    state.store = st;
+    st.onChange(() => { renderTanks(); if (state.open != null) drawDetail(); });
+    st.onRuns(mergeRuns);
+    st.onRecipes(mergeRecipes);
+    mergeRuns();
+    mergeRecipes();
+    applyEditing();
+    if (location.hash === '#edit') openKey();
+  });
+  window.addEventListener('hashchange', () => { if (location.hash === '#edit') openKey(); });
+  setInterval(refresh, CONFIG.pollSeconds * 1000);
+  setInterval(() => { reloadRuns(); reloadMeasurements(); reloadRecipes(); }, 5 * MIN);
+  setInterval(renderTanks, 5000);
+}
+start();
+</script>
+</body>
+</html>
