@@ -500,9 +500,9 @@ body.view-only .edit-only { display: none !important; }
   display: flex; align-items: center; gap: .5em .8em; flex-wrap: wrap;
   padding: .45em clamp(16px, 1.5vw, 28px); background: var(--panel); border-bottom: 1px solid var(--line);
 }
-.l-top .logo { height: 2.3em; }
+.l-top .logo { height: 2.9em; }
 .l-name { min-width: 0; margin-right: auto; }
-.l-name h1 { margin: 0; font: 700 1.35em/1 var(--font-display); }
+.l-name h1 { margin: 0; font: 800 1.9em/1 var(--font-display); letter-spacing: .01em; }
 .l-name p { margin: .15em 0 0; color: var(--muted); font-size: .7em; }
 .l-badges { display: flex; gap: .3em; align-items: center; }
 .l-badges .bd { width: 1.75em; height: 1.75em; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--line); color: var(--line); }
@@ -532,25 +532,6 @@ body.view-only .edit-only { display: none !important; }
 .l-tabs { display: flex; gap: .4em; flex-wrap: wrap; }
 .l-tab { min-height: 2.2em; padding: 0 1em; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); font: 600 .9em/1 var(--font-body); color: var(--muted); }
 .l-tab[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
-
-/* Start screen, shown when idle */
-.l-attract { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 1.5em; align-items: center; }
-.la-text { display: grid; gap: .7em; align-content: center; }
-.la-kicker { font: 600 .8em/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
-.la-text h2 { font: 700 3.3em/.98 var(--font-display); text-wrap: balance; }
-.la-sub { font-size: 1.15em; color: var(--muted); max-width: 34ch; }
-.la-btns { display: flex; gap: .6em; flex-wrap: wrap; margin-top: .3em; }
-.la-spot { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .1em .8em; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: .7em; padding: .6em .9em; margin-top: .4em; }
-.la-spot .live { grid-row: span 2; font: 700 .65em/1 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--ok); display: flex; align-items: center; gap: .4em; }
-.la-spot .live::before { content: ""; width: .7em; height: .7em; border-radius: 50%; background: var(--ok); animation: l-pulse 1.6s ease-in-out infinite; }
-.la-spot b { font: 600 1.05em/1.2 var(--font-display); }
-.la-spot span { color: var(--muted); font-size: .85em; }
-.la-tip { font-size: .95em; border-left: .25em solid var(--amber); padding: .2em 0 .2em .8em; max-width: 46ch; min-height: 3em; }
-.la-tip b { color: var(--amber); }
-.la-art { display: grid; place-items: center; min-height: 0; }
-.la-art svg { width: 100%; max-height: 72vh; }
-.la-course { font-size: .8em; color: var(--muted); }
-.la-course b { color: var(--fg); }
 
 /* Shared animations */
 @keyframes l-pulse { 50% { opacity: .3; } }
@@ -615,7 +596,7 @@ body.view-only .edit-only { display: none !important; }
 .l-promo span { color: var(--muted); font-size: .85em; }
 .l-promo .qr { grid-row: span 2; width: 5em; height: 5em; background: #fff; border-radius: .3em; padding: .2em; }
 .l-promo .qr svg { width: 100%; height: 100%; display: block; }
-.l-badgelist { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .5em; }
+.l-badgelist { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: .5em; }
 .l-badgelist div { display: grid; justify-items: center; text-align: center; gap: .2em; font-size: .72em; color: var(--muted); }
 .l-badgelist .bd { width: 2.6em; height: 2.6em; border-radius: 50%; display: grid; place-items: center; border: 2px dashed var(--line); color: var(--line); }
 .l-badgelist .bd .ico { width: 1.4em; height: 1.4em; }
@@ -800,14 +781,173 @@ body.view-only .edit-only { display: none !important; }
 .l-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
 .l-confetti i { position: absolute; top: 0; width: .6em; height: 1em; animation: l-fall var(--d, 3s) linear forwards; animation-delay: var(--t, 0s); font-size: clamp(14px, 1vw, 24px); }
 
+/* Design your fermentation: three columns that fill the screen without page scrolling on the 55" hallway screen */
+.l-view.fill { height: 100%; min-height: 0; }
+.d-wrap { height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 23fr) minmax(0, 37fr) minmax(0, 40fr); gap: 1em; }
+.d-col { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: .55em; }
+.d-mid { overflow: hidden; }
+.d-step { display: flex; align-items: center; gap: .45em; font: 700 1.15em/1.1 var(--font-display); margin: .1em 0 0; }
+.d-step i { font-style: normal; width: 1.5em; height: 1.5em; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-size: .85em; flex: none; }
+.d-step small { margin-left: auto; font: 600 .62em/1 var(--font-body); color: var(--muted); }
+.emo, .d-ing .e, .d-ingt { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+
+/* Microbes */
+.d-mics { display: grid; gap: .35em; }
+.d-mic { display: grid; grid-template-columns: 2em minmax(0, 1fr); gap: .55em; align-items: center; text-align: left; padding: .4em .6em; border-radius: .6em; border: 1px solid var(--line); background: var(--panel); color: var(--fg); }
+.d-mic svg { width: 2em; height: 2em; }
+.d-mic span { display: grid; gap: .05em; min-width: 0; }
+.d-mic b { font: 700 .95em/1.1 var(--font-display); }
+.d-mic i { font-size: .68em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d-mic em { font-style: normal; font-size: .72em; margin-top: .2em; }
+.d-mic.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; background: var(--panel); }
+.d-mic.on i { white-space: normal; }
+
+/* Middle: title, tank, start */
+.d-titlebar { display: grid; gap: .3em; justify-items: center; text-align: center; }
+.d-titlebar h2 { font: 800 2.3em/1 var(--font-display); letter-spacing: .01em; color: var(--accent); }
+.d-presets { display: flex; flex-wrap: wrap; gap: .3em; justify-content: center; align-items: center; }
+.d-presets span { font-size: .75em; color: var(--muted); margin-right: .2em; }
+.d-chip { min-height: 2em; padding: 0 .8em; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: 600 .78em/1 var(--font-body); }
+.d-chip:active { transform: scale(.96); }
+.d-made { font-size: 1.15em; color: var(--muted); }
+.d-made b { font: 700 1.25em/1 var(--font-display); color: var(--fg); }
+.d-stage { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5em; align-items: center; }
+.d-tank { width: 100%; height: 100%; max-height: 100%; min-height: 0; }
+.d-reads { display: grid; gap: .45em; align-content: center; }
+.d-read { background: #10191e; color: #e4edf1; border-radius: .5em; padding: .35em .7em .4em; min-width: 6.2em; box-shadow: inset 0 0 0 2px #2a3a42; }
+.d-read span { display: block; font: 600 .6em/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: #9fb0ba; }
+.d-read b { font: 700 1.6em/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.d-read b small { font-size: .45em; margin-left: .2em; color: #9fb0ba; font-weight: 500; }
+.d-read.ph b { color: #c7adff; } .d-read.do b { color: #5fe0d8; } .d-read.temp b { color: #ffb565; } .d-read.salt b { color: #9cc6ff; } .d-read.alc b { color: #f7c64a; }
+.d-go { display: grid; justify-items: center; gap: .35em; }
+.d-need { font-size: .85em; color: var(--muted); text-align: center; }
+.d-need.ok { color: var(--fg); font-weight: 600; }
+.d-start { font-size: 1.35em; min-height: 2.6em; padding: 0 1.6em; border-radius: 999px; }
+.d-start:not([disabled]) { animation: d-glow 2.2s ease-in-out infinite; }
+@keyframes d-glow { 50% { box-shadow: 0 0 0 .45em color-mix(in srgb, var(--accent) 25%, transparent); } }
+.d-tip { font-size: .8em; color: var(--muted); text-align: center; max-width: 46ch; justify-self: center; margin: 0 auto; min-height: 2.6em; }
+.d-tip b { color: var(--amber); }
+.d-time { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .3em .7em; align-items: center; }
+.d-time #dClock { font: 700 1.1em/1 var(--font-display); font-variant-numeric: tabular-nums; min-width: 7.5em; }
+.d-prog { height: .7em; border-radius: .35em; background: var(--line); overflow: hidden; }
+.d-prog i { display: block; height: 100%; width: 0; background: var(--accent); }
+.d-time input[type="range"] { grid-column: 1 / -1; }
+.d-time .l-btn { min-width: 6em; }
+
+/* Tank drawing */
+.d-liquid { transform: translateY(420px); transition: transform 1.8s ease-out; }
+.d-liquid.full { transform: none; }
+.d-ingt { font-size: 40px; text-anchor: middle; dominant-baseline: central; }
+.d-ingt.drop { animation: d-drop .6s cubic-bezier(.3, 1.4, .6, 1) both; animation-delay: var(--t, 0s); }
+.d-ingt.melt { animation: d-melt 2.4s ease-in forwards; }
+.d-ingt.solid { opacity: .85; }
+@keyframes d-drop { from { transform: translateY(-330px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes d-melt { 0%, 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-40px) scale(.6); } }
+.d-empty { font: 600 26px var(--font-body); fill: #6f8792; letter-spacing: .1em; text-transform: uppercase; }
+.d-plabel { font: 700 13px var(--font-body); fill: #fff; text-anchor: middle; }
+.d-brand { font: 700 13px var(--font-body); fill: #4e595f; letter-spacing: .2em; }
+.d-tank .dm { transform-box: fill-box; transform-origin: center; }
+
+/* Ingredients and conditions */
+.d-cats { display: flex; gap: .3em; flex-wrap: wrap; }
+.d-cat { min-height: 1.9em; padding: 0 .75em; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--muted); font: 600 .72em/1 var(--font-body); }
+.d-cat[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--bg); }
+.d-ings { flex: 1 1 auto; min-height: 6em; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(6.6em, 1fr)); gap: .35em; align-content: start; padding: .1em; }
+.d-ing { display: flex; align-items: center; gap: .35em; min-height: 2.3em; padding: .2em .5em; border-radius: .55em; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: 600 .8em/1.1 var(--font-body); text-align: left; }
+.d-ing .e { font-size: 1.45em; line-height: 1; flex: none; }
+.d-ing.on { border-color: var(--ok); background: var(--ok-bg); box-shadow: 0 0 0 2px var(--ok) inset; }
+.d-ing[disabled] { opacity: .4; }
+.d-conds { display: grid; gap: .2em; }
+.d-sl label { font-size: .85em; }
+.d-sl small { min-height: 2.4em; }
+.d-sl.T label output { color: var(--temp); } .d-sl.o2 label output { color: var(--do); } .d-sl.salt label output { color: var(--cool); }
+.learn .d-sl.o2 input::-webkit-slider-thumb { background: var(--do); } .learn .d-sl.salt input::-webkit-slider-thumb { background: var(--cool); }
+.learn .d-sl.o2 input::-moz-range-thumb { background: var(--do); } .learn .d-sl.salt input::-moz-range-thumb { background: var(--cool); }
+
+/* Reactions */
+.d-fail { background: var(--alarm-bg); color: var(--alarm); border-radius: .6em; padding: .5em .8em; font-weight: 600; display: grid; gap: .3em; }
+.d-rxns { display: grid; gap: .5em; }
+.d-rxn { background: var(--panel); border: 1px solid var(--line); border-radius: .7em; padding: .45em .6em .55em; display: grid; gap: .3em; transition: border-color .3s, box-shadow .3s; }
+.d-rxn.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.d-rlab { font: 600 .72em/1.2 var(--font-body); color: var(--muted); }
+.d-req { display: grid; grid-template-columns: minmax(0, 1fr) 2.6em minmax(0, 1fr); gap: .2em; align-items: center; }
+.d-side { display: flex; align-items: center; justify-content: center; gap: .15em; min-width: 0; }
+.d-side .plus { flex: none; }
+.d-side .plus { font: 700 1em/1 var(--font-display); color: var(--muted); }
+.d-mol { position: relative; display: grid; justify-items: center; gap: .1em; padding: .15em; border: 0; background: transparent; color: var(--fg); min-width: 0; flex: 1 1 0; max-width: 6em; }
+.d-mol svg { width: 100%; height: auto; max-height: 3.2em; }
+.d-mol > span:last-child { font: 600 .6em/1.1 var(--font-body); color: var(--muted); text-align: center; }
+.d-mol .n { position: absolute; left: -.1em; top: 0; font: 700 .85em/1 var(--font-display); color: var(--accent); }
+.d-mol.prod > span:last-child { color: var(--fg); }
+.d-arrow { position: relative; display: grid; place-items: center; }
+.d-arrow svg { width: 100%; height: 1.2em; fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.d-arrow .flow { position: absolute; inset: 0; pointer-events: none; }
+.d-arrow .flow i { position: absolute; left: 0; top: 50%; width: .45em; height: .45em; margin-top: -.22em; border-radius: 50%; background: var(--amber); opacity: 0; }
+.d-rxn.active .flow i { animation: d-flow 1.5s linear infinite; animation-delay: var(--t, 0s); }
+@keyframes d-flow { 0% { left: 0; opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { left: 85%; opacity: 0; } }
+.d-rxn.active .d-mol.prod svg { animation: d-born 1.5s ease-in-out infinite; }
+@keyframes d-born { 50% { transform: scale(1.08); } }
+.d-amts { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); gap: .4em; align-items: center; font-size: .6em; color: var(--muted); }
+.d-meter { height: .7em; border-radius: .35em; background: var(--line); overflow: hidden; }
+.d-amts .d-meter { height: 1em; }
+.d-meter i { display: block; height: 100%; width: 0; border-radius: inherit; }
+.d-meter.r i { background: var(--muted); width: 100%; } .d-meter.p i { background: var(--accent); }
+
+/* Right side while running */
+.d-chart { width: 100%; height: 10em; flex: none; background: var(--panel); border: 1px solid var(--line); border-radius: .7em; }
+.d-chart .grid-l { stroke: var(--line); stroke-width: 1; }
+.d-chart .ax { fill: var(--muted); font: 500 15px var(--font-body); }
+.d-chart .ax.ph { fill: var(--ph); font-weight: 700; } .d-chart .ax.do { fill: var(--do); font-weight: 700; }
+.d-chart .d-46 { stroke: var(--alarm); stroke-width: 2; stroke-dasharray: 8 6; }
+.d-chart .d-46t { fill: var(--alarm); font: 700 14px var(--font-body); }
+.d-chart .d-ln { fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.d-chart .d-ln.ph { stroke: var(--ph); } .d-chart .d-ln.do { stroke: var(--do); stroke-dasharray: 2 0; opacity: .85; }
+.d-chart .d-dot.ph { fill: var(--ph); } .d-chart .d-dot.do { fill: var(--do); }
+.d-flavs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6em; }
+.d-flavs .col { display: grid; gap: .3em; align-content: start; }
+.d-flavs h4 { margin: 0; font: 700 .75em/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; }
+.d-flavs .good h4 { color: var(--ok); } .d-flavs .bad h4 { color: var(--alarm); }
+.d-fl { display: grid; grid-template-columns: minmax(0, 1fr) 4.5em; gap: 0 .5em; align-items: center; text-align: left; padding: .3em .55em; border-radius: .55em; border: 1px solid var(--line); background: var(--panel); color: var(--fg); }
+.d-fl .d-meter { grid-column: 2; grid-row: 1 / span 2; }
+.d-fl b { font: 700 .85em/1.1 var(--font-display); }
+.d-fl span { font-size: .65em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d-flavs .good .d-meter i { background: var(--ok); } .d-flavs .bad .d-meter i { background: var(--alarm); }
+.d-result { display: grid; gap: .5em; animation: l-in .4s ease-out; }
+.d-safety { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .6em; align-items: center; border-radius: .6em; padding: .55em .8em; font-size: .85em; font-weight: 600; }
+.d-safety .ico { width: 1.6em; height: 1.6em; }
+.d-safety.ok { background: var(--ok-bg); color: var(--ok); } .d-safety.warn { background: var(--warn-bg); color: var(--warn); } .d-safety.bad { background: var(--alarm-bg); color: var(--alarm); }
+.d-notes { margin: 0; padding-left: 1.1em; display: grid; gap: .2em; font-size: .8em; }
+.d-notes li.bad::marker { color: var(--alarm); }
+.d-again { display: flex; gap: .5em; flex-wrap: wrap; }
+
+/* Molecule pop-up */
+.d-pop { position: fixed; inset: 0; z-index: 30; background: var(--shade); display: grid; place-items: center; padding: 16px; font-size: clamp(17px, calc(.95vw + .55vh), 30px); }
+.d-popcard { position: relative; width: min(30em, 100%); max-height: 90vh; overflow-y: auto; background: var(--panel); color: var(--fg); border-radius: 1em; padding: 1em 1.2em; display: grid; gap: .55em; animation: l-in .25s ease-out; }
+.d-popcard h2 { margin: 0; font: 700 1.8em/1 var(--font-display); padding-right: 2em; }
+.d-popcard p { margin: 0; font-size: .9em; }
+.d-popcard .smell { font: 600 1.15em/1.2 var(--font-display); color: var(--ph); }
+.d-popcard .l-molpic svg { max-height: 10em; }
+.d-x { position: absolute; top: .7em; right: .7em; min-height: 2.2em; width: 2.2em; padding: 0; }
+.d-why { border-radius: .5em; padding: .45em .7em; }
+.d-why.good { background: var(--ok-bg); } .d-why.bad { background: var(--alarm-bg); }
+.mol .a.S { fill: var(--amber); }
+.mol .a.C { fill: var(--fg); }
+
 /* Narrower screens: the 32" kiosk at 150% scaling, and phones */
 @media (max-width: 1500px) {
   .l-hub { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .l-tile { min-height: 7.5em; }
 }
 @media (max-width: 1100px) {
-  .l-attract, .l-tour, .l-mic, .l-flav, .l-lab, .l-safe, .l-tanks { grid-template-columns: minmax(0, 1fr); }
-  .la-art { order: -1; max-height: 34vh; } .la-art svg { max-height: 34vh; }
+  .l-tour, .l-mic, .l-flav, .l-lab, .l-safe, .l-tanks { grid-template-columns: minmax(0, 1fr); }
+  .l-view.fill { height: auto; }
+  .d-wrap { height: auto; display: flex; flex-direction: column; }
+  .d-col, .d-mid { overflow: visible; flex: none; }
+  .d-mid { order: -1; }
+  .d-stage { flex: none; }
+  .d-tank { height: 58vh; }
+  .d-ings { max-height: 50vh; }
+  .d-mics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lt-vis { min-height: 0; }
   .l-hub { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .l-tlist { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -818,7 +958,12 @@ body.view-only .edit-only { display: none !important; }
   .l-gauges, .l-opts, .l-two, .l-match, .l-mols { grid-template-columns: minmax(0, 1fr); }
   .l-tlist { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lt-live { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .la-text h2 { font-size: 2.4em; }
+  .d-mics, .d-flavs { grid-template-columns: minmax(0, 1fr); }
+  .d-titlebar h2 { font-size: 1.8em; }
+  .d-stage { grid-template-columns: minmax(0, 1fr); }
+  .d-tank { height: 48vh; }
+  .d-reads { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .l-name h1 { font-size: 1.2em; }
   .l-badges .bd { display: none; }
   .l-phase { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -1056,11 +1201,12 @@ body.view-only .edit-only { display: none !important; }
 </div>
 
 <div class="toast" id="toast" hidden role="status"></div>
-<section class="learn" id="learn" hidden aria-label="Fermentation Explorer">
+<section class="learn" id="learn" hidden aria-label="Chemistry And Fermentation Experience">
   <header class="l-top">
     <img class="logo" src="assets/cafe-lab-logo.png" alt="The CAFE Lab">
-    <div class="l-name"><h1>Fermentation Explorer</h1><p id="lCrumb">The chemistry and microbiology inside our tanks</p></div>
+    <div class="l-name"><h1>Chemistry And Fermentation Experience</h1><p id="lCrumb" hidden></p></div>
     <button type="button" class="l-btn" id="lBack" hidden>← All topics</button>
+    <button type="button" class="l-btn" id="lMore" data-go="hub">More to explore</button>
     <div class="l-badges" id="lBadges" role="img"></div>
     <div class="seg layer" role="group" aria-label="Screen">
       <button type="button" data-layer="monitor" aria-pressed="false">Live tanks</button>
@@ -1070,6 +1216,7 @@ body.view-only .edit-only { display: none !important; }
   <div class="l-body" id="lBody"></div>
 </section>
 <div class="l-pop" id="lPop" hidden role="status"></div>
+<div class="d-pop" id="dMolPop" hidden></div>
 <div class="l-confetti" id="lConfetti" hidden></div>
 
 <script>
@@ -2676,7 +2823,7 @@ async function start() {
   for (const m of ['mEntry', 'mRecipe', 'mRun', 'mRecipes', 'mEdit']) $(m).addEventListener('click', e => { if (e.target === $(m)) $(m).hidden = true; });
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
-    if (!$('learn').hidden) { if (!['attract', 'hub'].includes(L.view)) learnGo('hub'); return; }
+    if (!$('learn').hidden) { if (!$('dMolPop').hidden) $('dMolPop').hidden = true; else if (L.view === 'hub') learnGo('design'); else if (L.view !== 'design') learnGo('hub'); return; }
     if (!$('mEdit').hidden) $('mEdit').hidden = true;
     else if (!$('mRecEdit').hidden) $('mRecEdit').hidden = true;
     else if (!$('mEntry').hidden) $('mEntry').hidden = true;
@@ -2756,6 +2903,7 @@ const BADGES = [
   { id: 'lab', name: 'Brewmaster', how: 'Beat a lab challenge', icon: 'flask' },
   { id: 'safety', name: 'Safety Inspector', how: 'Read all 3 safety topics', icon: 'shield' },
   { id: 'quiz', name: 'Quiz Champ', how: 'Get 4 of 5 in the quiz', icon: 'star' },
+  { id: 'design', name: 'Fermentation Designer', how: 'Finish a fermentation you designed', icon: 'tank' },
 ];
 const COURSE = {
   title: 'Learn this hands-on in CHEM 337 (Beer Chemistry) and CHEM 339',
@@ -2778,7 +2926,7 @@ const TIPS = [
 const learnHome = new URLSearchParams(location.search).get('home') === 'learn' || CONFIG.homeLayer === 'learn';
 let layer = 'monitor';
 const L = {
-  view: 'attract', step: 0, badges: new Set(), lastTouch: Date.now(), tipI: 0, spotI: 0,
+  view: 'design', step: 0, badges: new Set(), lastTouch: Date.now(), tipI: 0, spotI: 0,
   tank: null, seenTanks: new Set(), microbe: 'yeast', seenMicrobes: new Set(),
   molCat: 'fruity', mol: 'isoamylAcetate', seenMols: new Set(), safety: 'ph', seenSafety: new Set(), so2pH: 3.4,
   ph46: {}, sim: null, quiz: null, match: null,
@@ -2974,7 +3122,7 @@ function molSvg(m) {
   const x0 = Math.min(...xs), y0 = Math.min(...ys);
   const W = (Math.max(...xs) - x0) * S + pad * 2, Hh = (Math.max(...ys) - y0) * S + pad * 2;
   const P0 = (x, y) => [(x - x0) * S + pad, (y - y0) * S + pad], P = i => P0(m.atoms[i][1], m.atoms[i][2]);
-  const lab = i => m.atoms[i][0] === 'C' ? null : (m.atoms[i][3] || m.atoms[i][0]);
+  const lab = i => m.atoms[i][3] || (m.atoms[i][0] === 'C' ? null : m.atoms[i][0]);
   const ln = (a, b, c, d) => `<line class="b" x1="${a.toFixed(1)}" y1="${b.toFixed(1)}" x2="${c.toFixed(1)}" y2="${d.toFixed(1)}"/>`;
   let g = '';
   for (const [a, b, o] of m.bonds) {
@@ -3515,26 +3663,6 @@ function renderFlavors() {
 }
 
 /* ---------- Start screen, tour and topic list ---------- */
-function spotlight() {
-  const live = state.tanks.map(t => viewFor(t.id)).filter(v => v?.run && !v.hist && v.r);
-  if (!live.length) return '';
-  const v = live[L.spotI % live.length], r = v.r;
-  const bits = [r.ph != null && `pH ${fmtPh(r.ph)}`, r.tempC != null && tUnit(r.tempC), `day ${dayOf(v.run)}`].filter(Boolean).join(' · ');
-  return `<span class="live">Live</span><b>${esc(v.tank.name)}: ${esc(v.run.experiment || v.run.name)}</b><span>${bits} · ${esc(phaseName(phaseOf(v)))}</span>`;
-}
-function renderAttract() {
-  return `<div class="l-attract">
-    <div class="la-text">
-      <p class="la-kicker">CAFE Lab · Fermentation Explorer</p>
-      <h2>What’s alive in these tanks?</h2>
-      <p class="la-sub">Yeast, bacteria and molds are turning sugar into flavor right now. Explore the chemistry and microbiology of fermentation.</p>
-      <div class="la-btns"><button type="button" class="l-btn primary big" data-go="tour">${ico('play')}Take the 1-minute tour</button><button type="button" class="l-btn big" data-go="hub">Explore on my own</button></div>
-      <div class="la-spot" id="laSpot" ${spotlight() ? '' : 'hidden'}>${spotlight()}</div>
-      <p class="la-tip" id="laTip"><b>Did you know?</b> ${esc(TIPS[L.tipI % TIPS.length])}</p>
-      <p class="la-course"><b>${esc(COURSE.title)}.</b></p>
-    </div>
-    <div class="la-art" data-go="tour">${artTank('att')}</div></div>`;
-}
 function renderTour() {
   const s = TOUR[L.step], last = L.step === TOUR.length - 1;
   return `<div class="l-tour">
@@ -3576,6 +3704,835 @@ function drawQr() {
   qrLib.then(() => { const q = qrcode(0, 'M'); q.addData(CONFIG.courseUrl); q.make(); if ($('lQr')) $('lQr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }).catch(() => {});
 }
 
+/* ---------- Design your fermentation: the Learn layer's main screen ----------
+   Visitors pick a microbe, ingredients and conditions, then watch a simplified teaching model ferment them:
+   pH and dissolved oxygen change, the main reactions turn reactants into products, and pleasant and
+   unpleasant flavor molecules build up. The numbers are made up but the directions are right. */
+const DMIC = {
+  ale: { name: 'Ale yeast', sci: 'Saccharomyces cerevisiae', kind: 'yeast', grp: 'yeast', T: [5, 30, 40], ideal: [16, 22], salt: [2, 10], o2: 'fac', hours: 336, ester: .45, tol: 11,
+    blurb: 'Top-fermenting brewer’s yeast. Turns sugar into alcohol and CO₂, with fruity esters.' },
+  lager: { name: 'Lager yeast', sci: 'Saccharomyces pastorianus', kind: 'yeast', grp: 'yeast', T: [2, 26, 34], ideal: [8, 13], salt: [2, 10], o2: 'fac', hours: 504, ester: .15, tol: 10,
+    blurb: 'Works cold and slow for a clean, crisp taste. Can leave sulfur and butter notes.' },
+  wheat: { name: 'Wheat beer yeast', sci: 'Saccharomyces cerevisiae (phenolic strain)', kind: 'yeast', grp: 'yeast', T: [5, 30, 40], ideal: [17, 22], salt: [2, 10], o2: 'fac', hours: 240, ester: .7, tol: 10, pof: true,
+    blurb: 'Makes banana and clove flavors in German wheat beer.' },
+  wine: { name: 'Wine yeast', sci: 'Saccharomyces cerevisiae (wine strain)', kind: 'yeast', grp: 'yeast', T: [8, 28, 38], ideal: [13, 25], salt: [2, 10], o2: 'fac', hours: 336, ester: .35, tol: 16, rose: true,
+    blurb: 'Handles strong sugar and high alcohol. Makes floral and fruity aromas.' },
+  brett: { name: 'Brettanomyces', sci: 'Brettanomyces bruxellensis', kind: 'yeast', grp: 'brett', T: [10, 28, 37], ideal: [18, 25], salt: [2, 8], o2: 'fac', hours: 1440, tol: 12,
+    blurb: 'A slow, wild yeast. Funky barnyard and tropical fruit flavors.' },
+  lab: { name: 'Lactic acid bacteria', sci: 'Leuconostoc, Lactiplantibacillus plantarum', kind: 'bacteria', grp: 'lab', T: [8, 30, 42], ideal: [16, 22], salt: [3, 12], o2: 'lab', hours: 504, t50: .18,
+    blurb: 'Sour vegetables: sauerkraut, pickles and kimchi. Turns sugar into lactic acid.' },
+  yogurt: { name: 'Yogurt cultures', sci: 'Streptococcus thermophilus + Lactobacillus bulgaricus', kind: 'bacteria', grp: 'yogurt', T: [20, 43, 50], ideal: [40, 45], salt: [1, 5], o2: 'lab', hours: 8,
+    blurb: 'Heat-loving bacteria that turn milk sugar into lactic acid and thicken milk.' },
+  kettle: { name: 'Sour beer Lactobacillus', sci: 'Lactobacillus delbrueckii', kind: 'bacteria', grp: 'kettle', T: [22, 42, 52], ideal: [35, 45], salt: [2, 8], o2: 'lab', hours: 48,
+    blurb: 'Sours unhopped wort fast and warm for kettle-sour beers.' },
+  aceto: { name: 'Vinegar bacteria', sci: 'Acetobacter aceti', kind: 'bacteria', grp: 'aceto', T: [10, 30, 37], ideal: [24, 30], salt: [1, 5], o2: 'aer', hours: 720,
+    blurb: 'Needs air. Turns alcohol into acetic acid: vinegar.' },
+  kombucha: { name: 'Kombucha SCOBY', sci: 'Yeasts + Komagataeibacter bacteria', kind: 'mix', grp: 'kombucha', T: [15, 28, 35], ideal: [22, 29], salt: [1, 5], o2: 'aer', hours: 240,
+    blurb: 'A team of yeast and bacteria living in a rubbery mat. Sweet tea becomes tangy and fizzy.' },
+  koji: { name: 'Koji mold', sci: 'Aspergillus oryzae', kind: 'mold', grp: 'koji', T: [15, 32, 42], ideal: [28, 35], salt: [8, 25], o2: 'aer', hours: 72,
+    blurb: 'Breaks starch into sugar and protein into savory glutamate. The start of soy sauce, miso and sake.' },
+  natto: { name: 'Natto bacteria', sci: 'Bacillus subtilis var. natto', kind: 'bacteria', grp: 'natto', T: [15, 40, 50], ideal: [37, 42], salt: [1, 6], o2: 'aer', hours: 24,
+    blurb: 'Turns soybeans sticky, nutty and pungent. Raises pH instead of lowering it.' },
+  blue: { name: 'Blue cheese mold', sci: 'Penicillium roqueforti', kind: 'mold', grp: 'blue', T: [4, 24, 35], ideal: [8, 14], salt: [4, 15], o2: 'aer', hours: 1440,
+    blurb: 'Breaks down milk fat into the sharp, peppery flavor of blue cheese.' },
+  wild: { name: 'Wild (no starter)', sci: 'Whatever lives on the ingredients', kind: 'wild', grp: 'wild', T: [5, 30, 42], ideal: [18, 24], salt: [2, 15], o2: 'fac', hours: 336,
+    blurb: 'No added culture. Sometimes delicious, sometimes spoiled. The conditions decide who wins.' },
+};
+
+// One portion of each ingredient. w = how big a share of the batch it usually is; nutrients are on a 0–1 scale.
+// s simple sugars, m maltose, l lactose, st starch, p protein, f fat, n yeast nutrients, phen hydroxycinnamic acids,
+// hop hop acids, eth alcohol, tea tea, ph natural pH, buf how strongly it holds its pH, solid = stays as pieces.
+const ING_CATS = [['all', 'All'], ['grain', 'Grains'], ['fruit', 'Fruit'], ['veg', 'Vegetables'], ['dairy', 'Dairy'], ['protein', 'Beans & fish'], ['sweet', 'Sweeteners'], ['herb', 'Hops, tea & spices'], ['drink', 'Drinks']];
+const ING = {
+  malt: { name: 'Barley malt', e: '🌾', cat: 'grain', m: .45, s: .05, p: .3, n: .8, phen: .5, ph: 5.4, buf: .9, c: '#c98a2e' },
+  wheatmalt: { name: 'Wheat malt', e: '🌾', cat: 'grain', m: .45, s: .05, p: .35, n: .8, phen: .9, ph: 5.5, buf: .9, c: '#e2b55c' },
+  rice: { name: 'Steamed rice', e: '🍚', cat: 'grain', st: .8, p: .12, n: .1, ph: 6.4, buf: .3, c: '#f3efe2', solid: true },
+  oats: { name: 'Oats', e: '🥣', cat: 'grain', st: .6, p: .25, f: .2, n: .2, phen: .3, ph: 6.2, buf: .5, c: '#d9c49a', solid: true },
+  corn: { name: 'Corn', e: '🌽', cat: 'grain', st: .65, s: .05, p: .15, n: .2, ph: 6.3, buf: .4, c: '#f1cf4a', solid: true },
+  flour: { name: 'Wheat flour', e: '🍞', cat: 'grain', st: .7, s: .03, p: .3, n: .3, phen: .4, ph: 6.0, buf: .5, c: '#efe2c4' },
+  potato: { name: 'Potatoes', e: '🥔', cat: 'grain', st: .55, s: .02, p: .08, n: .2, ph: 5.9, buf: .4, c: '#e3cf9b', solid: true },
+  grapes: { name: 'Grapes', e: '🍇', cat: 'fruit', s: 1, n: .5, phen: .3, ph: 3.4, buf: .5, c: '#7a2d5a' },
+  apples: { name: 'Apples', e: '🍎', cat: 'fruit', s: .55, n: .2, ph: 3.5, buf: .4, c: '#e9d58a' },
+  pears: { name: 'Pears', e: '🍐', cat: 'fruit', s: .55, n: .2, ph: 3.9, buf: .4, c: '#e5dc9a' },
+  berries: { name: 'Berries', e: '🍓', cat: 'fruit', s: .35, n: .3, phen: .2, ph: 3.3, buf: .5, c: '#c92f4a', solid: true },
+  cherries: { name: 'Cherries', e: '🍒', cat: 'fruit', s: .6, n: .3, ph: 3.8, buf: .5, c: '#8b1e2e', solid: true },
+  peaches: { name: 'Peaches', e: '🍑', cat: 'fruit', s: .45, n: .2, ph: 3.8, buf: .4, c: '#f2a65a', solid: true },
+  pineapple: { name: 'Pineapple', e: '🍍', cat: 'fruit', s: .6, n: .2, ph: 3.5, buf: .4, c: '#f4d35e', solid: true },
+  mango: { name: 'Mango', e: '🥭', cat: 'fruit', s: .7, n: .2, ph: 4.0, buf: .4, c: '#f6a41c', solid: true },
+  banana: { name: 'Bananas', e: '🍌', cat: 'fruit', s: .8, st: .1, n: .2, ph: 5.0, buf: .4, c: '#f2e3a0', solid: true },
+  oranges: { name: 'Oranges', e: '🍊', cat: 'fruit', s: .45, n: .2, ph: 3.7, buf: .4, c: '#f39a2b' },
+  lemons: { name: 'Lemons', e: '🍋', cat: 'fruit', w: .3, s: .1, n: .1, ph: 2.3, buf: .7, c: '#f7ef8a' },
+  cabbage: { name: 'Cabbage', e: '🥬', cat: 'veg', s: .2, n: .2, ph: 6.2, buf: .2, c: '#b9d97a', solid: true },
+  cucumbers: { name: 'Cucumbers', e: '🥒', cat: 'veg', s: .12, n: .1, ph: 5.8, buf: .15, c: '#8fc46b', solid: true },
+  carrots: { name: 'Carrots', e: '🥕', cat: 'veg', s: .25, n: .1, ph: 6.0, buf: .2, c: '#f08a24', solid: true },
+  tomatoes: { name: 'Tomatoes', e: '🍅', cat: 'veg', s: .3, n: .2, ph: 4.4, buf: .4, c: '#e0412e', solid: true },
+  peppers: { name: 'Chili peppers', e: '🌶️', cat: 'veg', w: .2, s: .2, n: .1, ph: 5.5, buf: .2, c: '#d23a2a', solid: true },
+  garlic: { name: 'Garlic', e: '🧄', cat: 'veg', w: .15, s: .1, p: .1, n: .2, ph: 6.0, buf: .2, c: '#f2ead8', solid: true },
+  onions: { name: 'Onions', e: '🧅', cat: 'veg', w: .4, s: .3, n: .1, ph: 5.6, buf: .2, c: '#e9d3e8', solid: true },
+  mushrooms: { name: 'Mushrooms', e: '🍄', cat: 'veg', s: .05, p: .3, n: .3, ph: 6.5, buf: .3, c: '#c8ad8e', solid: true },
+  milk: { name: 'Milk', e: '🥛', cat: 'dairy', l: .5, p: .35, f: .35, n: .3, ph: 6.7, buf: .9, c: '#fbf8ef' },
+  cream: { name: 'Cream', e: '🍦', cat: 'dairy', l: .3, p: .2, f: .9, ph: 6.6, buf: .6, c: '#fff6dc' },
+  cheese: { name: 'Cheese curds', e: '🧀', cat: 'dairy', l: .05, p: .7, f: .7, ph: 5.2, buf: .9, c: '#f6d36b', solid: true },
+  soy: { name: 'Soybeans', e: '🌱', cat: 'protein', st: .1, s: .05, p: .9, f: .4, n: .6, ph: 6.5, buf: .8, c: '#d9c08a', solid: true },
+  chickpeas: { name: 'Chickpeas', e: '🟡', cat: 'protein', st: .4, s: .05, p: .45, f: .1, n: .4, ph: 6.4, buf: .7, c: '#e1c27e', solid: true },
+  fish: { name: 'Fish', e: '🐟', cat: 'protein', p: .8, f: .2, n: .6, ph: 6.6, buf: .7, c: '#d9c7b5', solid: true },
+  honey: { name: 'Honey', e: '🍯', cat: 'sweet', w: .6, s: 1, n: .02, ph: 3.9, buf: .15, c: '#f5b82e' },
+  sugar: { name: 'Cane sugar', e: '🍬', cat: 'sweet', w: .4, s: 1, ph: 7, buf: .02, c: '#fffdf5' },
+  maple: { name: 'Maple syrup', e: '🍁', cat: 'sweet', w: .5, s: .9, n: .1, ph: 6.8, buf: .1, c: '#c4741c' },
+  molasses: { name: 'Molasses', e: '🟤', cat: 'sweet', w: .5, s: .8, n: .4, ph: 5.5, buf: .5, c: '#3b1f0e' },
+  agave: { name: 'Agave syrup', e: '🌵', cat: 'sweet', w: .5, s: .9, n: .05, ph: 4.8, buf: .1, c: '#f3c15a' },
+  hops: { name: 'Hops', e: '🌿', cat: 'herb', w: .1, hop: 1, phen: .1, ph: 5.5, buf: .05, c: '#8bb04a' },
+  blacktea: { name: 'Black tea', e: '🍵', cat: 'herb', w: .3, tea: 1, n: .2, ph: 5.0, buf: .1, c: '#8b4b1b' },
+  greentea: { name: 'Green tea', e: '🍵', cat: 'herb', w: .3, tea: 1, n: .2, ph: 5.5, buf: .1, c: '#c5b358' },
+  ginger: { name: 'Ginger', e: '🍠', cat: 'herb', w: .15, s: .05, n: .1, ph: 6.0, buf: .1, c: '#e8c98a', solid: true },
+  dill: { name: 'Dill', e: '🌿', cat: 'herb', w: .1, ph: 6.0, buf: .05, c: '#7fa35a' },
+  coffee: { name: 'Coffee', e: '☕', cat: 'herb', w: .4, n: .1, ph: 5.0, buf: .2, c: '#3e2412' },
+  water: { name: 'Water', e: '💧', cat: 'drink', ph: 7, buf: .02, c: '#d6ecf3' },
+  wine: { name: 'Wine', e: '🍷', cat: 'drink', eth: 1, s: .02, n: .1, ph: 3.5, buf: .5, c: '#6b1830' },
+  beer: { name: 'Beer', e: '🍺', cat: 'drink', eth: .4, m: .05, n: .2, ph: 4.3, buf: .7, c: '#e0a730' },
+  cider: { name: 'Hard cider', e: '🍏', cat: 'drink', eth: .5, s: .02, n: .1, ph: 3.6, buf: .4, c: '#efd98a' },
+  sake: { name: 'Sake', e: '🍶', cat: 'drink', eth: 1.1, n: .2, ph: 4.3, buf: .5, c: '#f2efe0' },
+};
+const ING_MAX = 6;
+const PRESETS = [
+  { name: 'Beer', mic: 'ale', ing: ['malt', 'hops'], T: 19, o2: 8, salt: 0 },
+  { name: 'Wine', mic: 'wine', ing: ['grapes'], T: 20, o2: 5, salt: 0 },
+  { name: 'Sauerkraut', mic: 'lab', ing: ['cabbage'], T: 20, o2: 1, salt: 2.25 },
+  { name: 'Yogurt', mic: 'yogurt', ing: ['milk'], T: 43, o2: 3, salt: 0 },
+  { name: 'Kombucha', mic: 'kombucha', ing: ['blacktea', 'sugar'], T: 25, o2: 6, salt: 0 },
+  { name: 'Miso', mic: 'koji', ing: ['soy', 'rice'], T: 30, o2: 6, salt: 11 },
+  { name: 'Natto', mic: 'natto', ing: ['soy'], T: 40, o2: 7, salt: 0 },
+  { name: 'Vinegar', mic: 'aceto', ing: ['wine'], T: 28, o2: 7, salt: 0 },
+];
+const DPLAY_SECONDS = 18;   // how long the animation of one fermentation takes
+
+function newDesign() {
+  return { mic: null, ing: [], T: 20, o2: 4, salt: 0, cat: 'all', touched: false, res: null, t: 0, playing: false, mol: null };
+}
+let D = newDesign(), dAnim = 0, tipT = 0;
+
+/* ----- Model ----- */
+function ctmi(T, [a, o, b]) {   // cardinal temperature model: 0 at the minimum and maximum, 1 at the optimum
+  if (T <= a || T >= b) return 0;
+  return clamp01((T - b) * (T - a) ** 2 / ((o - a) * ((o - a) * (T - o) - (o - b) * (o + a - 2 * T))));
+}
+function o2Sat(T) { return Math.max(4, 14.62 - .3898 * T + .006969 * T * T - .00005897 * T ** 3); }   // mg/L, fresh water in air
+function mixOf(ids) {
+  const keys = ['s', 'm', 'l', 'st', 'p', 'f', 'n', 'phen', 'hop', 'eth', 'tea'], out = {}, cats = new Set();
+  let W = 0, pb = 0, bw = 0, rgb = [0, 0, 0];
+  for (const k of keys) out[k] = 0;
+  for (const id of ids) {
+    const g = ING[id], w = g.w ?? 1; W += w; cats.add(g.cat);
+    for (const k of keys) out[k] += (g[k] || 0) * w;
+    pb += g.ph * g.buf * w; bw += g.buf * w;
+    const c = parseInt(g.c.slice(1), 16); rgb = rgb.map((v, i) => v + ((c >> (16 - 8 * i)) & 255) * w);
+  }
+  if (!W) return null;
+  for (const k of keys) out[k] /= W;
+  out.ph0 = bw ? pb / bw : 7; out.buf = bw / W; out.cats = cats;
+  out.color = `rgb(${rgb.map(v => Math.round(v / W)).join(',')})`;
+  out.solids = ids.filter(id => ING[id].solid);
+  return out;
+}
+const has = (ids, ...want) => want.some(w => ids.includes(w));
+
+// Runs the model for the current design. Returns time series plus final flavors, reactions and notes.
+function brew(d) {
+  const mic = DMIC[d.mic], x = mixOf(d.ing), T = d.T, salt = d.salt, notes = [], fl = {};
+  const H = mic.hours, ids = d.ing, do0 = Math.min(d.o2, o2Sat(T));
+  let grp = mic.grp, lag = 1, ac = 0;
+  // Wild ferments: the conditions decide which microbes win.
+  let wild = null;
+  if (grp === 'wild') {
+    if (x.eth > .2 && d.o2 >= 3) { grp = 'aceto'; wild = 'vinegar'; lag = 2; }
+    else if (x.p > .35 && salt >= 15) { grp = 'wild'; wild = 'salty'; }
+    else if (x.l > .2 && salt < 2) { grp = 'yogurt'; wild = 'clabber'; lag = 2.5; }
+    else if (salt >= 1.5 && salt <= 8 && x.s + x.m > .05 && x.ph0 > 4.2) { grp = 'lab'; wild = 'lacto'; lag = 1.8; }
+    else if (x.ph0 <= 4.3 && x.s + x.m > .1) { grp = 'yeast'; wild = 'fruit'; lag = 1.6; }
+    else { grp = 'wild'; wild = 'spoil'; }
+  }
+  // What this microbe can eat
+  const U = { yeast: x.s + x.m, brett: (x.s + x.m) * 1.1, lab: x.s + .6 * x.m, yogurt: x.l + .4 * x.s, kettle: x.m + x.s, aceto: x.eth + .1 * x.s,
+    kombucha: x.s, koji: x.st + x.s + x.p, natto: x.p + .3 * x.s, blue: x.f + x.p, wild: x.p + x.s + x.st }[grp];
+  // How fast: temperature, salt, oxygen, hops, nutrients, relative to the microbe's comfortable temperature
+  const tRef = ctmi((mic.ideal[0] + mic.ideal[1]) / 2, mic.T), fT = ctmi(T, mic.T) / tRef;
+  const fS = salt <= mic.salt[0] ? 1 : Math.max(0, 1 - (salt - mic.salt[0]) / (mic.salt[1] - mic.salt[0])) ** 1.5;
+  const fO = mic.o2 === 'aer' ? d.o2 / (d.o2 + 1.5) * 1.6 : mic.o2 === 'fac' ? .45 + .55 * Math.min(1, do0 / 8) : 1 - .15 * do0 / 10;
+  const hopSens = ['lab', 'kettle', 'yogurt'].includes(grp);
+  const fH = hopSens ? Math.exp(-x.hop * 6) : 1;
+  const yeasty = grp === 'yeast' || grp === 'brett' || grp === 'kombucha';
+  const fN = yeasty ? .35 + .65 * Math.min(1, (x.n + .1 * x.tea) / .25) : 1;
+  const fTea = grp === 'kombucha' ? .4 + .6 * Math.min(1, x.tea * 3) : 1;
+  const fPh = grp === 'natto' || grp === 'koji' || grp === 'blue' ? (x.ph0 < 4.5 ? .3 : 1) : grp === 'lab' || grp === 'yogurt' || grp === 'kettle' ? (x.ph0 < 3.6 ? .3 : 1) : 1;
+  const a = Math.min(2.5, fT) * fS * Math.min(1, fO) * fH * fN * fTea * fPh * (U > .02 ? 1 : 0);
+  const fails = [];
+  if (ctmi(T, mic.T) === 0) fails.push(T >= mic.T[2] ? `Too hot: ${mic.name.toLowerCase()} die above about ${tUnit(mic.T[2])}.` : `Too cold: ${mic.name.toLowerCase()} stop working below about ${tUnit(mic.T[0])}.`);
+  if (fS < .05) fails.push(`Too salty: ${salt}% salt draws water out of the cells and stops them.`);
+  if (mic.o2 === 'aer' && d.o2 < .5) fails.push(`${mic.name} need oxygen to grow, and there is almost none.`);
+  if (U <= .02) fails.push({
+    yeast: ids.some(i => ING[i].l) && !x.s && !x.m ? 'Yeast can’t eat lactose, the sugar in milk.' : x.st > .1 ? 'Yeast can’t eat starch. Brewers malt the grain first, and sake brewers use koji mold to turn starch into sugar.' : 'There’s no sugar here for yeast to eat.',
+    brett: 'There’s no sugar here for Brettanomyces to eat.', lab: 'There’s no sugar here for the bacteria to eat.', kettle: 'There’s no sugar here for the bacteria to eat.',
+    yogurt: 'Yogurt cultures need milk sugar (lactose) or other sugar.', aceto: 'Vinegar bacteria turn alcohol into acid. Start with wine, beer, cider or sake.',
+    kombucha: 'A SCOBY needs sugar to eat.', koji: 'Koji needs starch or protein to break down: try rice, soybeans or grains.', natto: 'Natto bacteria need protein: try soybeans.',
+    blue: 'Blue cheese mold needs milk fat and protein: try milk, cream or cheese curds.', wild: 'There’s nothing here for microbes to eat.' }[grp]);
+  if (fH < .3 && hopSens) notes.push({ t: 'Hops hold back lactic acid bacteria. Sour brewers add hops after souring.', bad: true });
+
+  // Progress: an S-shaped curve. At comfortable conditions about half done by a third of the run.
+  const rate = Math.max(a, 1e-6), t50 = (mic.t50 || .3) * H * lag / rate, sw = .07 * H * lag / rate;
+  const Lg = t => 1 / (1 + Math.exp(-(t - t50) / sw)), L0 = Lg(0);
+  const P = t => a < .03 ? 0 : clamp01((Lg(t) - L0) / (1 - L0));
+  // How much of the food gets used
+  let E = { yeast: 1, brett: 1, lab: .9, yogurt: .5, kettle: .55, aceto: .95, kombucha: .5, koji: .6, natto: .35, blue: .3, wild: .5 }[grp];
+  const tol = wild === 'fruit' ? 8 : mic.tol;
+  if (grp === 'yeast' || grp === 'brett') {
+    if (x.m > .1 && grp === 'yeast') E = .78;   // malt has sugars brewing yeast can’t eat
+    if (U * 13 * E > tol) { E = tol / (13 * U); notes.push({ t: `The alcohol got strong enough (about ${tol}%) to stop the yeast, so some sugar is left.`, bad: false }); }
+    E *= .55 + .45 * Math.min(1, fN / .8);
+  }
+  const used = t => U * E * P(t);
+  const total = U * E * P(H);
+
+  // pH: acids pull it toward a floor; the ingredients' buffering resists. Natto and cheese molds push it up.
+  const acidK = { yeast: .4, brett: .4, lab: 1, yogurt: 1, kettle: 1.1, aceto: 1.2, kombucha: 1, koji: .15, natto: -.8, blue: -.3, wild: wild === 'spoil' ? (x.p > .3 ? -.4 : .3) : wild === 'salty' ? .2 : 1 }[grp];
+  const floor = { yeast: 3.9, brett: 3.4, lab: 3.2, yogurt: 3.9, kettle: 3.1, aceto: 2.6, kombucha: 2.8, koji: 4.8, wild: 4.4 }[grp] ?? 3.2;
+  const ph0 = x.ph0;
+  const pHat = t => {
+    const A = acidK * used(t) / (U || 1) * Math.min(1, U * 2.5);
+    if (A < 0) return ph0 + (8.4 - ph0) * (1 - Math.exp(-6 * -A));
+    if (ph0 <= floor) return ph0 - .15 * A;
+    return floor + (ph0 - floor) * Math.exp(-4.6 * A / (x.buf + .25));
+  };
+  // Dissolved oxygen: sealed ferments use it up; air-loving microbes need it topped up.
+  const kO = { yeast: 6, brett: 2, lab: 1.5, yogurt: 3, kettle: 2, wild: 1.5 }[grp] ?? 2;
+  const doAt = t => {
+    if (mic.o2 === 'aer' || grp === 'aceto' || grp === 'kombucha') { const g = Lg(t); return Math.max(0, do0 * (1 - (a < .03 ? 0 : .75 * Math.min(1, a) * 4 * g * (1 - g)))); }
+    return do0 * Math.exp(-kO * Math.min(1.5, a) * 8 * t / H);
+  };
+  const N = 120, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = H * i / N, g = Lg(t);
+    pts.push({ t, ph: pHat(t), do: doAt(t), p: P(t), x: a < .03 ? .02 : .03 + .97 * P(Math.min(H, t * 1.25)), act: a < .03 ? 0 : Math.min(1, 4 * g * (1 - g) * Math.min(1, a * 1.3)) });
+  }
+  const ph72 = pHat(Math.min(72, H)), phEnd = pHat(H), doEnd = doAt(H);
+  let t46 = null; for (const p of pts) if (p.ph <= 4.6) { t46 = p.t; break; }
+  if (ph0 <= 4.6) t46 = 0;
+
+  // ----- Flavors: amount 0–1 and pleasant or not, from the conditions -----
+  const warm = clamp01((T - mic.ideal[1]) / 6), cold = clamp01((mic.ideal[0] - T) / 5), done = total / Math.max(U * E, 1e-6);
+  const add = (k, amt, good, why) => { amt = clamp01(amt); if (amt > .02) fl[k] = { amt: Math.max(fl[k]?.amt || 0, amt), good, why }; };
+  if (a >= .03 && has(ids, 'cabbage', 'garlic', 'onions')) add('dmds', .15 + .2 * done, false, 'Sulfur smells from the cabbage family and garlic: pungent, cooked cabbage.');
+  if (x.hop > .05) add('linalool', .2 + .6 * x.hop, true, 'From the hops: floral and citrusy.');
+  const abv = (grp === 'yeast' || grp === 'brett') ? used(H) * 13 : grp === 'kombucha' ? Math.min(1.5, used(H) * 4) : 0;
+  if (a >= .03) {
+    if (grp === 'yeast') {
+      const ester = wild === 'fruit' ? .5 : mic.ester;
+      add('ethanol', abv / 14, true, `About ${abv.toFixed(1)}% alcohol: warming.`);
+      add('isoamylAcetate', ester * (1 + warm * 1.3) * (do0 < 3 ? 1.2 : 1) * done, true, 'Fruity esters from the yeast, more when warm.');
+      add('ethylAcetate', (.12 + warm * .6 + (wild === 'fruit' ? .35 : 0)) * done, warm < .4 && wild !== 'fruit', warm >= .4 || wild === 'fruit' ? 'So much ethyl acetate it smells like nail-polish remover.' : 'A little ethyl acetate tastes like pear.');
+      add('ethylHexanoate', (.2 + cold * .3 + (mic.rose ? .15 : 0)) * done, true, 'Apple-like ester, nicer at cool temperatures.');
+      if (mic.rose || d.mic === 'ale') add('phenylethanol', (mic.rose ? .45 : .2) * done, true, 'Rose-scented alcohol made by the yeast.');
+      add('isoamylAlcohol', (.08 + warm * .85) * done, false, warm > .2 ? 'Too warm: harsh, solventy fusel alcohols.' : 'A trace of fusel alcohol.');
+      add('diacetyl', (d.mic === 'lager' ? .25 : .1) + cold * .45 - warm * .1, false, cold > .2 ? 'Too cold for the yeast to clean up buttery diacetyl.' : 'Buttery diacetyl the yeast didn’t quite clean up.');
+      add('acetaldehyde', (1 - done) * .6 + .05, false, done < .8 ? 'Unfinished fermentation leaves green-apple acetaldehyde.' : 'A hint of green apple.');
+      add('h2s', (d.mic === 'lager' ? .3 : .06) + (x.n < .15 ? .55 : 0) + cold * .15, false, x.n < .15 ? 'Hungry yeast (few nutrients, as in honey or sugar) make rotten-egg hydrogen sulfide.' : 'Rotten-egg sulfur, common in lagers; it fades with time.');
+      if (mic.pof) add('vg4', .15 + .85 * x.phen, true, 'Clove from ferulic acid in the grain.');
+      if (wild === 'fruit') { add('vg4', .2 + .5 * x.phen, false, 'Wild yeasts make plastic-like phenols.'); add('acetic', .3, false, 'Bacteria came along too: vinegar.'); }
+    } else if (grp === 'brett') {
+      add('ethanol', abv / 14, true, `About ${abv.toFixed(1)}% alcohol.`);
+      add('ethylHexanoate', .5 * done, true, 'Tropical, pineapple-like esters.');
+      add('ep4', (.15 + .8 * x.phen) * done, false, 'Barnyard and horse blanket. Some brewers want it; winemakers call it a fault.');
+      add('isovaleric', .35 * done, false, 'Sweaty, cheesy isovaleric acid.');
+      if (d.o2 > 2) add('acetic', .2 + d.o2 / 20, false, 'Oxygen lets Brettanomyces make vinegary acetic acid.');
+    } else if (grp === 'lab') {
+      add('lactic', .3 + .7 * Math.min(1, (ph0 - phEnd) / 2.5), true, 'Clean, tangy sourness.');
+      add('acetic', .2 * done + warm * .2, warm < .5, warm >= .5 ? 'Warm ferments get too vinegary.' : 'A little acetic acid adds tang.');
+      add('diacetyl', .12 * done, true, 'A buttery note, normal in sauerkraut.');
+      add('ethanol', .06 * done, true, 'A little alcohol from early fermenters (Leuconostoc).');
+      if (salt < 1.5 || (t46 ?? 1e9) > 72) add('butyric', .35 + (1.5 - Math.min(1.5, salt)) * .4, false, 'Not enough salt or acid fast enough: spoilage bacteria make butyric acid (rancid butter).');
+      if (do0 > 5 || T > 26) add('ethylAcetate', .3 + warm * .3, false, 'A white film of kahm yeast grew on top: solventy smell.');
+      if (wild === 'lacto') add('vg4', .1, false, 'Wild microbes add a slightly medicinal note.');
+    } else if (grp === 'yogurt') {
+      add('lactic', .4 + .6 * done, true, 'Fresh, clean sourness.');
+      if (wild === 'clabber') { add('butyric', .35, false, 'Without a starter, other bacteria grow too: rancid notes.'); add('h2s', .15, false, 'Sulfur from spoiling milk proteins.'); }
+      else { add('acetaldehyde', .45 * done, true, 'The fresh, green-apple note that makes yogurt taste like yogurt.'); add('diacetyl', .3 * done, true, 'Buttery and creamy.'); }
+      if ((t46 ?? 1e9) > 6 && wild !== 'clabber') add('butyric', .2 + cold * .3, false, 'Slow souring let other bacteria grow: rancid notes.');
+      if (!ids.some(i => ING[i].cat === 'dairy')) add('acetic', .15, false, 'Without milk the bacteria struggle and taste odd.');
+    } else if (grp === 'kettle') {
+      add('lactic', .35 + .65 * Math.min(1, (ph0 - phEnd) / 2), true, 'Bright, clean sourness.');
+      const slow = (t46 ?? 1e9) > 12;
+      add('butyric', slow ? .3 + .4 * (T < 30 ? 1 : .5) : .03, false, slow ? 'The warm wort stayed above pH 4.6 too long: Clostridium makes butyric acid (vomit).' : 'Barely a trace of butyric acid.');
+      add('diacetyl', .1, false, 'A little butter from the bacteria.');
+    } else if (grp === 'aceto') {
+      add('acetic', .3 + .7 * done, true, 'Sharp vinegar sourness: the goal.');
+      add('ethylAcetate', .2 + .3 * done * (x.eth > .5 ? 1 : .5), false, 'Acid and leftover alcohol join into nail-polish-smelling ethyl acetate.');
+      add('acetaldehyde', .25 * (1 - done) + .08, false, 'The halfway step from alcohol to acid: bruised apple.');
+      if (x.eth < .1) add('gluconic', .3, true, 'With no alcohol, the bacteria make mild gluconic acid from sugar.');
+    } else if (grp === 'kombucha') {
+      add('acetic', .25 + .5 * done + (T > 29 ? .25 : 0), done < .9 && T <= 29, T > 29 ? 'Warm kombucha turns too vinegary.' : 'Tangy acetic acid.');
+      add('gluconic', .35 * done, true, 'Mild, smooth sourness.');
+      add('ethylAcetate', .2 * done, true, 'A fruity note at low levels.');
+      add('ethanol', .1 * done, true, 'A trace of alcohol (usually under 1%).');
+      if (x.tea < .1) add('isovaleric', .2, false, 'Without tea, the SCOBY grows poorly and tastes off.');
+    } else if (grp === 'koji') {
+      if (x.st > .05) add('glucose', .3 + .6 * x.st * done, true, 'Sweet glucose from starch.');
+      if (x.p > .05) add('glutamate', .3 + .7 * x.p * done, true, 'Savory umami from protein.');
+      add('octenol', .25 * done, true, 'Earthy, mushroom smell of koji.');
+      if (T > 40) add('nh3', .4, false, 'Too hot: koji gets stressed and smells of ammonia.');
+      else add('nh3', .06 + (salt < 5 && x.p > .3 ? .15 : 0), false, 'A whiff of ammonia from broken-down protein.');
+    } else if (grp === 'natto') {
+      add('tetramethylpyrazine', .5 * done + .1, true, 'Nutty, roasted aroma.');
+      add('glutamate', .4 * done, true, 'Savory umami.');
+      add('nh3', .3 + .4 * done + warm * .2, false, 'Ammonia from broken-down protein; strong when overfermented.');
+      add('isovaleric', .3 * done, false, 'Sweaty-sock isovaleric acid: part of natto’s famous funk.');
+    } else if (grp === 'blue') {
+      add('heptanone', .35 + .6 * x.f * done, true, 'The sharp, peppery blue-cheese flavor.');
+      add('octenol', .25 * done, true, 'Earthy, mushroom note.');
+      add('butyric', .2 + .3 * x.f * done, false, 'Rancid-butter butyric acid from milk fat.');
+      add('nh3', .15 + .3 * done, false, 'Ammonia as the cheese ages.');
+    } else if (wild === 'salty') {
+      add('glutamate', .6 * done + .2, true, 'Savory umami: this is how fish sauce and soy sauce get their flavor.');
+      add('isovaleric', .25, false, 'A cheesy, sweaty note.');
+      add('nh3', .15, false, 'A little ammonia.');
+    } else {
+      add('butyric', .6, false, 'Spoilage bacteria: rancid butter and vomit.');
+      add('cadaverine', .3 + .5 * Math.min(1, x.p * 1.5), false, 'Rotting protein. This batch is spoiled.');
+      add('h2s', .4, false, 'Rotten eggs.');
+      add('isovaleric', .3, false, 'Sweaty feet.');
+      add('lactic', .15, true, 'A little lactic acid, but not enough to protect the food.');
+    }
+    if (yeasty || grp === 'lab') add('co2', grp === 'lab' ? .3 : .6 * done + .1, true, 'Bubbles: fizz.');
+    if ((grp === 'yeast' || grp === 'brett') && doEnd > 1.5) add('nonenal', .4, false, 'Oxygen stayed in the batch: stale, cardboard flavors.');
+    if (grp === 'yeast' && done > .5 && (x.m > .1) && d.o2 < 2) notes.push({ t: 'Almost no oxygen at the start: yeast can’t build healthy cells, so they work slowly.', bad: true });
+  }
+
+  // ----- Safety and notes -----
+  let safety;
+  const lowAcid = ph0 > 4.6, aerobicHigh = ['natto', 'koji', 'blue'].includes(grp);
+  if (a < .03) safety = { lvl: 'warn', t: 'Nothing fermented, so nothing protects this food. Throw it out.' };
+  else if ((grp === 'yeast' || grp === 'brett') && abv >= 2 && phEnd <= 4.6) safety = { lvl: 'ok', t: `Alcohol (about ${abv.toFixed(1)}%), acid${x.hop > .05 ? ', hops' : ''} and CO₂ together keep disease-causing microbes from growing in finished ${has(ids, 'malt', 'wheatmalt') ? 'beer' : 'drinks like this'}.` };
+  else if (!lowAcid) safety = { lvl: 'ok', t: `Started acidic (pH ${fmtPh(ph0)}), below the 4.6 safety line. Botulism bacteria can’t grow.` };
+  else if (aerobicHigh) safety = { lvl: 'warn', t: 'This ferment doesn’t get acidic. It stays safe because of air, a strong starter culture, salt or a short time, and it’s kept cold afterward.' };
+  else if (t46 != null && t46 <= 72) safety = { lvl: 'ok', t: `Reached pH 4.6 in ${t46 < 48 ? Math.max(1, Math.round(t46)) + ' hours' : (t46 / 24).toFixed(1) + ' days'}: acidic enough, fast enough, to keep botulism bacteria out.` };
+  else if (salt >= 10) safety = { lvl: 'warn', t: `Still pH ${fmtPh(ph72)} after 3 days, but ${salt}% salt holds back botulism bacteria.` };
+  else safety = { lvl: 'bad', t: `Still pH ${fmtPh(ph72)} after 3 days. Above 4.6 with little oxygen, Clostridium botulinum could grow. Don’t eat it.` };
+  if (grp === 'lab' && a >= .03) {
+    if (salt < 1.5) notes.push({ t: 'Too little salt: spoilage bacteria grow and vegetables turn mushy.', bad: true });
+    else if (salt <= 3) notes.push({ t: 'About 2–3% salt lets lactic acid bacteria win and keeps vegetables crunchy.', bad: false });
+    else if (salt > 6) notes.push({ t: 'Very salty: the good bacteria slow down.', bad: true });
+  }
+  if (a >= .03 && warm > .3) notes.push({ t: `Warmer than ${mic.name.toLowerCase()} like (about ${tUnit(mic.ideal[0])}–${tUnit(mic.ideal[1])}): faster, but harsher flavors.`, bad: true });
+  if (a >= .03 && cold > .3) notes.push({ t: `Cooler than ${mic.name.toLowerCase()} like (about ${tUnit(mic.ideal[0])}–${tUnit(mic.ideal[1])}): slow going.`, bad: true });
+  if (mic.o2 === 'aer' && d.o2 > 0 && d.o2 < 3 && a >= .03) notes.push({ t: 'Air-loving microbes work slowly with this little oxygen.', bad: true });
+  if (d.o2 > o2Sat(T) && mic.o2 !== 'aer') notes.push({ t: `Air can only dissolve about ${o2Sat(T).toFixed(1)} mg/L of oxygen at this temperature. More takes pure oxygen.`, bad: false });
+  if (wild) notes.unshift({ t: { vinegar: 'Wild vinegar bacteria found the alcohol and air.', salty: 'Only salt-loving microbes survive this much salt. The food’s own enzymes do most of the work.', clabber: 'Lactic acid bacteria in the milk soured it, along with some spoilers.', lacto: 'Salt let wild lactic acid bacteria take over, like homemade sauerkraut.', fruit: 'Wild yeasts on the fruit started fermenting, with some bacteria along for the ride.', spoil: 'With no acid, salt or starter, spoilage bacteria took over.' }[wild], bad: wild === 'spoil' });
+
+  return { mic: d.mic, grp, wild, a, H, pts, ph0, phEnd, doEnd, t46, abv, used: total / Math.max(U, 1e-6), U, fl, fails, notes, safety, mix: x,
+    name: (n => n[0].toUpperCase() + n.slice(1))(productName(d, grp, wild, a, x)), reactions: reactionsFor(grp, wild, d, x) };
+}
+function productName(d, grp, wild, a, x) {
+  const ids = d.ing, only = (...k) => ids.every(i => k.includes(i));
+  if (a < .03) return 'Nothing happened';
+  if (wild === 'spoil') return 'Spoiled!';
+  if (wild === 'salty') return has(ids, 'fish') ? 'Fish sauce' : 'Salty umami sauce';
+  if (wild === 'clabber') return 'Clabbered (sour) milk';
+  if (wild === 'vinegar') return 'Wild vinegar';
+  if (grp === 'yeast' || grp === 'brett') {
+    const funky = grp === 'brett' ? 'Funky ' : wild ? 'Wild ' : '';
+    if (has(ids, 'malt', 'wheatmalt')) return funky + (has(ids, 'wheatmalt') || d.mic === 'wheat' ? 'wheat beer' : d.mic === 'lager' ? 'lager' : has(ids, 'hops') ? 'ale' : 'unhopped ale (gruit)');
+    if (has(ids, 'grapes')) return funky + 'wine';
+    if (has(ids, 'apples')) return funky + 'hard cider';
+    if (has(ids, 'pears')) return funky + 'perry (pear cider)';
+    if (has(ids, 'honey')) return funky + 'mead';
+    if (has(ids, 'pineapple')) return funky + 'tepache-style pineapple brew';
+    if (has(ids, 'agave')) return funky + 'pulque-style agave brew';
+    if (ids.some(i => ING[i].cat === 'fruit')) return funky + 'fruit wine';
+    return funky + 'sugar wash';
+  }
+  if (grp === 'lab') {
+    if (has(ids, 'cabbage') && has(ids, 'peppers', 'garlic', 'ginger')) return 'Kimchi-style ferment';
+    if (has(ids, 'cabbage')) return 'Sauerkraut';
+    if (has(ids, 'cucumbers')) return 'Sour pickles';
+    if (has(ids, 'peppers')) return 'Fermented hot sauce';
+    if (has(ids, 'carrots')) return 'Fermented carrots';
+    if (ids.some(i => ING[i].cat === 'fruit')) return 'Lacto-fermented fruit';
+    return 'Lacto-fermented vegetables';
+  }
+  if (grp === 'yogurt') return ids.some(i => ING[i].cat === 'dairy') ? 'Yogurt' : 'Thin sour drink';
+  if (grp === 'kettle') return has(ids, 'malt', 'wheatmalt') ? 'Kettle-sour beer base' : 'Lactic sour drink';
+  if (grp === 'aceto') return has(ids, 'wine') ? 'Wine vinegar' : has(ids, 'cider') ? 'Cider vinegar' : has(ids, 'beer') ? 'Malt vinegar' : has(ids, 'sake') ? 'Rice vinegar' : 'Weak vinegar';
+  if (grp === 'kombucha') return x.tea > .1 ? 'Kombucha' : 'Fizzy sour sugar drink';
+  if (grp === 'koji') return has(ids, 'soy') && d.salt >= 14 ? 'Soy sauce base (moromi)' : has(ids, 'soy') && d.salt >= 5 ? 'Miso' : has(ids, 'rice') && d.salt < 3 ? 'Amazake (sweet rice)' : 'Koji ferment';
+  if (grp === 'natto') return has(ids, 'soy') ? 'Natto' : 'Natto-style ferment';
+  if (grp === 'blue') return ids.some(i => ING[i].cat === 'dairy') ? 'Blue cheese' : 'Moldy ferment';
+  return 'Your ferment';
+}
+
+/* ----- Molecules used in the reactions (adds to MOLS) and simple pictures for big molecules ----- */
+Object.assign(MOLS, {
+  glucose: { name: 'Glucose', formula: 'C₆H₁₂O₆', cat: 'base', smell: 'Sweet', made: 'The sugar most microbes eat first. Plants make it; enzymes free it from starch.',
+    atoms: [['O', .866, -.5], ['C', .866, .5], ['C', 0, 1], ['C', -.866, .5], ['C', -.866, -.5], ['C', 0, -1], ['O', 1.732, 1, 'OH'], ['O', 0, 2, 'OH'], ['O', -1.732, 1, 'HO'], ['O', -1.732, -1, 'HO'], ['C', 0, -2], ['O', .866, -2.5, 'OH']],
+    bonds: [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 5, 1], [5, 0, 1], [1, 6, 1], [2, 7, 1], [3, 8, 1], [4, 9, 1], [5, 10, 1], [10, 11, 1]] },
+  ethanol: { name: 'Ethanol', formula: 'C₂H₆O', cat: 'base', smell: 'Warming, slightly sweet', made: 'Yeast make it from sugar when there’s no oxygen: alcoholic fermentation.',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', 1.732, .5, 'OH']], bonds: [[0, 1, 1], [1, 2, 1]] },
+  co2: { name: 'Carbon dioxide', formula: 'CO₂', cat: 'base', smell: 'Fizz and a little bite', made: 'Released when yeast and some bacteria break down sugar. It makes bubbles.',
+    atoms: [['O', 0, 0], ['C', 1, 0, 'C'], ['O', 2, 0]], bonds: [[0, 1, 2], [1, 2, 2]] },
+  o2: { name: 'Oxygen', formula: 'O₂', cat: 'base', smell: '', atoms: [['O', 0, 0], ['O', 1, 0]], bonds: [[0, 1, 2]] },
+  h2o: { name: 'Water', formula: 'H₂O', cat: 'base', smell: '', atoms: [['O', 0, 0, 'H₂O']], bonds: [] },
+  nh3: { name: 'Ammonia', formula: 'NH₃', cat: 'off', smell: 'Sharp, like cleaning products', match: null,
+    atoms: [['N', 0, 0, 'NH₃']], bonds: [],
+    made: 'Microbes cut the nitrogen off amino acids as they break down protein. Ammonia is a base, so it raises pH.',
+    more: 'Long, warm fermentations of protein-rich food.', found: 'Natto, over-ripe Camembert, fish sauce.' },
+  h2s: { name: 'Hydrogen sulfide', formula: 'H₂S', cat: 'off', smell: 'Rotten eggs', match: null,
+    atoms: [['S', 0, 0, 'H₂S']], bonds: [],
+    made: 'Yeast make it while building sulfur-containing amino acids, especially when short of nutrients.',
+    more: 'Lager yeast, nutrient-poor honey or sugar, and stressed yeast.', found: 'Young lagers and young wines. It usually fades as CO₂ carries it away.' },
+  dmds: { name: 'Dimethyl disulfide', formula: 'C₂H₆S₂', cat: 'off', smell: 'Cooked cabbage, garlic, sulfur', match: null,
+    atoms: [['C', 0, .5], ['S', .866, 0], ['S', 1.732, .5], ['C', 2.598, 0]], bonds: [[0, 1, 1], [1, 2, 1], [2, 3, 1]],
+    made: 'Released when sulfur compounds in cabbage, garlic and onions break down.', more: 'Cabbage-family vegetables and alliums, warm ferments.', found: 'Sauerkraut, kimchi, cooked cabbage, garlic.' },
+  phenylethanol: { name: '2-Phenylethanol', formula: 'C₈H₁₀O', cat: 'fruity', ring: true, smell: 'Rose, honey', match: 'Rose',
+    atoms: [...RING, ['C', 0, -2], ['C', .866, -2.5], ['O', 1.732, -2, 'OH']], bonds: [...RINGB, [0, 6, 1], [6, 7, 1], [7, 8, 1]],
+    made: 'Yeast make it from the amino acid phenylalanine.', more: 'Wine yeasts and some ale yeasts.', found: 'Wine, beer, sake and roses.' },
+  linalool: { name: 'Linalool', formula: 'C₁₀H₁₈O', cat: 'fruity', smell: 'Floral, lavender, citrus', match: 'Floral',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['C', .866, -1], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['O', 3.83, -.866, 'OH'], ['C', 5.196, .5], ['C', 6.062, 0], ['C', 4.83, -.866]],
+    bonds: [[0, 1, 1], [1, 2, 1], [1, 3, 2], [3, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1], [6, 10, 1], [6, 8, 1], [8, 9, 2]],
+    made: 'Made by the hop plant, not by microbes. It dissolves into beer from the hops.', more: 'Adding aromatic hops late or after fermentation (dry hopping).', found: 'Hoppy beers, lavender, coriander seed.' },
+  isovaleric: { name: 'Isovaleric acid', formula: 'C₅H₁₀O₂', cat: 'off', smell: 'Sweaty feet, strong cheese', match: 'Sweaty socks',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['C', .866, -1], ['C', 1.732, .5], ['C', 2.598, 0], ['O', 2.598, -1], ['O', 3.464, .5, 'OH']],
+    bonds: [[0, 1, 1], [1, 2, 1], [1, 3, 1], [3, 4, 1], [4, 5, 2], [4, 6, 1]],
+    made: 'Microbes make it from the amino acid leucine. Old, oxidized hops have it too.', more: 'Brettanomyces, natto bacteria, aged cheese.', found: 'Natto, Limburger cheese, and sweaty feet.' },
+  heptanone: { name: '2-Heptanone', formula: 'C₇H₁₄O', cat: 'savory', smell: 'Blue cheese, spicy', match: 'Blue cheese',
+    atoms: [['C', 0, .5], ['C', .866, 0], ['O', .866, -1], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['C', 5.196, .5]],
+    bonds: [[0, 1, 1], [1, 2, 2], [1, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1], [6, 7, 1]],
+    made: 'Penicillium molds cut fatty acids from milk fat and trim them into methyl ketones like this one.', more: 'Blue molds with plenty of fat and air.', found: 'Roquefort, Gorgonzola and other blue cheeses.' },
+  tetramethylpyrazine: { name: 'Tetramethylpyrazine', formula: 'C₈H₁₂N₂', cat: 'savory', ring: true, smell: 'Nutty, roasted', match: 'Roasted nuts',
+    atoms: [['N', 0, -1], ['C', .866, -.5], ['C', .866, .5], ['N', 0, 1], ['C', -.866, .5], ['C', -.866, -.5], ['C', 1.732, -1], ['C', 1.732, 1], ['C', -1.732, 1], ['C', -1.732, -1]],
+    bonds: [...RINGB, [1, 6, 1], [2, 7, 1], [4, 8, 1], [5, 9, 1]],
+    made: 'Bacillus bacteria make it from acetoin and ammonia.', more: 'Natto and long fermentations of soy.', found: 'Natto, cocoa, and roasted foods.' },
+  cadaverine: { name: 'Cadaverine', formula: 'C₅H₁₄N₂', cat: 'off', smell: 'Rotting flesh', match: 'Rotting meat',
+    atoms: [['N', 0, .5, 'H₂N'], ['C', .866, 0], ['C', 1.732, .5], ['C', 2.598, 0], ['C', 3.464, .5], ['C', 4.33, 0], ['N', 5.196, .5, 'NH₂']],
+    bonds: [[0, 1, 1], [1, 2, 1], [2, 3, 1], [3, 4, 1], [4, 5, 1], [5, 6, 1]],
+    made: 'Spoilage bacteria cut CO₂ off the amino acid lysine.', more: 'Protein foods that rot instead of fermenting.', found: 'Rotting meat and fish. A sure sign of spoilage.' },
+  gluconic: { name: 'Gluconic acid', formula: 'C₆H₁₂O₇', cat: 'sour', smell: 'Mild, soft sourness', match: null,
+    atoms: [['C', 0, .5], ['O', 0, 1.5], ['O', -.866, 0, 'HO'], ['C', .866, 0], ['O', .866, -1, 'OH'], ['C', 1.732, .5], ['O', 1.732, 1.5, 'OH'], ['C', 2.598, 0], ['O', 2.598, -1, 'OH'], ['C', 3.464, .5], ['O', 3.464, 1.5, 'OH'], ['C', 4.33, 0], ['O', 5.196, .5, 'OH']],
+    bonds: [[0, 1, 2], [0, 2, 1], [0, 3, 1], [3, 4, 1], [3, 5, 1], [5, 6, 1], [5, 7, 1], [7, 8, 1], [7, 9, 1], [9, 10, 1], [9, 11, 1], [11, 12, 1]],
+    made: 'Acetic acid bacteria oxidize glucose straight to gluconic acid.', more: 'Kombucha and honey.', found: 'Kombucha, honey and wine made from moldy grapes.' },
+  ferulic: { name: 'Ferulic acid', formula: 'C₁₀H₁₀O₄', cat: 'base', ring: true, smell: '', made: 'Found in the cell walls of grains, especially wheat.',
+    atoms: [...RING, ['O', 0, -2, 'OH'], ['O', 1.732, -1], ['C', 2.598, -.5], ['C', 0, 2], ['C', .866, 2.5], ['C', .866, 3.5], ['O', 0, 4], ['O', 1.732, 4, 'OH']],
+    bonds: [...RINGB, [0, 6, 1], [1, 7, 1], [7, 8, 1], [3, 9, 1], [9, 10, 2], [10, 11, 1], [11, 12, 2], [11, 13, 1]] },
+  coumaric: { name: 'p-Coumaric acid', formula: 'C₉H₈O₃', cat: 'base', ring: true, smell: '', made: 'Found in grape skins and grains.',
+    atoms: [...RING, ['O', 0, -2, 'OH'], ['C', 0, 2], ['C', .866, 2.5], ['C', .866, 3.5], ['O', 0, 4], ['O', 1.732, 4, 'OH']],
+    bonds: [...RINGB, [0, 6, 1], [3, 7, 1], [7, 8, 2], [8, 9, 1], [9, 10, 2], [9, 11, 1]] },
+});
+MOLCATS.find(c => c[0] === 'savory')[1] = 'Savory, nutty & earthy';
+// Big molecules drawn as simple pictures: rings for sugars, beads for protein, tails for fat.
+const BIG = {
+  maltose: { name: 'Maltose', formula: 'C₁₂H₂₂O₁₁', n: 2, made: 'Malt sugar: two glucose units joined.' },
+  lactose: { name: 'Lactose', formula: 'C₁₂H₂₂O₁₁', n: 2, made: 'Milk sugar: glucose joined to galactose.' },
+  sucrose: { name: 'Sucrose', formula: 'C₁₂H₂₂O₁₁', n: 2, made: 'Table sugar: glucose joined to fructose.' },
+  starch: { name: 'Starch', formula: '(C₆H₁₀O₅)ₙ', n: 4, made: 'Hundreds of glucose units in a chain. Most microbes can’t eat it without help.' },
+  protein: { name: 'Protein', formula: 'chains of amino acids', beads: true, made: 'Long chains of amino acids.' },
+  fat: { name: 'Milk fat', formula: 'triglycerides', fat: true, made: 'Three fatty acids on a glycerol backbone.' },
+  acetylcoa: { name: 'Acetyl-CoA', formula: 'an acetyl group on coenzyme A', coa: true, made: 'The cell’s carrier for two-carbon acetyl groups.' },
+};
+const hexPts = (cx, cy, r) => Array.from({ length: 6 }, (_, i) => `${(cx + r * Math.cos(i * Math.PI / 3)).toFixed(1)},${(cy + r * Math.sin(i * Math.PI / 3)).toFixed(1)}`).join(' ');
+function bigSvg(k) {
+  const b = BIG[k];
+  if (b.n) {
+    const r = 26, sp = 86, W = b.n * sp + 4;
+    let g = '';
+    for (let i = 0; i < b.n; i++) {
+      const cx = 45 + i * sp;
+      g += `<polygon points="${hexPts(cx, 50, r)}" fill="none" stroke="var(--fg)" stroke-width="3"/><circle class="bg" cx="${cx + r / 2}" cy="${50 - r * .866}" r="9"/><text class="a O" x="${cx + r / 2}" y="${50 - r * .866}">O</text>`;
+      if (i) g += `<line class="b" x1="${cx - sp + r}" y1="50" x2="${cx - sp / 2 - 9}" y2="50"/><text class="a O" x="${cx - sp / 2}" y="50">O</text><line class="b" x1="${cx - sp / 2 + 9}" y1="50" x2="${cx - r}" y2="50"/>`;
+    }
+    if (k === 'starch') g += '<text x="8" y="56" font-size="26" fill="var(--muted)">…</text>' + `<text x="${W - 20}" y="56" font-size="26" fill="var(--muted)">…</text>`;
+    return `<svg class="mol" viewBox="0 0 ${W} 100" role="img" aria-label="${b.name}">${g}</svg>`;
+  }
+  if (b.beads) {
+    const cs = ['var(--ph)', 'var(--amber)', 'var(--ok)', 'var(--do)', 'var(--temp)', 'var(--ph)', 'var(--cool)', 'var(--amber)'];
+    let g = '<path d="M20 60' + cs.map((_, i) => ` L${20 + i * 30} ${i % 2 ? 35 : 60}`).join('') + '" fill="none" stroke="var(--muted)" stroke-width="3"/>';
+    g += cs.map((c, i) => `<circle cx="${20 + i * 30}" cy="${i % 2 ? 35 : 60}" r="12" fill="${c}" fill-opacity=".35" stroke="${c}" stroke-width="3"/>`).join('');
+    return `<svg class="mol" viewBox="0 0 250 90" role="img" aria-label="Protein, a chain of amino acids">${g}</svg>`;
+  }
+  if (b.fat) {
+    let g = '<line class="b" x1="20" y1="15" x2="20" y2="95"/>';
+    for (const y of [15, 55, 95]) g += `<path class="b" fill="none" d="M20 ${y}${Array.from({ length: 7 }, (_, i) => ` L${45 + i * 25} ${y + (i % 2 ? 0 : -10)}`).join('')}"/>`;
+    return `<svg class="mol" viewBox="0 0 220 110" role="img" aria-label="Fat: three fatty-acid tails">${g}</svg>`;
+  }
+  return `<svg class="mol" viewBox="0 0 230 80" role="img" aria-label="Acetyl-CoA"><line class="b" x1="15" y1="50" x2="45" y2="35"/><line class="b" x1="45" y1="35" x2="45" y2="5"/><line class="b" x1="51" y1="35" x2="51" y2="8"/><text class="a O" x="48" y="0" font-size="18" dy="8">O</text><line class="b" x1="45" y1="35" x2="80" y2="50"/><text class="a S" x="92" y="52">S</text><rect x="110" y="30" width="110" height="44" rx="22" fill="var(--panel-2)" stroke="var(--muted)" stroke-width="2"/><text x="165" y="58" text-anchor="middle" font-size="20" font-weight="700" fill="var(--fg)">CoA</text></svg>`;
+}
+const structSvg = k => BIG[k] ? bigSvg(k) : molSvg(MOLS[k]);
+const molName = k => (BIG[k] || MOLS[k]).name;
+
+// The reactions each microbe runs, in the order they matter. [reactants, products, label]; '2×' sets a count.
+function reactionsFor(grp, wild, d, x) {
+  const sugar = x.m > x.s ? 'maltose' : 'glucose', R = [];
+  if (grp === 'yeast' || grp === 'brett') {
+    if (sugar === 'maltose') R.push({ r: [['maltose']], p: [['glucose', 2]], lab: 'Maltase enzyme splits malt sugar' });
+    R.push({ r: [['glucose']], p: [['ethanol', 2], ['co2', 2]], lab: 'Alcoholic fermentation' });
+    if (grp === 'brett') R.push({ r: [['coumaric']], p: [['ep4']], lab: 'Brettanomyces make barnyard phenols (two steps)' });
+    else if (DMIC[d.mic].pof) R.push({ r: [['ferulic']], p: [['vg4'], ['co2']], lab: 'Phenolic yeast make clove flavor' });
+    else R.push({ r: [['isoamylAlcohol'], ['acetylcoa']], p: [['isoamylAcetate']], lab: 'Making a fruity ester' });
+  } else if (grp === 'lab' || grp === 'kettle') {
+    if (grp === 'kettle' && sugar === 'maltose') R.push({ r: [['maltose']], p: [['glucose', 2]], lab: 'Splitting malt sugar' });
+    R.push({ r: [['glucose']], p: [['lactic', 2]], lab: 'Lactic acid fermentation' });
+    if (grp === 'lab') R.push({ r: [['glucose']], p: [['lactic'], ['ethanol'], ['co2']], lab: 'Leuconostoc start it off (heterolactic)' });
+  } else if (grp === 'yogurt') {
+    R.push({ r: [['lactose'], ['h2o']], p: [['lactic', 4]], lab: 'Milk sugar becomes lactic acid' });
+    if (wild !== 'clabber') R.push({ r: [['glucose']], p: [['acetaldehyde']], lab: 'A side product: yogurt’s fresh aroma' });
+  } else if (grp === 'aceto') {
+    R.push({ r: [['ethanol'], ['o2']], p: [['acetic'], ['h2o']], lab: 'Acetic acid bacteria use oxygen' });
+    R.push({ r: [['acetic'], ['ethanol']], p: [['ethylAcetate'], ['h2o']], lab: 'Acid and alcohol form an ester' });
+  } else if (grp === 'kombucha') {
+    R.push({ r: [['sucrose'], ['h2o']], p: [['glucose', 2]], lab: 'Yeast split table sugar (into glucose and fructose)' });
+    R.push({ r: [['glucose']], p: [['ethanol', 2], ['co2', 2]], lab: 'Yeast make alcohol and fizz' });
+    R.push({ r: [['ethanol'], ['o2']], p: [['acetic'], ['h2o']], lab: 'Bacteria turn the alcohol into acid' });
+  } else if (grp === 'koji') {
+    if (x.st > .05) R.push({ r: [['starch'], ['h2o']], p: [['glucose', 2]], lab: 'Amylase enzymes cut starch into sugar' });
+    if (x.p > .05) R.push({ r: [['protein'], ['h2o']], p: [['glutamate']], lab: 'Protease enzymes free amino acids' });
+  } else if (grp === 'natto') {
+    R.push({ r: [['protein'], ['h2o']], p: [['glutamate']], lab: 'Proteases break down soy protein' });
+    R.push({ r: [['glutamate']], p: [['nh3']], lab: 'Amino acids release ammonia: pH goes up' });
+    R.push({ r: [['glucose']], p: [['tetramethylpyrazine']], lab: 'A nutty aroma (several steps)' });
+  } else if (grp === 'blue') {
+    R.push({ r: [['fat']], p: [['butyric'], ['heptanone']], lab: 'Lipase enzymes cut milk fat' });
+    R.push({ r: [['protein']], p: [['nh3']], lab: 'Protein breaks down as it ages' });
+  } else if (wild === 'salty') {
+    R.push({ r: [['protein'], ['h2o']], p: [['glutamate']], lab: 'The food’s own enzymes free amino acids' });
+  } else {
+    R.push({ r: [['glucose']], p: [['butyric'], ['co2', 2]], lab: 'Clostridium make butyric acid' });
+    R.push({ r: [['protein']], p: [['cadaverine'], ['h2s']], lab: 'Protein rots' });
+  }
+  return R;
+}
+
+/* ----- Pictures: a Spike-style conical fermenter ----- */
+const MIC_SHAPE = {
+  yeast: (x, y, s) => `<ellipse cx="${x}" cy="${y}" rx="${7 * s}" ry="${6 * s}" fill="#f7c64a" stroke="#a46d00" stroke-width="1.5"/>`,
+  bacteria: (x, y, s, r) => `<rect x="${x - 9 * s}" y="${y - 3.5 * s}" width="${18 * s}" height="${7 * s}" rx="${3.5 * s}" fill="#c9a6ff" stroke="#6d45c6" stroke-width="1.5" transform="rotate(${r} ${x} ${y})"/>`,
+  mold: (x, y, s, r) => `<g transform="rotate(${r} ${x} ${y})"><path d="M${x - 10 * s} ${y + 6 * s} q${6 * s} -${8 * s} ${10 * s} -${2 * s} t${10 * s} -${6 * s}" fill="none" stroke="#5fa36a" stroke-width="2.5"/><circle cx="${x + 10 * s}" cy="${y - 2 * s}" r="${4 * s}" fill="#9fd4a6" stroke="#2f7a3c" stroke-width="1.5"/></g>`,
+};
+function micShapes(kind) {
+  const sh = kind === 'mix' ? ['yeast', 'bacteria'] : kind === 'wild' ? ['yeast', 'bacteria', 'mold'] : [kind];
+  let g = '';
+  for (let i = 0; i < 30; i++) {
+    const x = 135 + rnd(i + 300) * 170, y = 175 + rnd(i + 330) * 240 + (i % 3) * 10;
+    const xx = y > 400 ? 220 + (x - 220) * (1 - (y - 400) / 150) : x;
+    g += `<g class="dm anim-drift" data-i="${i}" style="--d:${(5 + rnd(i + 360) * 5).toFixed(1)}s;--t:-${(rnd(i + 390) * 6).toFixed(1)}s;--dx:${((rnd(i + 420) - .5) * 24).toFixed(0)}px;--dy:${((rnd(i + 450) - .5) * 20).toFixed(0)}px;--rot:${((rnd(i + 480) - .5) * 60).toFixed(0)}deg">${MIC_SHAPE[sh[i % sh.length]](xx.toFixed(0), y.toFixed(0), 1.1, Math.round(rnd(i + 510) * 180))}</g>`;
+  }
+  return g;
+}
+function fermenterSvg() {
+  const r = D.res, mic = D.mic && DMIC[D.mic], x = mixOf(D.ing);
+  // where the ingredients sit
+  const spots = [[180, 470], [250, 470], [215, 505], [160, 430], [275, 430], [215, 440]];
+  const emo = D.ing.map((id, i) => `<text class="d-ingt${r ? (ING[id].solid ? ' solid' : ' melt') : id === D.newIng ? ' drop' : ''}" x="${spots[i][0]}" y="${spots[i][1]}" style="--t:${i * .08}s">${ING[id].e}</text>`).join('');
+  let bub = '';
+  for (let i = 0; i < 20; i++) bub += `<circle class="anim-rise" cx="${(140 + rnd(i + 600) * 160).toFixed(0)}" cy="${(520 - rnd(i + 620) * 60).toFixed(0)}" r="${(2.5 + rnd(i + 640) * 4).toFixed(1)}" fill="#fff" fill-opacity=".7" style="--d:${(2.4 + rnd(i + 660) * 2.4).toFixed(1)}s;--t:-${(rnd(i + 680) * 4).toFixed(1)}s;--rise:-${(300 + rnd(i + 700) * 60).toFixed(0)}px;--dx:${((rnd(i + 720) - .5) * 20).toFixed(0)}px"/>`;
+  const top = r?.grp === 'kombucha' || r?.grp === 'aceto' ? 'pellicle' : mic?.kind === 'mold' ? 'mold' : mic?.kind === 'yeast' || r?.grp === 'yeast' ? 'foam' : 'none';
+  return `<svg class="d-tank" viewBox="0 0 440 640" role="img" aria-label="A stainless steel conical fermenter${r ? ' fermenting' : ', empty'}">
+    <defs>
+      <linearGradient id="dSteel" x1="0" x2="1"><stop offset="0" stop-color="#7d8a92"/><stop offset=".18" stop-color="#d9e1e6"/><stop offset=".38" stop-color="#9aa7af"/><stop offset=".6" stop-color="#eef3f5"/><stop offset=".85" stop-color="#a3afb6"/><stop offset="1" stop-color="#6f7b83"/></linearGradient>
+      <linearGradient id="dSteelV" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#eef3f5"/><stop offset="1" stop-color="#8d9aa2"/></linearGradient>
+      <linearGradient id="dIn" x1="0" x2="1"><stop offset="0" stop-color="#1b262c"/><stop offset=".5" stop-color="#2c3a42"/><stop offset="1" stop-color="#1b262c"/></linearGradient>
+      <linearGradient id="dGlass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset=".15" stop-color="#fff" stop-opacity=".22"/><stop offset=".3" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <clipPath id="dClip"><path d="M116 134H324V396L232 528H208L116 396Z"/></clipPath>
+    </defs>
+    <!-- legs -->
+    <path d="M182 390L172 612" stroke="#8c979e" stroke-width="12" stroke-linecap="round"/>
+    <path d="M110 360L84 612M330 360L356 612" stroke="url(#dSteel)" stroke-width="15" stroke-linecap="round"/>
+    <ellipse cx="84" cy="618" rx="20" ry="6" fill="#5d686f"/><ellipse cx="356" cy="618" rx="20" ry="6" fill="#5d686f"/><ellipse cx="172" cy="616" rx="16" ry="5" fill="#5d686f"/>
+    <!-- glycol hoses -->
+    <path id="dHose" d="M100 190C60 190 50 220 30 240M100 360C60 360 50 330 30 320" fill="none" stroke="${hoseColor()}" stroke-width="9" stroke-linecap="round" opacity=".85"/>
+    <!-- body: cylinder and 60° cone -->
+    <path d="M100 120H340V400L238 548H202L100 400Z" fill="url(#dSteel)" stroke="#5d686f" stroke-width="3"/>
+    <path d="M100 170H340M100 380H340" stroke="#6f7b83" stroke-width="2" opacity=".6"/>
+    ${[200, 230, 260, 290, 320, 350].map(y => `<path d="M100 ${y}H340" stroke="#fff" stroke-width="1.5" opacity=".25"/>`).join('')}
+    <!-- see-through window into the tank -->
+    <path d="M116 134H324V396L232 528H208L116 396Z" fill="url(#dIn)"/>
+    <g clip-path="url(#dClip)">
+      <g id="dLiquid" class="d-liquid${r && !D.fresh ? ' full' : ''}">
+        <rect x="100" y="160" width="240" height="400" fill="${x ? x.color : '#888'}" opacity=".88"/>
+        <rect x="100" y="160" width="240" height="8" fill="#fff" opacity=".35"/>
+        <g id="dBub" style="opacity:0">${bub}</g>
+        <g id="dMic">${r ? micShapes(r.wild === 'spoil' ? 'wild' : mic.kind === 'wild' ? 'wild' : mic.kind) : ''}</g>
+        <rect id="dFoam" x="100" y="160" width="240" height="0" fill="${top === 'pellicle' ? '#e8d6b0' : top === 'mold' ? (D.mic === 'blue' ? '#9fc3b3' : '#f1f5ea') : '#fff9e8'}" opacity="${top === 'none' ? 0 : .95}"/>
+      </g>
+      ${emo}
+      ${r ? '' : '<text x="220" y="300" text-anchor="middle" class="d-empty">' + (D.ing.length ? '' : 'Empty') + '</text>'}
+    </g>
+    <path d="M116 134H324V396L232 528H208L116 396Z" fill="url(#dGlass)" stroke="#4e595f" stroke-width="4"/>
+    <!-- lid, clamp band and fittings -->
+    <path d="M100 122Q220 66 340 122Z" fill="url(#dSteelV)" stroke="#5d686f" stroke-width="3"/>
+    <rect x="93" y="112" width="254" height="18" rx="7" fill="#8d9aa2" stroke="#5d686f" stroke-width="2"/>
+    <rect x="336" y="108" width="20" height="26" rx="4" fill="#6f7b83"/>
+    <rect x="207" y="62" width="26" height="30" fill="url(#dSteel)" stroke="#5d686f" stroke-width="2"/>
+    <circle cx="220" cy="50" r="19" fill="#f4f7f8" stroke="#5d686f" stroke-width="3"/><path d="M220 50L230 40" stroke="var(--alarm)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M150 104V80Q150 62 170 62" fill="none" stroke="#9aa7af" stroke-width="8" stroke-linecap="round"/>
+    <!-- probes: pH and dissolved oxygen -->
+    <rect x="336" y="236" width="34" height="18" rx="4" fill="#8d9aa2" stroke="#5d686f" stroke-width="2"/><rect x="370" y="232" width="38" height="26" rx="6" fill="var(--ph)"/>
+    <rect x="336" y="300" width="34" height="18" rx="4" fill="#8d9aa2" stroke="#5d686f" stroke-width="2"/><rect x="370" y="296" width="38" height="26" rx="6" fill="var(--do)"/>
+    <text x="389" y="250" class="d-plabel">pH</text><text x="389" y="314" class="d-plabel">O₂</text>
+    <!-- racking arm and bottom valve -->
+    <rect x="128" y="448" width="30" height="18" rx="4" transform="rotate(-55 143 457)" fill="#8d9aa2" stroke="#5d686f" stroke-width="2"/>
+    <path d="M132 470L104 486V506" fill="none" stroke="url(#dSteel)" stroke-width="12" stroke-linecap="round"/><rect x="90" y="500" width="28" height="8" rx="3" fill="#c42727"/>
+    <rect x="206" y="548" width="28" height="34" fill="url(#dSteel)" stroke="#5d686f" stroke-width="2"/><rect x="232" y="560" width="40" height="9" rx="4" fill="#c42727"/>
+    <text x="220" y="105" text-anchor="middle" class="d-brand">CAFE LAB</text>
+  </svg>`;
+}
+
+// The glycol hoses show blue when the tank is being cooled, orange when heated.
+const hoseColor = () => D.T < 18 ? 'var(--cool)' : D.T > 26 ? 'var(--heat)' : '#9aa7af';
+function dReads() {
+  const set = (id, h) => { const e = $(id); if (e) e.innerHTML = h; };
+  set('dTemp', esc(tUnit(D.T)));
+  set('dSalt', DCOND.salt(D.salt).replace('%', '<small>%</small>'));
+  set('dDo', `${Math.min(D.o2, o2Sat(D.T)).toFixed(1)}<small>mg/L</small>`);
+  $('dHose')?.setAttribute('stroke', hoseColor());
+}
+function dRender(top) {
+  const keep = top ? [] : [...document.querySelectorAll('.d-col, .d-ings')].map(e => e.scrollTop);
+  learnRender(true);
+  document.querySelectorAll('.d-col, .d-ings').forEach((e, i) => { e.scrollTop = keep[i] || 0; });
+  D.newIng = null;
+}
+function onDesignAct(act, v) {
+  D.touched = true;
+  if (act === 'd-mic') { D.mic = v; dRender(); }
+  else if (act === 'd-ing') {
+    const i = D.ing.indexOf(v);
+    if (i >= 0) D.ing.splice(i, 1); else if (D.ing.length < ING_MAX) { D.ing.push(v); D.newIng = v; }
+    dRender();
+  } else if (act === 'd-cat') { D.cat = v; dRender(); const g = document.querySelector('.d-ings'); if (g) g.scrollTop = 0; }
+  else if (act === 'd-preset') {
+    const p = PRESETS[+v];
+    Object.assign(D, { mic: p.mic, ing: [...p.ing], T: p.T, o2: p.o2, salt: p.salt, cat: 'all', newIng: null });
+    dRender(true);
+    D.ing.forEach((id, i) => document.querySelectorAll('.d-ingt')[i]?.classList.add('drop'));
+  } else if (act === 'd-start') { if (D.mic && D.ing.length) dStart(); }
+  else if (act === 'd-play') { if (D.playing) dPause(); else dPlay(); }
+  else if (act === 'd-edit') { dPause(); D.res = null; dRender(true); }
+  else if (act === 'd-new') { dPause(); D = newDesign(); D.touched = true; dRender(true); }
+  else if (act === 'd-mol') dMolPop(v);
+  else if (act === 'd-molx') $('dMolPop').hidden = true;
+}
+
+/* ----- Screen ----- */
+function micIcon(kind) {
+  const s = { yeast: MIC_SHAPE.yeast(20, 20, 1.7), bacteria: MIC_SHAPE.bacteria(20, 20, 1.3, -25), mold: MIC_SHAPE.mold(20, 22, 1.3, 0),
+    mix: MIC_SHAPE.yeast(14, 15, 1.1) + MIC_SHAPE.bacteria(25, 27, .9, 20), wild: MIC_SHAPE.yeast(12, 13, .9) + MIC_SHAPE.bacteria(27, 14, .7, 60) + MIC_SHAPE.mold(20, 30, .7, 0) }[kind];
+  return `<svg viewBox="0 0 40 40" aria-hidden="true">${s}</svg>`;
+}
+function dSlider(key, label, min, max, step, val, out, hint) {
+  return `<div class="l-slider d-sl ${key}"><label for="dsl-${key}">${label}<output id="dout-${key}">${out}</output></label>
+    <input type="range" id="dsl-${key}" data-dsl="${key}" min="${min}" max="${max}" step="${step}" value="${val}">
+    <small id="dhint-${key}">${hint}</small></div>`;
+}
+const DCOND = {
+  T: v => tUnit(+v), o2: v => `${(+v).toFixed(1)} mg/L`, salt: v => `${(+v).toFixed(+v < 10 ? 1 : 0)}%`,
+};
+function condHint(k) {
+  const mic = D.mic && DMIC[D.mic];
+  if (k === 'T') return mic ? `${mic.name} like about ${tUnit(mic.ideal[0])} to ${tUnit(mic.ideal[1])}.` : 'Room temperature is about ' + tUnit(21) + '.';
+  if (k === 'o2') {
+    const sat = o2Sat(D.T);
+    return `${mic?.o2 === 'aer' ? 'These microbes need air: this is how much you keep stirring in. ' : mic?.o2 === 'fac' ? 'Yeast use a little oxygen at the start to grow. ' : ''}Air can dissolve about ${sat.toFixed(1)} mg/L at this temperature.`;
+  }
+  return D.salt < .5 ? 'No salt. Beer, wine and yogurt use none.' : D.salt < 4 ? 'Sauerkraut and pickles use about 2–5%.' : D.salt < 14 ? 'Miso uses about 5–13%.' : 'Soy sauce and fish sauce use 15–25%.';
+}
+function renderDesign() {
+  const r = D.res;
+  return `<div class="d-wrap${r ? ' running' : ''}">
+    <section class="d-col d-left">${r ? renderReactions() : renderMicrobeList()}</section>
+    <section class="d-col d-mid">
+      <div class="d-titlebar"><h2>Design your Fermentation</h2>
+        ${r ? `<p class="d-made">${r.a < .03 ? 'Nothing is happening' : D.t >= 1 ? 'You made:' : 'Fermenting…'} <b>${esc(r.a < .03 ? '' : r.name)}</b></p>`
+          : `<div class="d-presets"><span>Try one:</span>${PRESETS.map((p, i) => `<button type="button" class="d-chip sm" data-act="d-preset" data-v="${i}">${esc(p.name)}</button>`).join('')}</div>`}
+      </div>
+      <div class="d-stage">
+        ${fermenterSvg()}
+        <div class="d-reads">
+          <div class="d-read ph"><span>pH</span><b id="dPh">${r ? fmtPh(r.ph0) : D.ing.length ? fmtPh(mixOf(D.ing).ph0) : '–'}</b></div>
+          <div class="d-read do"><span>Dissolved O₂</span><b id="dDo">${(r ? Math.min(D.o2, o2Sat(D.T)) : Math.min(D.o2, o2Sat(D.T))).toFixed(1)}<small>mg/L</small></b></div>
+          <div class="d-read temp"><span>Temperature</span><b id="dTemp">${esc(tUnit(D.T))}</b></div>
+          <div class="d-read salt"><span>Salt</span><b id="dSalt">${DCOND.salt(D.salt).replace('%', '<small>%</small>')}</b></div>
+          ${r && (r.grp === 'yeast' || r.grp === 'brett') ? '<div class="d-read alc"><span>Alcohol</span><b id="dAbv">0.0<small>%</small></b></div>' : ''}
+        </div>
+      </div>
+      ${r ? `<div class="d-time"><span id="dClock">${clockText(0)}</span><div class="d-prog"><i id="dTimeBar"></i></div>
+          <button type="button" class="l-btn" data-act="d-play" id="dPlay">${D.playing ? 'Pause' : D.t >= 1 ? 'Replay' : 'Play'}</button>
+          <input type="range" id="dScrub" data-dsl="scrub" min="0" max="1000" value="0" aria-label="Move through time" ${D.playing ? 'hidden' : ''}></div>`
+        : `<div class="d-go">${startHint()}<button type="button" class="l-btn primary big d-start" data-act="d-start" ${D.mic && D.ing.length ? '' : 'disabled'}>${ico('play')}Start fermentation</button></div>
+           <p class="d-tip" id="dTip"><b>Did you know?</b> ${esc(TIPS[L.tipI % TIPS.length])}</p>`}
+    </section>
+    <section class="d-col d-right">${r ? renderRunPanel() : renderIngredients() + renderConditions()}</section>
+  </div>`;
+}
+function startHint() {
+  const miss = [!D.mic && 'a microbe', !D.ing.length && 'at least one ingredient'].filter(Boolean);
+  return miss.length ? `<p class="d-need">Pick ${miss.join(' and ')} to start.</p>` : `<p class="d-need ok">${esc(DMIC[D.mic].name)} + ${D.ing.map(i => esc(ING[i].name.toLowerCase())).join(', ')}</p>`;
+}
+function renderMicrobeList() {
+  return `<h3 class="d-step"><i>1</i>Choose a microbe</h3>
+    <div class="d-mics">${Object.entries(DMIC).map(([k, m]) => `<button type="button" class="d-mic${D.mic === k ? ' on' : ''}" data-act="d-mic" data-v="${k}" aria-pressed="${D.mic === k}">
+      ${micIcon(m.kind)}<span><b>${esc(m.name)}</b><i>${esc(m.sci)}</i>${D.mic === k ? `<em>${esc(m.blurb)}</em>` : ''}</span></button>`).join('')}</div>`;
+}
+function renderIngredients() {
+  const list = Object.entries(ING).filter(([, g]) => D.cat === 'all' || g.cat === D.cat);
+  return `<h3 class="d-step"><i>2</i>Add ingredients <small>${D.ing.length} of ${ING_MAX}</small></h3>
+    <div class="d-cats">${ING_CATS.map(([k, w]) => `<button type="button" class="d-cat" data-act="d-cat" data-v="${k}" aria-pressed="${D.cat === k}">${w}</button>`).join('')}</div>
+    <div class="d-ings">${list.map(([k, g]) => `<button type="button" class="d-ing${D.ing.includes(k) ? ' on' : ''}" data-act="d-ing" data-v="${k}" aria-pressed="${D.ing.includes(k)}" ${!D.ing.includes(k) && D.ing.length >= ING_MAX ? 'disabled' : ''}><span class="e">${g.e}</span>${esc(g.name)}</button>`).join('')}</div>`;
+}
+function renderConditions() {
+  return `<h3 class="d-step"><i>3</i>Set the conditions</h3>
+    <div class="d-conds">
+      ${dSlider('T', 'Temperature', 0, 60, .5, D.T, DCOND.T(D.T), condHint('T'))}
+      ${dSlider('o2', 'Dissolved oxygen', 0, 12, .5, D.o2, DCOND.o2(D.o2), condHint('o2'))}
+      ${dSlider('salt', 'Salt', 0, 25, .25, D.salt, DCOND.salt(D.salt), condHint('salt'))}
+    </div>`;
+}
+function renderReactions() {
+  const r = D.res;
+  return `<h3 class="d-step">What the microbes are doing</h3>
+    ${r.fails.length ? `<div class="d-fail">${r.fails.map(f => `<p>${esc(f)}</p>`).join('')}</div>` : ''}
+    <div class="d-rxns">${r.reactions.map((x, i) => `<div class="d-rxn" data-rx="${i}">
+      <p class="d-rlab">${esc(x.lab)}</p>
+      <div class="d-req">
+        <div class="d-side">${x.r.map(([k, n], j) => `${j ? '<span class="plus">+</span>' : ''}<button type="button" class="d-mol" data-act="d-mol" data-v="${k}">${n ? `<span class="n">${n}</span>` : ''}${structSvg(k)}<span>${esc(molName(k))}</span></button>`).join('')}</div>
+        <div class="d-arrow"><svg viewBox="0 0 80 30" aria-hidden="true"><path d="M2 15H72M62 6L74 15L62 24"/></svg><span class="flow">${[0, 1, 2].map(j => `<i style="--t:-${j * .5}s"></i>`).join('')}</span></div>
+        <div class="d-side">${x.p.map(([k, n], j) => `${j ? '<span class="plus">+</span>' : ''}<button type="button" class="d-mol prod" data-act="d-mol" data-v="${k}">${n ? `<span class="n">${n}</span>` : ''}${structSvg(k)}<span>${esc(molName(k))}</span></button>`).join('')}</div>
+      </div>
+      <div class="d-amts"><span>left</span><div class="d-meter r"><i data-rb="${i}"></i></div><span>made</span><div class="d-meter p"><i data-pb="${i}"></i></div></div>
+    </div>`).join('')}</div>
+    <p class="l-note">Tap a molecule to learn about it. Corners in the drawings are carbon atoms.</p>`;
+}
+function renderRunPanel() {
+  const r = D.res, fl = Object.entries(r.fl).filter(([k]) => MOLS[k]);
+  const good = fl.filter(([, f]) => f.good).sort((a, b) => b[1].amt - a[1].amt).slice(0, 5), bad = fl.filter(([, f]) => !f.good).sort((a, b) => b[1].amt - a[1].amt).slice(0, 5);
+  const row = ([k, f]) => `<button type="button" class="d-fl" data-act="d-mol" data-v="${k}"><b>${esc(MOLS[k].name)}</b><span>${esc(MOLS[k].smell)}</span><div class="d-meter"><i data-fl="${k}" data-amt="${f.amt.toFixed(3)}"></i></div></button>`;
+  return `<h3 class="d-step">pH and oxygen</h3>
+    <svg class="d-chart" id="dChart" role="img" aria-label="pH and dissolved oxygen over time"></svg>
+    <h3 class="d-step">Flavors forming</h3>
+    <div class="d-flavs">
+      <div class="col good"><h4>Pleasant</h4>${good.map(row).join('') || '<p class="l-note">None yet.</p>'}</div>
+      <div class="col bad"><h4>Unpleasant</h4>${bad.map(row).join('') || '<p class="l-note">None. Nice work!</p>'}</div>
+    </div>
+    <div class="d-result" id="dResult" ${D.t >= 1 ? '' : 'hidden'}>${resultHtml()}</div>`;
+}
+function resultHtml() {
+  const r = D.res, s = r.safety;
+  return `<div class="d-safety ${s.lvl}">${ico(s.lvl === 'ok' ? 'check' : 'shield')}<p>${esc(s.t)}</p></div>
+    ${r.notes.length ? `<ul class="d-notes">${r.notes.slice(0, 2).map(n => `<li class="${n.bad ? 'bad' : ''}">${esc(n.t)}</li>`).join('')}</ul>` : ''}
+    <div class="d-again"><button type="button" class="l-btn primary" data-act="d-edit">Change my design</button><button type="button" class="l-btn" data-act="d-new">Start over</button></div>`;
+}
+function clockText(f) {
+  const h = f * (D.res?.H || 0);
+  return D.res.H <= 72 ? `Hour ${Math.round(h)} of ${D.res.H}` : `Day ${Math.floor(h / 24)} of ${Math.round(D.res.H / 24)}`;
+}
+
+/* ----- Running the animation ----- */
+function dStart() {
+  D.res = brew(D); D.t = 0; D.playing = true; D.touched = true; D.fresh = true;
+  learnRender(true);
+  D.fresh = false;
+  const liq = $('dLiquid'); liq?.getBoundingClientRect();   // so the fill animates from empty
+  requestAnimationFrame(() => { liq?.classList.add('full'); dPlay(); });
+}
+function dPlay() {
+  cancelAnimationFrame(dAnim);
+  if (D.t >= 1) D.t = 0;
+  D.playing = true;
+  const t0 = performance.now() - D.t * DPLAY_SECONDS * 1000;
+  const step = now => {
+    if (layer !== 'learn' || L.view !== 'design' || !D.res) return;
+    D.t = clamp01((now - t0) / (DPLAY_SECONDS * 1000));
+    dUpdate();
+    if (D.t < 1 && D.playing) dAnim = requestAnimationFrame(step);
+    else if (D.t >= 1) dFinish();
+  };
+  dSyncButtons();
+  dAnim = requestAnimationFrame(step);
+}
+function dPause() { D.playing = false; cancelAnimationFrame(dAnim); dSyncButtons(); }
+function dSyncButtons() {
+  const b = $('dPlay'), s = $('dScrub');
+  if (b) b.textContent = D.playing ? 'Pause' : D.t >= 1 ? 'Replay' : 'Play';
+  if (s) { s.hidden = D.playing; s.value = Math.round(D.t * 1000); }
+}
+function dFinish() {
+  D.playing = false; dSyncButtons();
+  const res = $('dResult'); if (res) res.hidden = false;
+  const made = document.querySelector('.d-made');
+  if (made && D.res.a >= .03) made.innerHTML = `You made: <b>${esc(D.res.name)}</b>`;
+  if (D.res.a >= .03) earn('design');
+}
+function ptAt(f) {
+  const pts = D.res.pts, i = f * (pts.length - 1), a = Math.floor(i), b = Math.min(pts.length - 1, a + 1), u = i - a;
+  const o = {}; for (const k of Object.keys(pts[a])) o[k] = pts[a][k] + (pts[b][k] - pts[a][k]) * u;
+  return o;
+}
+function dUpdate() {
+  const r = D.res, f = D.t, p = ptAt(f);
+  const set = (id, h) => { const e = $(id); if (e) e.innerHTML = h; };
+  set('dPh', fmtPh(p.ph));
+  set('dDo', `${p.do.toFixed(1)}<small>mg/L</small>`);
+  set('dAbv', `${(r.abv * (r.used ? p.p : 0)).toFixed(1)}<small>%</small>`);
+  set('dClock', clockText(f));
+  const pr = $('dTimeBar'); if (pr) pr.style.width = (f * 100).toFixed(1) + '%';
+  const bub = $('dBub'); if (bub) bub.style.opacity = (r.grp === 'koji' || r.grp === 'blue' || r.grp === 'natto' ? 0 : p.act * (r.grp === 'yogurt' ? .25 : 1)).toFixed(2);
+  const foam = $('dFoam');
+  if (foam) {
+    const h = r.grp === 'kombucha' || r.grp === 'aceto' ? 4 + 18 * p.x : (r.grp === 'koji' || r.grp === 'blue') ? 3 + 22 * p.x : r.grp === 'yeast' || r.grp === 'brett' ? 30 * p.act : 0;
+    foam.setAttribute('height', (r.a < .03 ? 0 : h).toFixed(1)); foam.setAttribute('y', (166 - (r.grp === 'yeast' || r.grp === 'brett' ? h : 0)).toFixed(1));
+  }
+  const shown = Math.round(3 + 27 * p.x * (r.a < .03 ? .1 : 1));
+  document.querySelectorAll('#dMic .dm').forEach((g, i) => { g.style.display = i < shown ? '' : 'none'; });
+  r.reactions.forEach((_, i) => {
+    // later reactions get going a little later
+    const pp = clamp01(p.p * (1 + .15 * i) - .1 * i);
+    const rb = document.querySelector(`[data-rb="${i}"]`), pb = document.querySelector(`[data-pb="${i}"]`);
+    if (rb) rb.style.width = ((1 - pp * Math.min(1, r.used * 1.1)) * 100).toFixed(1) + '%';
+    if (pb) pb.style.width = (pp * Math.min(1, r.used * 1.1) * 100).toFixed(1) + '%';
+    const card = document.querySelector(`[data-rx="${i}"]`); if (card) card.classList.toggle('active', r.a >= .03 && p.act > .05 && D.playing);
+  });
+  document.querySelectorAll('[data-fl]').forEach(e => { e.style.width = (+e.dataset.amt * Math.max(.04, p.p) * 100).toFixed(1) + '%'; });
+  dChart(f);
+}
+function dChart(f) {
+  const svg = $('dChart'); if (!svg) return;
+  const box = svg.getBoundingClientRect(), W = Math.max(300, box.width), Hh = Math.max(160, box.height);
+  const r = D.res, pts = r.pts, n = Math.round(f * (pts.length - 1));
+  const L0 = 46, R0 = 46, T0 = 14, B0 = 26, w = W - L0 - R0, h = Hh - T0 - B0;
+  const X = i => L0 + i / (pts.length - 1) * w, Yp = v => T0 + (9 - v) / 7 * h, Yd = v => T0 + (12 - v) / 12 * h;
+  let g = '';
+  for (const v of [3, 4, 5, 6, 7, 8]) g += `<line class="grid-l" x1="${L0}" x2="${W - R0}" y1="${Yp(v)}" y2="${Yp(v)}"/><text class="ax" x="${L0 - 8}" y="${Yp(v) + 5}" text-anchor="end">${v}</text>`;
+  for (const v of [0, 4, 8, 12]) g += `<text class="ax do" x="${W - R0 + 8}" y="${Yd(v) + 5}">${v}</text>`;
+  g += `<line class="d-46" x1="${L0}" x2="${W - R0}" y1="${Yp(4.6)}" y2="${Yp(4.6)}"/><text class="d-46t" x="${W - R0 - 6}" y="${Yp(4.6) - 6}" text-anchor="end">pH 4.6 safety line</text>`;
+  const ticks = r.H <= 72 ? [0, .25, .5, .75, 1] : [0, .25, .5, .75, 1];
+  for (const t of ticks) g += `<text class="ax" x="${L0 + t * w}" y="${Hh - 6}" text-anchor="middle">${r.H <= 72 ? Math.round(t * r.H) + ' h' : 'Day ' + Math.round(t * r.H / 24)}</text>`;
+  const path = (Y, k) => pts.slice(0, n + 1).map((p, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(Math.max(0, Math.min(k === 'ph' ? 9 : 12, p[k]))).toFixed(1)}`).join('');
+  if (n > 0) {
+    g += `<path class="d-ln do" d="${path(Yd, 'do')}"/><path class="d-ln ph" d="${path(Yp, 'ph')}"/>`;
+    const lp = pts[n];
+    g += `<circle class="d-dot ph" cx="${X(n)}" cy="${Yp(lp.ph)}" r="7"/><circle class="d-dot do" cx="${X(n)}" cy="${Yd(Math.min(12, lp.do))}" r="6"/>`;
+  }
+  g += `<text class="ax ph" x="${L0}" y="${T0 - 2}" >pH</text><text class="ax do" x="${W - R0}" y="${T0 - 2}" text-anchor="end">O₂ mg/L</text>`;
+  svg.setAttribute('viewBox', `0 0 ${W} ${Hh}`);
+  svg.innerHTML = g;
+}
+function dMolPop(k) {
+  const m = BIG[k] || MOLS[k], f = D.res?.fl[k];
+  const pop = $('dMolPop');
+  pop.innerHTML = `<div class="d-popcard" role="dialog" aria-label="${esc(m.name)}">
+    <button type="button" class="l-btn d-x" data-act="d-molx" aria-label="Close">✕</button>
+    <h2>${esc(m.name)}</h2>${m.smell ? `<p class="smell">${esc(m.smell)}</p>` : ''}
+    <div class="l-molpic">${structSvg(k)}<span class="f">${m.formula}</span></div>
+    ${f ? `<p class="d-why ${f.good ? 'good' : 'bad'}"><b>${f.good ? 'Pleasant here' : 'Unpleasant here'}.</b> ${esc(f.why)}</p>` : ''}
+    ${m.made ? `<p>${esc(m.made)}</p>` : ''}${m.found ? `<p class="l-note">Found in: ${esc(m.found)}</p>` : ''}
+  </div>`;
+  pop.hidden = false;
+}
+
 /* ---------- Badges ---------- */
 function renderBadgeBar() {
   $('lBadges').innerHTML = BADGES.map(b => `<span class="bd ${L.badges.has(b.id) ? 'on' : ''}" title="${esc(b.name)}">${ico(b.icon)}</span>`).join('')
@@ -3600,31 +4557,40 @@ function confetti() {
 }
 
 /* ---------- Navigation ---------- */
-const VIEW_NAMES = { tanks: 'Inside our tanks', microbes: 'Meet the microbes', flavors: 'Flavor molecules', lab: 'Fermentation lab', safety: 'Safe and fresh', quiz: 'Fermentation quiz', match: 'Flavor match', hub: 'Pick a topic', tour: 'The tour' };
+const VIEW_NAMES = { design: '', tanks: 'Inside our tanks', microbes: 'Meet the microbes', flavors: 'Flavor molecules', lab: 'Fermentation lab', safety: 'Safe and fresh', quiz: 'Fermentation quiz', match: 'Flavor match', hub: 'Pick a topic', tour: 'The tour' };
 function learnGo(view) {
   if (view === 'tour') L.step = 0;
   if (view === 'quiz') L.quiz = newQuiz();
   if (view === 'match') L.match = newMatch();
   if (view !== 'lab') cancelAnimationFrame(simAnim);
+  if (view !== 'design') { cancelAnimationFrame(dAnim); D.playing = false; }
   L.view = view;
   learnRender();
 }
 function learnRender(keepScroll) {
   const body = $('lBody'), top = body.scrollTop;
-  const html = { attract: renderAttract, tour: renderTour, hub: renderHub, tanks: renderTanksView, microbes: renderMicrobes, flavors: renderFlavors,
+  const html = { design: renderDesign, tour: renderTour, hub: renderHub, tanks: renderTanksView, microbes: renderMicrobes, flavors: renderFlavors,
     lab: renderLab, safety: renderSafety, quiz: renderQuiz, match: renderMatch }[L.view]();
-  const center = ['attract', 'tour'].includes(L.view) || (L.view === 'quiz' && L.quiz.i >= L.quiz.qs.length) || (L.view === 'match' && L.match.done.size === L.match.keys.length);
-  body.innerHTML = `<div class="l-view${keepScroll ? '' : ' anim'}${center ? ' center' : ''}">${html}</div>`;
+  const center = L.view === 'tour' || (L.view === 'quiz' && L.quiz.i >= L.quiz.qs.length) || (L.view === 'match' && L.match.done.size === L.match.keys.length);
+  const design = L.view === 'design';
+  body.innerHTML = `<div class="l-view${keepScroll ? '' : ' anim'}${center ? ' center' : ''}${design ? ' fill' : ''}">${html}</div>`;
   body.scrollTop = keepScroll ? top : 0;
-  $('lBack').hidden = ['attract', 'hub'].includes(L.view);
-  $('lCrumb').textContent = VIEW_NAMES[L.view] || 'The chemistry and microbiology inside our tanks';
+  const back = $('lBack');
+  back.hidden = design; back.dataset.go = L.view === 'hub' ? 'design' : 'hub';
+  back.textContent = L.view === 'hub' ? '← Design your fermentation' : '← All topics';
+  $('lMore').hidden = !design;
+  $('lBadges').hidden = design;
+  $('lCrumb').hidden = design;
+  $('lCrumb').textContent = VIEW_NAMES[L.view] || '';
   renderBadgeBar();
+  if (design && D.res) { dUpdate(); if (D.playing) dPlay(); }
   if (L.view === 'lab' && !L.sim.running) { const r = L.sim.result; requestAnimationFrame(() => { if ($('simChart')) simChart($('simChart'), r || simulate(L.sim), r ? r.days : 0); }); }
   if (L.view === 'hub') drawQr();
 }
 function resetLearn() {
-  cancelAnimationFrame(simAnim);
-  Object.assign(L, { view: 'attract', step: 0, badges: new Set(), tank: null, seenTanks: new Set(), microbe: 'yeast', seenMicrobes: new Set(),
+  cancelAnimationFrame(simAnim); cancelAnimationFrame(dAnim);
+  D = newDesign(); $('dMolPop').hidden = true;
+  Object.assign(L, { view: 'design', step: 0, badges: new Set(), tank: null, seenTanks: new Set(), microbe: 'yeast', seenMicrobes: new Set(),
     molCat: 'fruity', mol: 'isoamylAcetate', seenMols: new Set(), safety: 'ph', seenSafety: new Set(), so2pH: 3.4, sim: newSim(), quiz: null, match: null });
   $('lPop').hidden = true;
 }
@@ -3633,14 +4599,16 @@ function showLayer(l) {
   $('learn').hidden = l !== 'learn';
   document.querySelectorAll('[data-layer]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.layer === l)));
   if (l === 'learn') learnRender();
-  else { cancelAnimationFrame(simAnim); L.sim.running = false; }
+  else { cancelAnimationFrame(simAnim); L.sim.running = false; cancelAnimationFrame(dAnim); D.playing = false; }
 }
 function onLearnClick(e) {
   const lay = e.target.closest('[data-layer]'); if (lay) return showLayer(lay.dataset.layer);
-  if (!e.target.closest('#learn')) return;
+  if (!e.target.closest('#learn, #dMolPop')) return;
+  if (e.target.id === 'dMolPop') { $('dMolPop').hidden = true; return; }
   const go = e.target.closest('[data-go]'); if (go) return learnGo(go.dataset.go);
   const a = e.target.closest('[data-act]'); if (!a || a.disabled) return;
   const v = a.dataset.v, act = a.dataset.act;
+  if (act.startsWith('d-')) return onDesignAct(act, v);
   if (act === 'tour-next') { if (L.step < TOUR.length - 1) { L.step++; learnRender(); } else { earn('tour'); learnGo('hub'); } }
   else if (act === 'tour-back') { L.step = Math.max(0, L.step - 1); learnRender(); }
   else if (act === 'tank') { L.tank = Number(a.dataset.id); learnRender(true); }
@@ -3671,6 +4639,15 @@ function onLearnClick(e) {
   } else if (act === 'match-again') learnGo('match');
 }
 function onLearnInput(e) {
+  const dk = e.target.dataset?.dsl;
+  if (dk === 'scrub') { dPause(); D.t = +e.target.value / 1000; dUpdate(); if (D.t >= 1) dFinish(); return; }
+  if (dk) {
+    D[dk] = +e.target.value; D.touched = true;
+    $('dout-' + dk).textContent = DCOND[dk](D[dk]);
+    for (const k of ['T', 'o2', 'salt']) { const h = $('dhint-' + k); if (h) h.textContent = condHint(k); }
+    dReads();
+    return;
+  }
   const k = e.target.dataset?.sl; if (!k) return;
   const val = +e.target.value;
   if (k === 'so2') {
@@ -3688,15 +4665,14 @@ function onLearnInput(e) {
 function initLearn() {
   document.addEventListener('click', onLearnClick);
   $('learn').addEventListener('input', onLearnInput);
-  $('lBack').onclick = () => learnGo('hub');
+  $('lBack').onclick = e => learnGo(e.currentTarget.dataset.go || 'hub');
   // Any touch counts as activity for the idle timer.
   for (const ev of ['pointerdown', 'keydown', 'wheel']) document.addEventListener(ev, () => { L.lastTouch = Date.now(); }, { capture: true, passive: true });
   setInterval(() => {
-    if (layer === 'learn' && L.view === 'attract') {
-      L.tipI++; L.spotI++;
-      const tip = $('laTip'), spot = $('laSpot');
+    if (layer === 'learn' && L.view === 'design') {
+      L.tipI++;
+      const tip = $('dTip');
       if (tip) tip.innerHTML = `<b>Did you know?</b> ${esc(TIPS[L.tipI % TIPS.length])}`;
-      if (spot) { const h = spotlight(); spot.hidden = !h; spot.innerHTML = h; }
     }
   }, 8000);
   // Keep the live topic current.
@@ -3710,7 +4686,7 @@ function checkIdle() {
   // Never interrupt someone filling in a form on the kiosk.
   if (['mEntry', 'mRun', 'mRecEdit', 'mEdit'].some(id => !$(id).hidden)) return;
   if (layer === 'learn') {
-    if (L.view === 'attract' && !L.badges.size) return;
+    if (L.view === 'design' && !D.touched && !L.badges.size) return;
     resetLearn();
     if (learnHome) learnRender(); else showLayer('monitor');
   } else if (learnHome) {
